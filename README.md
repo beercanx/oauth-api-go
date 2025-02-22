@@ -21,6 +21,14 @@ go build ./cmd/hello-world
 ./hello-world
 ```
 
+### Hello, World! HTTP
+```bash
+go build ./cmd/http
+```
+```bash
+./http
+```
+
 ### The OAuth server
 ```bash
 go build ./cmd/server
