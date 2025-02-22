@@ -8,20 +8,17 @@ An exercise into how to create an HTTP service using GO, following guidance from
 Then gave up doing vanilla Go HTTP server; because I'm a wimp and used a framework instead:
 * https://github.com/gin-gonic/gin
 
+Went back a day later and continued to re-read the "after 13 years" blog post to create the `Hello, World!` http sample. 
+
+Regardless, I have decided to continue with `gin` itself, but following the coding styles suggested; such as not storing dependencies in a `struct` but passing them through the functions. 
+
 ## Requirements
 * Go 1.24
 
 ## Building
 
 ### Hello, World!
-```bash
-go build ./cmd/hello-world
-```
-```bash
-./hello-world
-```
-
-### Hello, World! HTTP
+A hello world HTTP server, using just the built-in GO [http](https://pkg.go.dev/net/http) library.
 ```bash
 go build ./cmd/http
 ```
@@ -30,6 +27,7 @@ go build ./cmd/http
 ```
 
 ### The OAuth server
+An OAuth server, using mostly the [Gin web framework](https://github.com/gin-gonic/gin) that wraps around the Go [http](https://pkg.go.dev/net/http) library.
 ```bash
 go build ./cmd/server
 ```
