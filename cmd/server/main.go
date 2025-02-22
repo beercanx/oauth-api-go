@@ -3,12 +3,11 @@ package main
 import (
 	"baconi.co.uk/oauth/internal/app/server"
 	"context"
+	"github.com/codingconcepts/env"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-
-	"github.com/codingconcepts/env"
 )
 
 func main() {
