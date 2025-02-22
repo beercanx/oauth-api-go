@@ -7,16 +7,23 @@ import (
 
 func Engine(
 	config *Config,
-) *gin.Engine {
+) (*gin.Engine, error) {
+
+	// TODO - gin.SetMode(gin.ReleaseMode)
 
 	// Engine setup
-	// TODO - gin.SetMode(gin.ReleaseMode)
-	engine := gin.New()
-	engine.Use(gin.Logger(), gin.Recovery())
-	_ = engine.SetTrustedProxies(nil) // TODO - or exit and return error
+	engine := gin.New(func(engine *gin.Engine) {
+		engine.HandleMethodNotAllowed = true
+		engine.Use(gin.Logger(), gin.Recovery())
+	})
+
+	// Because GO likes to have errors returned.
+	if err := engine.SetTrustedProxies(nil); err != nil {
+		return nil, err
+	}
 
 	// Add Routes
 	engine.POST("/token", token.Route)
 
-	return engine
+	return engine, nil
 }

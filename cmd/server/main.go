@@ -3,30 +3,64 @@ package main
 import (
 	"baconi.co.uk/oauth/internal/app/server"
 	"context"
+	"errors"
 	"github.com/codingconcepts/env"
 	"log"
 	"net"
-	"os"
+	"net/http"
 	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	ctx := context.Background()
-	if err := run(ctx); err != nil {
-		log.Fatalf("%+v", err)
+	if err := run(); err != nil {
+		log.Fatalf("%s\n", err)
 	}
 }
 
-func run(ctx context.Context) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	config := server.Config{}
-	if err := env.Set(&config); err != nil {
-		return err
+	if configError := env.Set(&config); configError != nil {
+		return configError
 	}
 
-	engine := server.Engine(&config)
+	engine, engineError := server.Engine(&config)
+	if engineError != nil {
+		return engineError
+	}
 
-	return engine.Run(net.JoinHostPort(config.HttpHost, config.HttpPort))
+	httpServer := &http.Server{
+		Addr:    net.JoinHostPort(config.HttpHost, config.HttpPort),
+		Handler: engine,
+	}
+
+	log.Printf("Listening and serving HTTP on http://%s\n", httpServer.Addr)
+
+	// Initializing the server in a goroutine so that it won't block the graceful shutdown handling below.
+	go func() {
+		if listenErr := httpServer.ListenAndServe(); listenErr != nil && !errors.Is(listenErr, http.ErrServerClosed) {
+			log.Fatalln("Server listen failed: ", listenErr)
+		}
+	}()
+
+	// Listen for the interrupt signal.
+	<-ctx.Done()
+
+	// Restore default behavior on the interrupt signal and notify user of shutdown.
+	stop()
+	log.Println("Server shutting down gracefully, press Ctrl+C again to force.")
+
+	// The context is used to inform the server it has 5 seconds to finish the request it is currently handling.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Fatalln("Server forced to shutdown: ", err)
+	}
+
+	log.Println("Server exiting.")
+	return nil
 }
