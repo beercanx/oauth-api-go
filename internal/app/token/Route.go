@@ -18,13 +18,16 @@ func Route(context *gin.Context) {
 		AllowedGrantTypes: []grant.Type{grant.Password},
 	}
 
-	// TODO - Validate contentType
-	// TODO - Validate formPost
+	// TODO - Look at replacing with some middleware, this endpoint only supports URL encoded form posts, others may also.
+	if contentType := context.ContentType(); contentType != "application/x-www-form-urlencoded" {
+		context.JSON(http.StatusUnsupportedMediaType, ErrorResponse{Error: InvalidRequest, Description: "Unsupported Media Type: " + contentType})
+		return
+	}
 
 	request, invalid := validateRequest(principal, context)
 	if invalid != nil {
 		// TODO - Can we combine Valid and Invalid to one return type and add a type case in the switch below?
-		context.JSON(http.StatusBadRequest, ErrorResponse{Error: invalid.Error, Description: invalid.Description})
+		context.JSON(http.StatusBadRequest, ErrorResponse(*invalid))
 		return
 	}
 
@@ -33,24 +36,6 @@ func Route(context *gin.Context) {
 	case *PasswordRequest:
 		context.JSON(http.StatusOK, valid)
 	default:
-		context.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error:       UnsupportedGrantType,
-			Description: reflect.TypeOf(valid).Name(),
-		})
-	}
-}
-
-func validateRequest(principal client.Principal, context *gin.Context) (Valid, *Invalid) {
-
-	switch grantType := context.PostForm("grant_type"); grantType {
-
-	case "":
-		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: grant_type"}
-
-	case string(grant.Password):
-		return validatePasswordRequest(principal, context)
-
-	default:
-		return nil, &Invalid{Error: UnsupportedGrantType, Description: "unsupported: " + grantType}
+		context.JSON(http.StatusInternalServerError, ErrorResponse{Error: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()})
 	}
 }
