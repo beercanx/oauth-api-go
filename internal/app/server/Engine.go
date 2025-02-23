@@ -2,6 +2,8 @@ package server
 
 import (
 	"baconi.co.uk/oauth/internal/app/token"
+	internalAuthentication "baconi.co.uk/oauth/internal/pkg/authentication"
+	internalToken "baconi.co.uk/oauth/internal/pkg/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,8 +24,23 @@ func Engine(
 		return nil, err
 	}
 
+	//
+	// Create stuff to be injected
+	//
+	accessTokenRepository := internalToken.NewInMemoryRepository[internalToken.AccessToken]()
+	accessTokenService := internalToken.NewAccessTokenService(accessTokenRepository)
+
+	refreshTokenRepository := internalToken.NewInMemoryRepository[internalToken.RefreshToken]()
+	refreshTokenService := internalToken.NewRefreshTokenService(refreshTokenRepository)
+
+	userAuthenticationService := internalAuthentication.UserAuthenticationService{}
+
+	passwordGrant := token.NewPasswordGrant(accessTokenService, refreshTokenService, userAuthenticationService)
+
+	//
 	// Add Routes
-	engine.POST("/token", token.Route)
+	//
+	engine.POST("/token", token.Route(passwordGrant))
 
 	return engine, nil
 }
