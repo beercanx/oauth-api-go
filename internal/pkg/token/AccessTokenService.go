@@ -53,13 +53,16 @@ func (service AccessTokenService) Authenticate(token uuid.UUID) (*AccessToken, e
 	case err != nil:
 		return nil, err
 
+	case accessToken == nil:
+		return nil, nil
+
 	case accessToken.HasExpired():
-		return nil, service.repository.DeleteByRecord(accessToken)
+		return nil, service.repository.DeleteByRecord(*accessToken)
 
 	case accessToken.IsBefore():
 		return nil, nil
 
 	default:
-		return &accessToken, nil
+		return accessToken, nil
 	}
 }

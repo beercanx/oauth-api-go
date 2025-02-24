@@ -33,7 +33,9 @@ func Engine(
 	refreshTokenRepository := internalToken.NewInMemoryRepository[internalToken.RefreshToken]()
 	refreshTokenService := internalToken.NewRefreshTokenService(refreshTokenRepository)
 
-	userAuthenticationService := internalAuthentication.UserAuthenticationService{}
+	userCredentialRepository := internalAuthentication.NewInMemoryUserCredentialRepository()
+	userStatusRepository := internalAuthentication.NewInMemoryUserStatusRepository()
+	userAuthenticationService := internalAuthentication.NewUserAuthenticationService(userCredentialRepository, userStatusRepository)
 
 	passwordGrant := token.NewPasswordGrant(accessTokenService, refreshTokenService, userAuthenticationService)
 

@@ -3,6 +3,7 @@ module baconi.co.uk/oauth
 go 1.24
 
 require (
+	github.com/alexedwards/argon2id v1.0.0
 	github.com/codingconcepts/env v0.0.0-20240618133406-5b0845441187
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0

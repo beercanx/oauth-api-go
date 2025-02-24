@@ -19,8 +19,13 @@ func (i InMemoryRepository[T]) Insert(new T) (T, error) {
 	return new, nil
 }
 
-func (i InMemoryRepository[T]) FindById(id uuid.UUID) (T, error) {
-	return i.store[id], nil
+func (i InMemoryRepository[T]) FindById(id uuid.UUID) (*T, error) {
+	value, ok := i.store[id]
+	if ok {
+		return &value, nil
+	} else {
+		return nil, nil
+	}
 }
 
 func (i InMemoryRepository[T]) FindAllByUsername(username authentication.AuthenticatedUsername) ([]T, error) {
