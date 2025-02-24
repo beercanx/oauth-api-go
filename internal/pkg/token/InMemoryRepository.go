@@ -31,7 +31,7 @@ func (i InMemoryRepository[T]) FindById(id uuid.UUID) (*T, error) {
 func (i InMemoryRepository[T]) FindAllByUsername(username authentication.AuthenticatedUsername) ([]T, error) {
 	v := make([]T, 0, len(i.store))
 	for _, value := range i.store {
-		if value.GetUsername().Value == username.Value {
+		if value.GetUsername().Value() == username.Value() {
 			v = append(v, value)
 		}
 	}

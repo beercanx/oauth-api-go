@@ -1,5 +1,9 @@
 package authentication
 
 type AuthenticatedUsername struct {
-	Value string
+	value string
+}
+
+func (username AuthenticatedUsername) Value() string {
+	return username.value
 }
