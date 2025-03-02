@@ -15,6 +15,13 @@ Regardless, I have decided to continue with `gin` itself, but following the codi
 ## Requirements
 * Go 1.24
 
+## Testing
+
+The standard Go approach to unit testing
+```bash
+go test
+```
+
 ## Building
 
 ### Hello, World!
