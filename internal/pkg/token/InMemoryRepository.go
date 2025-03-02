@@ -1,8 +1,8 @@
 package token
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/authentication"
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 )
 
@@ -28,10 +28,10 @@ func (i InMemoryRepository[T]) FindById(id uuid.UUID) (*T, error) {
 	}
 }
 
-func (i InMemoryRepository[T]) FindAllByUsername(username authentication.AuthenticatedUsername) ([]T, error) {
+func (i InMemoryRepository[T]) FindAllByUsername(username user.AuthenticatedUsername) ([]T, error) {
 	v := make([]T, 0, len(i.store))
 	for _, value := range i.store {
-		if value.GetUsername().Value() == username.Value() {
+		if value.GetUsername() == username {
 			v = append(v, value)
 		}
 	}
@@ -41,7 +41,7 @@ func (i InMemoryRepository[T]) FindAllByUsername(username authentication.Authent
 func (i InMemoryRepository[T]) FindAllByClientId(clientId client.Id) ([]T, error) {
 	v := make([]T, 0, len(i.store))
 	for _, value := range i.store {
-		if value.GetClientId().Value == clientId.Value {
+		if value.GetClientId() == clientId {
 			v = append(v, value)
 		}
 	}

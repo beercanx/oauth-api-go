@@ -1,9 +1,13 @@
-package token
+package token_exchange
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"github.com/google/uuid"
 )
+
+type Response interface {
+	success() bool
+}
 
 // Success https://www.rfc-editor.org/rfc/rfc6749#section-5.1
 type Success struct {
@@ -29,11 +33,15 @@ type Success struct {
 	// Scope OPTIONAL if identical to the scope requested by the client; otherwise,
 	// REQUIRED. The scope of the access token as described by
 	// https://www.rfc-editor.org/rfc/rfc6749#section-3.3
-	Scope *[]string `json:"scope,omitempty"`
+	Scope *string `json:"scope,omitempty"`
 
 	// State REQUIRED if the "state" parameter was present in the client
 	// authorization request. The exact value received from the client.
 	State *string `json:"state,omitempty"`
+}
+
+func (s Success) success() bool {
+	return true
 }
 
 // Failed https://www.rfc-editor.org/rfc/rfc6749#section-5.2
@@ -45,4 +53,8 @@ type Failed struct {
 	// Description Human-readable ASCII text providing additional information, used
 	// to assist the client developer in understanding the error that occurred.
 	Description string `json:"error_description"`
+}
+
+func (f Failed) success() bool {
+	return false
 }

@@ -1,4 +1,4 @@
-package token
+package token_exchange
 
 type ErrorType string
 

@@ -1,4 +1,4 @@
-package authentication
+package user
 
 type Success struct {
 	Username AuthenticatedUsername
@@ -16,6 +16,6 @@ const (
 	Locked     Reason = "locked"
 )
 
-type UserAuthenticator interface {
+type Authenticator interface {
 	Authenticate(username string, password string) (*Success, *Failure, error)
 }

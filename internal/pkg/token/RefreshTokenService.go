@@ -1,8 +1,9 @@
 package token
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/authentication"
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/scope"
+	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 	"time"
 )
@@ -17,14 +18,14 @@ func NewRefreshTokenService(repository Repository[RefreshToken]) *RefreshTokenSe
 	return &RefreshTokenService{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,
-		tokenAge:       2 * time.Hour,
+		tokenAge:       4 * time.Hour,
 	}
 }
 
 func (service RefreshTokenService) Issue(
-	username authentication.AuthenticatedUsername,
+	username user.AuthenticatedUsername,
 	clientId client.Id,
-	scopes []string,
+	scopes []scope.Scope,
 ) (*RefreshToken, error) {
 
 	issuedAt := time.Now()

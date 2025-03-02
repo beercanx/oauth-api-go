@@ -1,19 +1,19 @@
-package authentication
+package user
 
 import "github.com/alexedwards/argon2id"
 
-type UserAuthenticationService struct {
-	userCredentialRepository UserCredentialRepository
-	userStatusRepository     UserStatusRepository
+type AuthenticationService struct {
+	credentialRepository CredentialRepository
+	statusRepository     StatusRepository
 }
 
-func NewUserAuthenticationService(userCredentialRepository UserCredentialRepository, userStatusRepository UserStatusRepository) *UserAuthenticationService {
-	return &UserAuthenticationService{userCredentialRepository: userCredentialRepository, userStatusRepository: userStatusRepository}
+func NewAuthenticationService(credentialRepository CredentialRepository, statusRepository StatusRepository) *AuthenticationService {
+	return &AuthenticationService{credentialRepository: credentialRepository, statusRepository: statusRepository}
 }
 
-func (service UserAuthenticationService) Authenticate(username string, password string) (*Success, *Failure, error) {
+func (service AuthenticationService) Authenticate(username string, password string) (*Success, *Failure, error) {
 
-	credential, err := service.userCredentialRepository.FindByUsername(username)
+	credential, err := service.credentialRepository.FindByUsername(username)
 	switch {
 	case err != nil:
 		return nil, nil, err
@@ -30,7 +30,7 @@ func (service UserAuthenticationService) Authenticate(username string, password 
 		return nil, &Failure{Mismatched}, nil
 	}
 
-	status, err := service.userStatusRepository.FindByUsername(username)
+	status, err := service.statusRepository.FindByUsername(username)
 	switch {
 	case err != nil:
 		return nil, nil, err

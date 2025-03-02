@@ -1,5 +1,5 @@
 package client
 
 type Id struct {
-	Value string
+	Value string // TODO - Don't export field once we've implemented automated client authentication
 }

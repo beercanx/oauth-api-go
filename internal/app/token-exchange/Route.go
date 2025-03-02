@@ -1,8 +1,9 @@
-package token
+package token_exchange
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/grant"
+	"baconi.co.uk/oauth/internal/pkg/scope"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 )
 
 func Route(
+	scopeService *scope.Service,
 	passwordGrant *PasswordGrant,
 ) gin.HandlerFunc {
 
@@ -21,7 +23,7 @@ func Route(
 		principal := client.Principal{
 			Id:                client.Id{Value: "aardvark"},
 			Type:              client.Confidential,
-			AllowedScopes:     []string{"basic"},
+			AllowedScopes:     []scope.Scope{scope.Basic},
 			AllowedGrantTypes: []grant.Type{grant.Password},
 		}
 
@@ -31,35 +33,36 @@ func Route(
 			return
 		}
 
-		request, invalid := validateRequest(principal, context)
+		request, invalid := validateRequest(scopeService, principal, context)
 		if invalid != nil {
 			// TODO - Can we combine Valid and Invalid to one return type and add a type case in the switch below?
 			context.JSON(http.StatusBadRequest, Failed(*invalid))
 			return
 		}
 
-		var success *Success
-		var failed *Failed
+		var result Response
 		var err error
 
 		switch valid := request.(type) {
 		// TODO - Add support for other grant types
 		case *PasswordRequest:
-			success, failed, err = passwordGrant.Exchange(*valid)
+			result, err = passwordGrant.Exchange(*valid)
 		default:
-			failed = &Failed{Error: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
+			result = &Failed{Error: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
 		}
 
-		switch {
-		case err != nil:
+		if err != nil {
 			log.Println("[ERROR] Failed to exchange the grant:", err.Error())
 			context.AbortWithStatus(http.StatusInternalServerError)
-		case failed != nil:
-			context.JSON(http.StatusBadRequest, failed)
-		case success != nil:
-			context.JSON(http.StatusOK, success)
+		}
+
+		switch response := result.(type) {
+		case Failed:
+			context.JSON(http.StatusBadRequest, response)
+		case Success:
+			context.JSON(http.StatusOK, response)
 		default:
-			log.Println("[ERROR] No success or failure to reply with...")
+			log.Println("[ERROR] No success or failure to reply with...", reflect.TypeOf(response).Name())
 			context.AbortWithStatus(http.StatusInternalServerError)
 		}
 	}

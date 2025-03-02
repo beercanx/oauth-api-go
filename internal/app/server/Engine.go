@@ -1,9 +1,10 @@
 package server
 
 import (
-	"baconi.co.uk/oauth/internal/app/token"
-	internalAuthentication "baconi.co.uk/oauth/internal/pkg/authentication"
-	internalToken "baconi.co.uk/oauth/internal/pkg/token"
+	"baconi.co.uk/oauth/internal/app/token-exchange"
+	"baconi.co.uk/oauth/internal/pkg/scope"
+	"baconi.co.uk/oauth/internal/pkg/token"
+	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,22 +28,25 @@ func Engine(
 	//
 	// Create stuff to be injected
 	//
-	accessTokenRepository := internalToken.NewInMemoryRepository[internalToken.AccessToken]()
-	accessTokenService := internalToken.NewAccessTokenService(accessTokenRepository)
+	accessTokenRepository := token.NewInMemoryRepository[token.AccessToken]()
+	accessTokenService := token.NewAccessTokenService(accessTokenRepository)
 
-	refreshTokenRepository := internalToken.NewInMemoryRepository[internalToken.RefreshToken]()
-	refreshTokenService := internalToken.NewRefreshTokenService(refreshTokenRepository)
+	refreshTokenRepository := token.NewInMemoryRepository[token.RefreshToken]()
+	refreshTokenService := token.NewRefreshTokenService(refreshTokenRepository)
 
-	userCredentialRepository := internalAuthentication.NewInMemoryUserCredentialRepository()
-	userStatusRepository := internalAuthentication.NewInMemoryUserStatusRepository()
-	userAuthenticationService := internalAuthentication.NewUserAuthenticationService(userCredentialRepository, userStatusRepository)
+	scopeRepository := scope.NewInMemoryRepository()
+	scopeService := scope.NewService(scopeRepository)
 
-	passwordGrant := token.NewPasswordGrant(accessTokenService, refreshTokenService, userAuthenticationService)
+	userCredentialRepository := user.NewInMemoryCredentialRepository()
+	userStatusRepository := user.NewInMemoryStatusRepository()
+	userAuthenticationService := user.NewAuthenticationService(userCredentialRepository, userStatusRepository)
+
+	passwordGrant := token_exchange.NewPasswordGrant(accessTokenService, refreshTokenService, userAuthenticationService)
 
 	//
 	// Add Routes
 	//
-	engine.POST("/token", token.Route(passwordGrant))
+	engine.POST("/token", token_exchange.Route(scopeService, passwordGrant))
 
 	return engine, nil
 }

@@ -1,12 +1,13 @@
-package token
+package token_exchange
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/grant"
+	"baconi.co.uk/oauth/internal/pkg/scope"
 	"github.com/gin-gonic/gin"
 )
 
-func validateRequest(principal client.Principal, context *gin.Context) (Valid, *Invalid) {
+func validateRequest(scopeService *scope.Service, principal client.Principal, context *gin.Context) (Valid, *Invalid) {
 
 	switch grantType := context.PostForm("grant_type"); grantType {
 
@@ -14,7 +15,7 @@ func validateRequest(principal client.Principal, context *gin.Context) (Valid, *
 		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: grant_type"}
 
 	case string(grant.Password):
-		return validatePasswordRequest(principal, context)
+		return validatePasswordRequest(scopeService, principal, context)
 
 	default:
 		return nil, &Invalid{Error: UnsupportedGrantType, Description: "unsupported: " + grantType}

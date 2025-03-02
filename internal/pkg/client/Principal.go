@@ -2,6 +2,7 @@ package client
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/grant"
+	"baconi.co.uk/oauth/internal/pkg/scope"
 	"slices"
 )
 
@@ -9,7 +10,7 @@ type Principal struct {
 	Id                Id
 	Type              Type
 	RedirectUris      []string
-	AllowedScopes     []string
+	AllowedScopes     []scope.Scope
 	AllowedActions    []string
 	AllowedGrantTypes []grant.Type
 }
@@ -26,10 +27,10 @@ func (principal Principal) Can(grantType grant.Type) bool {
 	return slices.Contains(principal.AllowedGrantTypes, grantType)
 }
 
-func (principal Principal) CanBeIssued(scopes []string) bool {
+func (principal Principal) CanBeIssued(scopes []scope.Scope) bool {
 	result := true
-	for _, scope := range scopes {
-		if result = slices.Contains(principal.AllowedScopes, scope); !result {
+	for _, s := range scopes {
+		if result = slices.Contains(principal.AllowedScopes, s); !result {
 			break
 		}
 	}

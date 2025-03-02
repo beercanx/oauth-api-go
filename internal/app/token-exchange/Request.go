@@ -1,4 +1,4 @@
-package token
+package token_exchange
 
 import "baconi.co.uk/oauth/internal/pkg/client"
 

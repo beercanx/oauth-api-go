@@ -1,17 +1,18 @@
 package token
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/authentication"
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/scope"
+	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 	"time"
 )
 
 type AccessToken struct {
 	Value     uuid.UUID
-	Username  authentication.AuthenticatedUsername
+	Username  user.AuthenticatedUsername
 	ClientId  client.Id
-	Scopes    []string
+	Scopes    []scope.Scope
 	IssuedAt  time.Time
 	ExpiresAt time.Time
 	NotBefore time.Time
@@ -21,7 +22,7 @@ func (token AccessToken) GetValue() uuid.UUID {
 	return token.Value
 }
 
-func (token AccessToken) GetUsername() authentication.AuthenticatedUsername {
+func (token AccessToken) GetUsername() user.AuthenticatedUsername {
 	return token.Username
 }
 

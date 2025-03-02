@@ -1,19 +1,20 @@
-package token
+package token_exchange
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/grant"
+	"baconi.co.uk/oauth/internal/pkg/scope"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
 
-func validatePasswordRequest(principal client.Principal, context *gin.Context) (*PasswordRequest, *Invalid) {
+func validatePasswordRequest(scopeService *scope.Service, principal client.Principal, context *gin.Context) (*PasswordRequest, *Invalid) {
 
 	username, usernameOk := context.GetPostForm("username")
 	password, passwordOk := context.GetPostForm("password")
-	scope, scopeOk := context.GetPostForm("scope")
-	rawScopes := strings.Split(scope, " ")
-	scopes := rawScopes // TODO - Perform a check to filter down to only valid scopes
+	scopeP, scopeOk := context.GetPostForm("scope")
+	rawScopes := strings.Split(scopeP, " ")
+	scopes := scopeService.Validate(rawScopes)
 
 	switch {
 	case !principal.IsConfidential():
