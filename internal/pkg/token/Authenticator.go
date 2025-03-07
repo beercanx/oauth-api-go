@@ -5,5 +5,5 @@ import (
 )
 
 type Authenticator[T Token] interface {
-	Authenticate(token uuid.UUID) (*T, error)
+	Authenticate(token uuid.UUID) (T, error)
 }

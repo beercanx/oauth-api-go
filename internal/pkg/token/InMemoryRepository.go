@@ -3,7 +3,12 @@ package token
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/user"
+	"errors"
 	"github.com/google/uuid"
+)
+
+var (
+	ErrNoSuchToken = errors.New("token does not exist")
 )
 
 type InMemoryRepository[T Token] struct {
@@ -14,17 +19,17 @@ func NewInMemoryRepository[T Token]() *InMemoryRepository[T] {
 	return &InMemoryRepository[T]{store: make(map[uuid.UUID]T)}
 }
 
-func (i InMemoryRepository[T]) Insert(new T) (T, error) {
+func (i InMemoryRepository[T]) Insert(new T) error {
 	i.store[new.GetValue()] = new
-	return new, nil
+	return nil
 }
 
-func (i InMemoryRepository[T]) FindById(id uuid.UUID) (*T, error) {
+func (i InMemoryRepository[T]) FindById(id uuid.UUID) (T, error) {
 	value, ok := i.store[id]
 	if ok {
-		return &value, nil
+		return value, nil
 	} else {
-		return nil, nil
+		return *new(T), ErrNoSuchToken
 	}
 }
 

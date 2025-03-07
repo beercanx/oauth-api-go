@@ -4,6 +4,8 @@ import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/user"
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"time"
 )
@@ -26,14 +28,14 @@ func (service AccessTokenService) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes []scope.Scope,
-) (*AccessToken, error) {
+) (AccessToken, error) {
 
 	issuedAt := time.Now()
 
 	expiresAt := issuedAt.Add(service.tokenAge)
 	notBefore := issuedAt.Add(-service.notBeforeShift)
 
-	accessToken, err := service.repository.Insert(AccessToken{
+	accessToken := AccessToken{
 		Value:     uuid.New(),
 		Username:  username,
 		ClientId:  clientId,
@@ -41,27 +43,36 @@ func (service AccessTokenService) Issue(
 		IssuedAt:  issuedAt,
 		ExpiresAt: expiresAt,
 		NotBefore: notBefore,
-	})
+	}
 
-	return &accessToken, err
+	if err := service.repository.Insert(accessToken); err != nil {
+		return AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
+	}
+
+	return accessToken, nil
 }
 
-func (service AccessTokenService) Authenticate(token uuid.UUID) (*AccessToken, error) {
+var (
+	ErrAccessTokenHasExpired = errors.New("access token has expired")
+	ErrAccessTokenIsBefore   = errors.New("access token is before")
+)
+
+func (service AccessTokenService) Authenticate(token uuid.UUID) (AccessToken, error) {
 
 	accessToken, err := service.repository.FindById(token)
 	switch {
 
 	case err != nil:
-		return nil, err
-
-	case accessToken == nil:
-		return nil, nil
+		return AccessToken{}, fmt.Errorf("authenticate access token failed: %w", err)
 
 	case accessToken.HasExpired():
-		return nil, service.repository.DeleteByRecord(*accessToken)
+		if err = service.repository.DeleteByRecord(accessToken); err != nil {
+			return AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
+		}
+		return AccessToken{}, ErrAccessTokenHasExpired
 
 	case accessToken.IsBefore():
-		return nil, nil
+		return AccessToken{}, ErrAccessTokenIsBefore
 
 	default:
 		return accessToken, nil
