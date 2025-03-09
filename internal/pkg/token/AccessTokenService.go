@@ -16,6 +16,10 @@ type AccessTokenService struct {
 	notBeforeShift time.Duration
 }
 
+// assert InMemoryRepository implements Issuer and Authenticator
+var _ Issuer[AccessToken] = &AccessTokenService{}
+var _ Authenticator[AccessToken] = &AccessTokenService{}
+
 func NewAccessTokenService(repository Repository[AccessToken]) *AccessTokenService {
 	return &AccessTokenService{
 		repository:     repository,
@@ -24,11 +28,11 @@ func NewAccessTokenService(repository Repository[AccessToken]) *AccessTokenServi
 	}
 }
 
-func (service AccessTokenService) Issue(
+func (service *AccessTokenService) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes []scope.Scope,
-) (AccessToken, error) {
+) AccessToken {
 
 	issuedAt := time.Now()
 
@@ -46,10 +50,10 @@ func (service AccessTokenService) Issue(
 	}
 
 	if err := service.repository.Insert(accessToken); err != nil {
-		return AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
+		panic(fmt.Errorf("issue access token failed: %w", err))
 	}
 
-	return accessToken, nil
+	return accessToken
 }
 
 var (
@@ -57,7 +61,7 @@ var (
 	ErrAccessTokenIsBefore   = errors.New("access token is before")
 )
 
-func (service AccessTokenService) Authenticate(token uuid.UUID) (AccessToken, error) {
+func (service *AccessTokenService) Authenticate(token uuid.UUID) (AccessToken, error) {
 
 	accessToken, err := service.repository.FindById(token)
 	switch {

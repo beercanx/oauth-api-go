@@ -16,14 +16,12 @@ func TestInMemoryCredentialRepository(t *testing.T) {
 	t.Run("findByUsername with valid credential", func(t *testing.T) {
 		credential, err := underTest.FindByUsername("insert")
 		assert.NoError(t, err)
-		if assert.NotNil(t, credential) {
-			assert.Equal(t, &Credential{username: "insert", hashedSecret: "hash"}, credential)
-		}
+		assert.Equal(t, Credential{username: "insert", hashedSecret: "hash"}, credential)
 	})
 
 	t.Run("findByUsername with no credential for username", func(t *testing.T) {
 		credential, err := underTest.FindByUsername("no-such-username")
-		assert.NoError(t, err)
-		assert.Nil(t, credential)
+		assert.ErrorIs(t, err, ErrNoSuchCredential)
+		assert.Zero(t, credential)
 	})
 }

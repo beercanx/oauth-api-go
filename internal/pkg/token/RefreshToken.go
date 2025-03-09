@@ -18,6 +18,9 @@ type RefreshToken struct {
 	NotBefore time.Time
 }
 
+// assert RefreshToken implements Token
+var _ Token = &RefreshToken{}
+
 func (token RefreshToken) GetValue() uuid.UUID {
 	return token.Value
 }

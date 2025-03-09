@@ -28,16 +28,16 @@ type Success struct {
 	// RefreshToken OPTIONAL. The refresh token, which can be used to obtain new
 	// access tokens using the same authorization grant as described in
 	// https://www.rfc-editor.org/rfc/rfc6749#section-6
-	RefreshToken *uuid.UUID `json:"refresh_token,omitempty"`
+	RefreshToken uuid.UUID `json:"refresh_token,omitempty"` // TODO - Stop serialising the zero value 00000000-0000-0000-0000-000000000000
 
 	// Scope OPTIONAL if identical to the scope requested by the client; otherwise,
 	// REQUIRED. The scope of the access token as described by
 	// https://www.rfc-editor.org/rfc/rfc6749#section-3.3
-	Scope *string `json:"scope,omitempty"`
+	Scope string `json:"scope,omitempty"`
 
 	// State REQUIRED if the "state" parameter was present in the client
 	// authorization request. The exact value received from the client.
-	State *string `json:"state,omitempty"`
+	State string `json:"state,omitempty"`
 }
 
 func (s Success) success() bool {

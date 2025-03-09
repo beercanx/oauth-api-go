@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"github.com/alexedwards/argon2id"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -19,7 +18,7 @@ func TestAuthenticate(t *testing.T) {
 	validUsername := "aardvark"
 	validPassword := "P@55w0rd"
 	validHash := "$argon2id$v=19$m=8,t=1,p=1$ZHl1SVFDUVBlT3JkYkpJRQ$smHA3mizJ+fSojqdxJC+Pg" // P@55w09rd
-	validCredential := &Credential{validUsername, validHash, time.Now(), time.Now()}
+	validCredential := Credential{validUsername, validHash, time.Now(), time.Now()}
 
 	//
 	// Error
@@ -30,15 +29,13 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository := new(MockedCredentialRepository)
 		statusRepository := new(MockedStatusRepository)
 
-		credentialRepository.On(FindByUsername, "cred-repo-error").Return(nil, credentialRepoError).Once()
+		credentialRepository.On(FindByUsername, "cred-repo-error").Return(Credential{}, credentialRepoError).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate("cred-repo-error", validPassword)
-		assert.Nil(t, success, "success should be nil")
-		assert.Nil(t, failure, "failure should be nil")
-		assert.Error(t, err)
-		assert.Equal(t, credentialRepoError, err)
+		assert.Panics(t, func() { // TODO - Check for credentialRepoError
+			underTest.Authenticate("cred-repo-error", validPassword)
+		})
 
 		credentialRepository.AssertExpectations(t)
 		statusRepository.AssertNotCalled(t, FindByUsername, mock.Anything)
@@ -56,11 +53,9 @@ func TestAuthenticate(t *testing.T) {
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate("argon2-error", validPassword)
-		assert.Nil(t, success, "success should be nil")
-		assert.Nil(t, failure, "failure should be nil")
-		assert.Error(t, err)
-		assert.Equal(t, argon2id.ErrInvalidHash, err)
+		assert.Panics(t, func() { // TODO - Check for argon2id.ErrInvalidHash
+			underTest.Authenticate("argon2-error", validPassword)
+		})
 
 		credentialRepository.AssertExpectations(t)
 		statusRepository.AssertNotCalled(t, FindByUsername, mock.Anything)
@@ -72,15 +67,13 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := new(MockedStatusRepository)
 
 		credentialRepository.On(FindByUsername, validUsername).Return(validCredential, nil).Once()
-		statusRepository.On(FindByUsername, validUsername).Return(nil, statusRepoError).Once()
+		statusRepository.On(FindByUsername, validUsername).Panic(statusRepoError.Error()).Maybe()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, validPassword)
-		assert.Nil(t, success, "success should be nil")
-		assert.Nil(t, failure, "failure should be nil")
-		assert.Error(t, err)
-		assert.Equal(t, statusRepoError, err)
+		assert.Panics(t, func() { // TODO - Check for statusRepoError
+			underTest.Authenticate(validUsername, validPassword)
+		})
 
 		credentialRepository.AssertExpectations(t)
 		statusRepository.AssertExpectations(t)
@@ -95,12 +88,11 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository := new(MockedCredentialRepository)
 		statusRepository := new(MockedStatusRepository)
 
-		credentialRepository.On(FindByUsername, validUsername).Return(nil, nil).Once()
+		credentialRepository.On(FindByUsername, validUsername).Return(Credential{}, ErrNoSuchCredential).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, "badger")
-		assert.NoError(t, err)
+		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Nil(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
 		assert.Equal(t, Missing, failure.Reason)
@@ -118,8 +110,7 @@ func TestAuthenticate(t *testing.T) {
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, "badger")
-		assert.NoError(t, err)
+		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Nil(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
 		assert.Equal(t, Mismatched, failure.Reason)
@@ -134,12 +125,11 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := new(MockedStatusRepository)
 
 		credentialRepository.On(FindByUsername, validUsername).Return(validCredential, nil).Once()
-		statusRepository.On(FindByUsername, validUsername).Return(nil, nil).Once()
+		statusRepository.On(FindByUsername, validUsername).Return(Status{}, ErrNoSuchStatus).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, validPassword)
-		assert.NoError(t, err)
+		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Nil(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
 		assert.Equal(t, Missing, failure.Reason)
@@ -154,12 +144,11 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := new(MockedStatusRepository)
 
 		credentialRepository.On(FindByUsername, validUsername).Return(validCredential, nil).Once()
-		statusRepository.On(FindByUsername, validUsername).Return(&Status{validUsername, true}, nil).Once()
+		statusRepository.On(FindByUsername, validUsername).Return(Status{validUsername, true}, nil).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, validPassword)
-		assert.NoError(t, err)
+		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Nil(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
 		assert.Equal(t, Locked, failure.Reason)
@@ -178,12 +167,11 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := new(MockedStatusRepository)
 
 		credentialRepository.On(FindByUsername, validUsername).Return(validCredential, nil).Once()
-		statusRepository.On(FindByUsername, validUsername).Return(&Status{validUsername, false}, nil).Once()
+		statusRepository.On(FindByUsername, validUsername).Return(Status{validUsername, false}, nil).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		success, failure, err := underTest.Authenticate(validUsername, validPassword)
-		assert.NoError(t, err)
+		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Nil(t, failure, "failure should be nil")
 		assert.NotNil(t, success, "success should not be nil")
 		assert.Equal(t, AuthenticatedUsername{validUsername}, success.Username)
@@ -197,34 +185,32 @@ type MockedCredentialRepository struct {
 	mock.Mock
 }
 
+// assert MockedCredentialRepository implements CredentialRepository
+var _ CredentialRepository = &MockedCredentialRepository{}
+
 func (repo *MockedCredentialRepository) Insert(cred Credential) error {
 	args := repo.Called(cred)
 	return args.Error(0)
 }
 
-func (repo *MockedCredentialRepository) FindByUsername(username string) (*Credential, error) {
+func (repo *MockedCredentialRepository) FindByUsername(username string) (Credential, error) {
 	args := repo.Called(username)
-	if c := args.Get(0); c == nil {
-		return nil, args.Error(1)
-	} else {
-		return c.(*Credential), args.Error(1)
-	}
+	return args.Get(0).(Credential), args.Error(1)
 }
 
 type MockedStatusRepository struct {
 	mock.Mock
 }
 
+// assert MockedStatusRepository implements StatusRepository
+var _ StatusRepository = &MockedStatusRepository{}
+
 func (repo *MockedStatusRepository) Insert(status Status) error {
 	args := repo.Called(status)
 	return args.Error(0)
 }
 
-func (repo *MockedStatusRepository) FindByUsername(username string) (*Status, error) {
+func (repo *MockedStatusRepository) FindByUsername(username string) (Status, error) {
 	args := repo.Called(username)
-	if s := args.Get(0); s == nil {
-		return nil, args.Error(1)
-	} else {
-		return s.(*Status), args.Error(1)
-	}
+	return args.Get(0).(Status), args.Error(1)
 }

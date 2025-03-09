@@ -17,5 +17,5 @@ const (
 )
 
 type Authenticator interface {
-	Authenticate(username string, password string) (*Success, *Failure, error)
+	Authenticate(username string, password string) (*Success, *Failure)
 }

@@ -1,8 +1,17 @@
 package scope
 
+import "errors"
+
+var (
+	ErrNoSuchScope = errors.New("scope does not exist")
+)
+
 type InMemoryRepository struct {
 	store map[string]Scope
 }
+
+// assert InMemoryRepository implements Repository
+var _ Repository = &InMemoryRepository{}
 
 func NewInMemoryRepository() *InMemoryRepository {
 	repository := &InMemoryRepository{make(map[string]Scope)}
@@ -10,11 +19,11 @@ func NewInMemoryRepository() *InMemoryRepository {
 	return repository
 }
 
-func (repository InMemoryRepository) FindById(id string) *Scope {
+func (repository *InMemoryRepository) FindById(id string) (Scope, error) {
 	scope, ok := repository.store[id]
 	if ok {
-		return &scope
+		return scope, nil
 	} else {
-		return nil
+		return Scope{}, ErrNoSuchScope
 	}
 }

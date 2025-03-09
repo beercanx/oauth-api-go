@@ -7,5 +7,5 @@ import (
 )
 
 type Issuer[T Token] interface {
-	Issue(username user.AuthenticatedUsername, clientId client.Id, scopes []scope.Scope) (T, error)
+	Issue(username user.AuthenticatedUsername, clientId client.Id, scopes []scope.Scope) T
 }

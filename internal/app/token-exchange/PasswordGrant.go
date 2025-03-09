@@ -28,15 +28,9 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Response, error) {
 		return Failed{Error: InvalidGrant, Description: string(failure.Reason)}, nil
 	}
 
-	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
-	if err != nil {
-		return nil, err
-	}
+	accessToken := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
 
-	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
-	if err != nil {
-		return nil, err
-	}
+	refreshToken := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
 
 	scopes := scope.MarshalScopes(accessToken.Scopes)
 
@@ -44,9 +38,8 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Response, error) {
 		AccessToken:  accessToken.Value,
 		TokenType:    token.Bearer,
 		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
-		RefreshToken: &refreshToken.Value,
-		Scope:        &scopes,
-		State:        nil,
+		RefreshToken: refreshToken.Value,
+		Scope:        scopes,
 	}, nil
 }
 

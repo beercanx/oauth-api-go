@@ -18,6 +18,9 @@ type AccessToken struct {
 	NotBefore time.Time
 }
 
+// assert AccessToken implements Token
+var _ Token = &AccessToken{}
+
 func (token AccessToken) GetValue() uuid.UUID {
 	return token.Value
 }

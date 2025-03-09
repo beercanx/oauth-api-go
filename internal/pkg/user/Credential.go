@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"github.com/alexedwards/argon2id"
 	"strings"
 	"time"
@@ -14,13 +15,20 @@ type Credential struct {
 }
 
 type CredentialRepository interface {
-	Insert(new Credential) error
-	FindByUsername(username string) (*Credential, error)
+	Insert(new Credential) error                        // TODO - Verify if Go DB libraries panic or return errors
+	FindByUsername(username string) (Credential, error) // TODO - Verify if Go DB libraries panic or return errors
 }
+
+var (
+	ErrNoSuchCredential = errors.New("credential does not exist")
+)
 
 type InMemoryCredentialRepository struct {
 	store map[string]Credential
 }
+
+// assert InMemoryCredentialRepository implements CredentialRepository
+var _ CredentialRepository = &InMemoryCredentialRepository{}
 
 func NewInMemoryCredentialRepository() *InMemoryCredentialRepository {
 	repository := &InMemoryCredentialRepository{make(map[string]Credential)}
@@ -32,16 +40,14 @@ func NewInMemoryCredentialRepository() *InMemoryCredentialRepository {
 	return repository
 }
 
-func (repository InMemoryCredentialRepository) Insert(new Credential) error {
+func (repository *InMemoryCredentialRepository) Insert(new Credential) error {
 	repository.store[strings.ToLower(new.username)] = new
 	return nil
 }
 
-func (repository InMemoryCredentialRepository) FindByUsername(username string) (*Credential, error) {
-	credential, ok := repository.store[strings.ToLower(username)]
-	if ok {
-		return &credential, nil
-	} else {
-		return nil, nil
+func (repository *InMemoryCredentialRepository) FindByUsername(username string) (Credential, error) {
+	if credential, ok := repository.store[strings.ToLower(username)]; ok {
+		return credential, nil
 	}
+	return Credential{}, ErrNoSuchCredential
 }
