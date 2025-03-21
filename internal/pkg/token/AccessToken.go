@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type AccessToken struct {
+type AccessToken struct { // TODO - Consider locking down access to getters.
 	Value     uuid.UUID
 	Username  user.AuthenticatedUsername
 	ClientId  client.Id

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type RefreshToken struct {
+type RefreshToken struct { // TODO - Consider locking down access to getters.
 	Value     uuid.UUID
 	Username  user.AuthenticatedUsername
 	ClientId  client.Id

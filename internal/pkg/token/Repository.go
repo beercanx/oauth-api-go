@@ -3,7 +3,12 @@ package token
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/user"
+	"errors"
 	"github.com/google/uuid"
+)
+
+var (
+	ErrNoSuchToken = errors.New("token does not exist")
 )
 
 type Repository[T Token] interface {

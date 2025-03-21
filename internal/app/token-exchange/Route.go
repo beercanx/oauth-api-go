@@ -12,7 +12,7 @@ import (
 
 func Route(
 	scopeService *scope.Service,
-	passwordGrant *PasswordGrant,
+	passwordGrant Grant[PasswordRequest],
 ) gin.HandlerFunc {
 
 	// TODO - Open to do other setup, no stored state of course...
@@ -41,19 +41,13 @@ func Route(
 		}
 
 		var result Response
-		var err error
 
 		switch valid := request.(type) {
 		// TODO - Add support for other grant types
 		case *PasswordRequest:
-			result, err = passwordGrant.Exchange(*valid)
+			result = passwordGrant.Exchange(*valid)
 		default:
 			result = &Failed{Error: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
-		}
-
-		if err != nil {
-			log.Println("[ERROR] Failed to exchange the grant:", err.Error())
-			context.AbortWithStatus(http.StatusInternalServerError)
 		}
 
 		switch response := result.(type) {

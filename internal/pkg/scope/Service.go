@@ -4,10 +4,6 @@ type Service struct {
 	repository Repository
 }
 
-func NewService(repository Repository) *Service {
-	return &Service{repository}
-}
-
 func (service *Service) Validate(inputs []string) []Scope {
 
 	var result []Scope
@@ -21,4 +17,8 @@ func (service *Service) Validate(inputs []string) []Scope {
 	}
 
 	return result
+}
+
+func NewService(repository Repository) *Service {
+	return &Service{repository}
 }

@@ -6,6 +6,18 @@ inpackage: True
 dir: "{{.InterfaceDir}}"
 filename: "{{.InterfaceName}}_mock.go"
 packages:
+  baconi.co.uk/oauth/internal/pkg/client:
+    config:
+      all: True
+  baconi.co.uk/oauth/internal/pkg/grant:
+    config:
+      all: True
+  baconi.co.uk/oauth/internal/pkg/scope:
+    config:
+      all: True
+  baconi.co.uk/oauth/internal/pkg/token:
+    config:
+      all: True
   baconi.co.uk/oauth/internal/pkg/user:
     config:
       all: True

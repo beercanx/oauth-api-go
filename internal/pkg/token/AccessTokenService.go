@@ -4,28 +4,15 @@ import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/user"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"time"
 )
 
-type AccessTokenService struct {
+type AccessTokenService struct { // TODO - Consider splitting into Issuer_AccessToken and Authenticator_AccessToken
 	repository     Repository[AccessToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
-}
-
-// assert InMemoryRepository implements Issuer and Authenticator
-var _ Issuer[AccessToken] = &AccessTokenService{}
-var _ Authenticator[AccessToken] = &AccessTokenService{}
-
-func NewAccessTokenService(repository Repository[AccessToken]) *AccessTokenService {
-	return &AccessTokenService{
-		repository:     repository,
-		notBeforeShift: 1 * time.Minute,
-		tokenAge:       2 * time.Hour,
-	}
 }
 
 func (service *AccessTokenService) Issue(
@@ -56,11 +43,6 @@ func (service *AccessTokenService) Issue(
 	return accessToken
 }
 
-var (
-	ErrAccessTokenHasExpired = errors.New("access token has expired")
-	ErrAccessTokenIsBefore   = errors.New("access token is before")
-)
-
 func (service *AccessTokenService) Authenticate(token uuid.UUID) (AccessToken, error) {
 
 	accessToken, err := service.repository.FindById(token)
@@ -80,5 +62,17 @@ func (service *AccessTokenService) Authenticate(token uuid.UUID) (AccessToken, e
 
 	default:
 		return accessToken, nil
+	}
+}
+
+// assert AccessTokenService implements Issuer and Authenticator
+var _ Issuer[AccessToken] = &AccessTokenService{}
+var _ Authenticator[AccessToken] = &AccessTokenService{}
+
+func NewAccessTokenService(repository Repository[AccessToken]) *AccessTokenService {
+	return &AccessTokenService{
+		repository:     repository,
+		notBeforeShift: 1 * time.Minute,
+		tokenAge:       2 * time.Hour,
 	}
 }

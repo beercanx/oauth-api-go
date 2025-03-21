@@ -3,24 +3,11 @@ package token
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/user"
-	"errors"
 	"github.com/google/uuid"
-)
-
-var (
-	ErrNoSuchToken = errors.New("token does not exist")
 )
 
 type InMemoryRepository[T Token] struct {
 	store map[uuid.UUID]T
-}
-
-// assert InMemoryRepository implements Repository
-var _ Repository[AccessToken] = &InMemoryRepository[AccessToken]{}
-var _ Repository[RefreshToken] = &InMemoryRepository[RefreshToken]{}
-
-func NewInMemoryRepository[T Token]() *InMemoryRepository[T] {
-	return &InMemoryRepository[T]{store: make(map[uuid.UUID]T)}
 }
 
 func (i *InMemoryRepository[T]) Insert(new T) error {
@@ -75,4 +62,12 @@ func (i *InMemoryRepository[T]) DeletedExpired() error {
 		}
 	}
 	return nil
+}
+
+// assert InMemoryRepository implements Repository
+var _ Repository[AccessToken] = &InMemoryRepository[AccessToken]{}
+var _ Repository[RefreshToken] = &InMemoryRepository[RefreshToken]{}
+
+func NewInMemoryRepository[T Token]() *InMemoryRepository[T] {
+	return &InMemoryRepository[T]{store: make(map[uuid.UUID]T)}
 }

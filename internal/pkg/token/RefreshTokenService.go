@@ -9,21 +9,10 @@ import (
 	"time"
 )
 
-type RefreshTokenService struct {
+type RefreshTokenService struct { // TODO - Consider refactoring into Issuer_RefreshToken
 	repository     Repository[RefreshToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
-}
-
-// assert RefreshTokenService implements Issuer
-var _ Issuer[RefreshToken] = &RefreshTokenService{}
-
-func NewRefreshTokenService(repository Repository[RefreshToken]) *RefreshTokenService {
-	return &RefreshTokenService{
-		repository:     repository,
-		notBeforeShift: 1 * time.Minute,
-		tokenAge:       4 * time.Hour,
-	}
 }
 
 func (service *RefreshTokenService) Issue(
@@ -52,4 +41,15 @@ func (service *RefreshTokenService) Issue(
 	}
 
 	return refreshToken
+}
+
+// assert RefreshTokenService implements Issuer
+var _ Issuer[RefreshToken] = &RefreshTokenService{}
+
+func NewRefreshTokenService(repository Repository[RefreshToken]) *RefreshTokenService {
+	return &RefreshTokenService{
+		repository:     repository,
+		notBeforeShift: 1 * time.Minute,
+		tokenAge:       4 * time.Hour,
+	}
 }

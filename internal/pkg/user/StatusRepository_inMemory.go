@@ -8,9 +8,6 @@ type InMemoryStatusRepository struct {
 	store map[string]Status
 }
 
-// assert InMemoryStatusRepository implements StatusRepository
-var _ StatusRepository = &InMemoryStatusRepository{}
-
 func (repository *InMemoryStatusRepository) Insert(status Status) error {
 	repository.store[strings.ToLower(status.username)] = status
 	return nil
@@ -22,6 +19,9 @@ func (repository *InMemoryStatusRepository) FindByUsername(username string) (Sta
 	}
 	return Status{}, ErrNoSuchStatus
 }
+
+// assert InMemoryStatusRepository implements StatusRepository
+var _ StatusRepository = &InMemoryStatusRepository{}
 
 func NewInMemoryStatusRepository() *InMemoryStatusRepository {
 	repository := &InMemoryStatusRepository{make(map[string]Status)}

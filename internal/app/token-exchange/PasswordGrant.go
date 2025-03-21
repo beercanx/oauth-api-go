@@ -18,14 +18,11 @@ func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refresh
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
-func (grant PasswordGrant) Exchange(request PasswordRequest) (Response, error) {
+func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
 
-	success, failure, err := grant.userAuthenticator.Authenticate(request.Username, request.Password)
-	if err != nil {
-		return nil, err
-	}
+	success, failure := grant.userAuthenticator.Authenticate(request.Username, request.Password)
 	if failure != nil {
-		return Failed{Error: InvalidGrant, Description: string(failure.Reason)}, nil
+		return Failed{Error: InvalidGrant, Description: string(failure.Reason)}
 	}
 
 	accessToken := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
@@ -40,7 +37,7 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Response, error) {
 		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
 		RefreshToken: refreshToken.Value,
 		Scope:        scopes,
-	}, nil
+	}
 }
 
 func secondsBetween(end time.Time, start time.Time) int64 {

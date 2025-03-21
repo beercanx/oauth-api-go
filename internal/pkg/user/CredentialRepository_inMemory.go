@@ -10,9 +10,6 @@ type InMemoryCredentialRepository struct {
 	store map[string]Credential
 }
 
-// assert InMemoryCredentialRepository implements CredentialRepository
-var _ CredentialRepository = &InMemoryCredentialRepository{}
-
 func (repository *InMemoryCredentialRepository) Insert(new Credential) error {
 	repository.store[strings.ToLower(new.username)] = new
 	return nil
@@ -24,6 +21,9 @@ func (repository *InMemoryCredentialRepository) FindByUsername(username string) 
 	}
 	return Credential{}, ErrNoSuchCredential
 }
+
+// assert InMemoryCredentialRepository implements CredentialRepository
+var _ CredentialRepository = &InMemoryCredentialRepository{}
 
 func NewInMemoryCredentialRepository() *InMemoryCredentialRepository {
 	repository := &InMemoryCredentialRepository{make(map[string]Credential)}
