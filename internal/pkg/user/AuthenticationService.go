@@ -13,10 +13,6 @@ type AuthenticationService struct {
 // assert AuthenticationService implements Authenticator
 var _ Authenticator = &AuthenticationService{}
 
-func NewAuthenticationService(credentialRepository CredentialRepository, statusRepository StatusRepository) *AuthenticationService {
-	return &AuthenticationService{credentialRepository: credentialRepository, statusRepository: statusRepository}
-}
-
 func (service *AuthenticationService) Authenticate(username string, password string) (*Success, *Failure) {
 
 	credential, err := service.credentialRepository.FindByUsername(username)
@@ -47,4 +43,8 @@ func (service *AuthenticationService) Authenticate(username string, password str
 	default:
 		return &Success{AuthenticatedUsername{username}}, nil
 	}
+}
+
+func NewAuthenticationService(credentialRepository CredentialRepository, statusRepository StatusRepository) *AuthenticationService {
+	return &AuthenticationService{credentialRepository: credentialRepository, statusRepository: statusRepository}
 }
