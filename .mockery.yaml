@@ -1,0 +1,11 @@
+with-expecter: True
+resolve-type-alias: False
+disable-version-string: True
+issue-845-fix: True
+inpackage: True
+dir: "{{.InterfaceDir}}"
+filename: "{{.InterfaceName}}_mock.go"
+packages:
+  baconi.co.uk/oauth/internal/pkg/user:
+    config:
+      all: True
