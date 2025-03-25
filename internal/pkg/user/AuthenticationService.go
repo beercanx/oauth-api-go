@@ -43,7 +43,7 @@ func (service *AuthenticationService) Authenticate(username string, password str
 }
 
 // assert AuthenticationService implements Authenticator
-var _ Authenticator = &AuthenticationService{}
+var _ Authenticator = (*AuthenticationService)(nil)
 
 func NewAuthenticationService(credentialRepository CredentialRepository, statusRepository StatusRepository) *AuthenticationService {
 	return &AuthenticationService{credentialRepository: credentialRepository, statusRepository: statusRepository}

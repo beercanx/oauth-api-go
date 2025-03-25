@@ -29,10 +29,10 @@ func Engine(
 	// Create stuff to be injected
 	//
 	accessTokenRepository := token.NewInMemoryRepository[token.AccessToken]()
-	accessTokenService := token.NewAccessTokenService(accessTokenRepository)
+	accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 
 	refreshTokenRepository := token.NewInMemoryRepository[token.RefreshToken]()
-	refreshTokenService := token.NewRefreshTokenService(refreshTokenRepository)
+	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
 
 	scopeRepository := scope.NewInMemoryRepository()
 	scopeService := scope.NewService(scopeRepository)
@@ -41,7 +41,7 @@ func Engine(
 	userStatusRepository := user.NewInMemoryStatusRepository()
 	userAuthenticationService := user.NewAuthenticationService(userCredentialRepository, userStatusRepository)
 
-	passwordGrant := token_exchange.NewPasswordGrant(accessTokenService, refreshTokenService, userAuthenticationService)
+	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticationService)
 
 	//
 	// Add Routes

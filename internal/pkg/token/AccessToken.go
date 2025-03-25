@@ -19,7 +19,7 @@ type AccessToken struct { // TODO - Consider locking down access to getters.
 }
 
 // assert AccessToken implements Token
-var _ Token = &AccessToken{}
+var _ Token = (*AccessToken)(nil)
 
 func (token AccessToken) GetValue() uuid.UUID {
 	return token.Value

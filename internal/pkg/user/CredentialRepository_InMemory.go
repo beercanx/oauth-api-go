@@ -23,7 +23,7 @@ func (repository *InMemoryCredentialRepository) FindByUsername(username string) 
 }
 
 // assert InMemoryCredentialRepository implements CredentialRepository
-var _ CredentialRepository = &InMemoryCredentialRepository{}
+var _ CredentialRepository = (*InMemoryCredentialRepository)(nil)
 
 func NewInMemoryCredentialRepository() *InMemoryCredentialRepository {
 	repository := &InMemoryCredentialRepository{make(map[string]Credential)}

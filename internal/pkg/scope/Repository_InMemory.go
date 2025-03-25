@@ -14,7 +14,7 @@ func (repository *InMemoryRepository) FindById(id string) (Scope, error) {
 }
 
 // assert InMemoryRepository implements Repository
-var _ Repository = &InMemoryRepository{}
+var _ Repository = (*InMemoryRepository)(nil)
 
 func NewInMemoryRepository() *InMemoryRepository {
 	repository := &InMemoryRepository{make(map[string]Scope)}

@@ -21,7 +21,7 @@ func (repository *InMemoryStatusRepository) FindByUsername(username string) (Sta
 }
 
 // assert InMemoryStatusRepository implements StatusRepository
-var _ StatusRepository = &InMemoryStatusRepository{}
+var _ StatusRepository = (*InMemoryStatusRepository)(nil)
 
 func NewInMemoryStatusRepository() *InMemoryStatusRepository {
 	repository := &InMemoryStatusRepository{make(map[string]Status)}

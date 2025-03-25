@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-type RefreshTokenService struct { // TODO - Consider refactoring into Issuer_RefreshToken
+type RefreshTokenIssuer struct {
 	repository     Repository[RefreshToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
 }
 
-func (service *RefreshTokenService) Issue(
+func (issuer *RefreshTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes []scope.Scope,
@@ -23,8 +23,8 @@ func (service *RefreshTokenService) Issue(
 
 	issuedAt := time.Now()
 
-	expiresAt := issuedAt.Add(service.tokenAge)
-	notBefore := issuedAt.Add(-service.notBeforeShift)
+	expiresAt := issuedAt.Add(issuer.tokenAge)
+	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
 	refreshToken := RefreshToken{
 		Value:     uuid.New(),
@@ -36,7 +36,7 @@ func (service *RefreshTokenService) Issue(
 		NotBefore: notBefore,
 	}
 
-	if err := service.repository.Insert(refreshToken); err != nil {
+	if err := issuer.repository.Insert(refreshToken); err != nil {
 		panic(fmt.Errorf("issue refresh token failed: %w", err))
 	}
 
@@ -44,10 +44,10 @@ func (service *RefreshTokenService) Issue(
 }
 
 // assert RefreshTokenService implements Issuer
-var _ Issuer[RefreshToken] = &RefreshTokenService{}
+var _ Issuer[RefreshToken] = (*RefreshTokenIssuer)(nil)
 
-func NewRefreshTokenService(repository Repository[RefreshToken]) *RefreshTokenService {
-	return &RefreshTokenService{
+func NewRefreshTokenIssuer(repository Repository[RefreshToken]) *RefreshTokenIssuer {
+	return &RefreshTokenIssuer{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,
 		tokenAge:       4 * time.Hour,

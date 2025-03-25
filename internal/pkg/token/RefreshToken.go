@@ -19,7 +19,7 @@ type RefreshToken struct { // TODO - Consider locking down access to getters.
 }
 
 // assert RefreshToken implements Token
-var _ Token = &RefreshToken{}
+var _ Token = (*RefreshToken)(nil)
 
 func (token RefreshToken) GetValue() uuid.UUID {
 	return token.Value

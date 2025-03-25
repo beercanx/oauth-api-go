@@ -40,6 +40,9 @@ type Success struct {
 	State string `json:"state,omitempty"`
 }
 
+// assert Success implements Response
+var _ Response = (*Success)(nil)
+
 func (s Success) success() bool {
 	return true
 }
@@ -54,6 +57,9 @@ type Failed struct {
 	// to assist the client developer in understanding the error that occurred.
 	Description string `json:"error_description"`
 }
+
+// assert Failed implements Response
+var _ Response = (*Failed)(nil)
 
 func (f Failed) success() bool {
 	return false
