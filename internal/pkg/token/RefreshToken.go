@@ -8,35 +8,43 @@ import (
 	"time"
 )
 
-type RefreshToken struct { // TODO - Consider locking down access to getters.
-	Value     uuid.UUID
-	Username  user.AuthenticatedUsername
-	ClientId  client.Id
-	Scopes    []scope.Scope
-	IssuedAt  time.Time
-	ExpiresAt time.Time
-	NotBefore time.Time
+type RefreshToken struct {
+	value     uuid.UUID
+	username  user.AuthenticatedUsername
+	clientId  client.Id
+	scopes    []scope.Scope
+	issuedAt  time.Time
+	expiresAt time.Time
+	notBefore time.Time
 }
 
 // assert RefreshToken implements Token
 var _ Token = (*RefreshToken)(nil)
 
 func (token RefreshToken) GetValue() uuid.UUID {
-	return token.Value
+	return token.value
 }
 
 func (token RefreshToken) GetUsername() user.AuthenticatedUsername {
-	return token.Username
+	return token.username
 }
 
 func (token RefreshToken) GetClientId() client.Id {
-	return token.ClientId
+	return token.clientId
 }
 
-func (token RefreshToken) HasExpired() bool {
-	return time.Now().After(token.ExpiresAt)
+func (token RefreshToken) GetScopes() []scope.Scope {
+	return token.scopes
 }
 
-func (token RefreshToken) IsBefore() bool {
-	return time.Now().Before(token.NotBefore)
+func (token RefreshToken) GetIssuedAt() time.Time {
+	return token.issuedAt
+}
+
+func (token RefreshToken) GetExpiresAt() time.Time {
+	return token.expiresAt
+}
+
+func (token RefreshToken) GetNotBefore() time.Time {
+	return token.notBefore
 }

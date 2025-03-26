@@ -27,13 +27,13 @@ func (issuer *AccessTokenIssuer) Issue(
 	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
 	accessToken := AccessToken{
-		Value:     uuid.New(),
-		Username:  username,
-		ClientId:  clientId,
-		Scopes:    scopes,
-		IssuedAt:  issuedAt,
-		ExpiresAt: expiresAt,
-		NotBefore: notBefore,
+		value:     uuid.New(),
+		username:  username,
+		clientId:  clientId,
+		scopes:    scopes,
+		issuedAt:  issuedAt,
+		expiresAt: expiresAt,
+		notBefore: notBefore,
 	}
 
 	if err := issuer.repository.Insert(accessToken); err != nil {

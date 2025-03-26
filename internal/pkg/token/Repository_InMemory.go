@@ -55,7 +55,7 @@ func (i *InMemoryRepository[T]) DeleteByRecord(record T) error {
 
 func (i *InMemoryRepository[T]) DeletedExpired() error {
 	for _, value := range i.store {
-		if value.HasExpired() {
+		if HasExpired(value) {
 			if err := i.DeleteByRecord(value); err != nil {
 				return err
 			}

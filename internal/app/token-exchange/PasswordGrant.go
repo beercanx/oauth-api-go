@@ -29,13 +29,13 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
 
 	refreshToken := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
 
-	scopes := scope.MarshalScopes(accessToken.Scopes)
+	scopes := scope.MarshalScopes(accessToken.GetScopes())
 
 	return Success{
-		AccessToken:  accessToken.Value,
+		AccessToken:  accessToken.GetValue(),
 		TokenType:    token.Bearer,
-		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
-		RefreshToken: refreshToken.Value,
+		ExpiresIn:    secondsBetween(accessToken.GetExpiresAt(), accessToken.GetIssuedAt()),
+		RefreshToken: refreshToken.GetValue(),
 		Scope:        scopes,
 		State:        request.State,
 	}

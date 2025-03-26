@@ -17,13 +17,13 @@ func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (AccessTo
 	case err != nil:
 		return AccessToken{}, fmt.Errorf("authenticate access token failed: %w", err)
 
-	case accessToken.HasExpired():
+	case HasExpired(accessToken):
 		if err = service.repository.DeleteByRecord(accessToken); err != nil {
 			return AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
 		}
 		return AccessToken{}, ErrAccessTokenHasExpired
 
-	case accessToken.IsBefore():
+	case IsBefore(accessToken):
 		return AccessToken{}, ErrAccessTokenIsBefore
 
 	default:

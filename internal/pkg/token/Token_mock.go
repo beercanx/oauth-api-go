@@ -6,6 +6,10 @@ import (
 	client "baconi.co.uk/oauth/internal/pkg/client"
 	mock "github.com/stretchr/testify/mock"
 
+	scope "baconi.co.uk/oauth/internal/pkg/scope"
+
+	time "time"
+
 	user "baconi.co.uk/oauth/internal/pkg/user"
 
 	uuid "github.com/google/uuid"
@@ -65,6 +69,188 @@ func (_c *MockToken_GetClientId_Call) Return(_a0 client.Id) *MockToken_GetClient
 }
 
 func (_c *MockToken_GetClientId_Call) RunAndReturn(run func() client.Id) *MockToken_GetClientId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetExpiresAt provides a mock function with no fields
+func (_m *MockToken) GetExpiresAt() time.Time {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetExpiresAt")
+	}
+
+	var r0 time.Time
+	if rf, ok := ret.Get(0).(func() time.Time); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(time.Time)
+	}
+
+	return r0
+}
+
+// MockToken_GetExpiresAt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetExpiresAt'
+type MockToken_GetExpiresAt_Call struct {
+	*mock.Call
+}
+
+// GetExpiresAt is a helper method to define mock.On call
+func (_e *MockToken_Expecter) GetExpiresAt() *MockToken_GetExpiresAt_Call {
+	return &MockToken_GetExpiresAt_Call{Call: _e.mock.On("GetExpiresAt")}
+}
+
+func (_c *MockToken_GetExpiresAt_Call) Run(run func()) *MockToken_GetExpiresAt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockToken_GetExpiresAt_Call) Return(_a0 time.Time) *MockToken_GetExpiresAt_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockToken_GetExpiresAt_Call) RunAndReturn(run func() time.Time) *MockToken_GetExpiresAt_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetIssuedAt provides a mock function with no fields
+func (_m *MockToken) GetIssuedAt() time.Time {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetIssuedAt")
+	}
+
+	var r0 time.Time
+	if rf, ok := ret.Get(0).(func() time.Time); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(time.Time)
+	}
+
+	return r0
+}
+
+// MockToken_GetIssuedAt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIssuedAt'
+type MockToken_GetIssuedAt_Call struct {
+	*mock.Call
+}
+
+// GetIssuedAt is a helper method to define mock.On call
+func (_e *MockToken_Expecter) GetIssuedAt() *MockToken_GetIssuedAt_Call {
+	return &MockToken_GetIssuedAt_Call{Call: _e.mock.On("GetIssuedAt")}
+}
+
+func (_c *MockToken_GetIssuedAt_Call) Run(run func()) *MockToken_GetIssuedAt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockToken_GetIssuedAt_Call) Return(_a0 time.Time) *MockToken_GetIssuedAt_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockToken_GetIssuedAt_Call) RunAndReturn(run func() time.Time) *MockToken_GetIssuedAt_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNotBefore provides a mock function with no fields
+func (_m *MockToken) GetNotBefore() time.Time {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNotBefore")
+	}
+
+	var r0 time.Time
+	if rf, ok := ret.Get(0).(func() time.Time); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(time.Time)
+	}
+
+	return r0
+}
+
+// MockToken_GetNotBefore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNotBefore'
+type MockToken_GetNotBefore_Call struct {
+	*mock.Call
+}
+
+// GetNotBefore is a helper method to define mock.On call
+func (_e *MockToken_Expecter) GetNotBefore() *MockToken_GetNotBefore_Call {
+	return &MockToken_GetNotBefore_Call{Call: _e.mock.On("GetNotBefore")}
+}
+
+func (_c *MockToken_GetNotBefore_Call) Run(run func()) *MockToken_GetNotBefore_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockToken_GetNotBefore_Call) Return(_a0 time.Time) *MockToken_GetNotBefore_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockToken_GetNotBefore_Call) RunAndReturn(run func() time.Time) *MockToken_GetNotBefore_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetScopes provides a mock function with no fields
+func (_m *MockToken) GetScopes() []scope.Scope {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetScopes")
+	}
+
+	var r0 []scope.Scope
+	if rf, ok := ret.Get(0).(func() []scope.Scope); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]scope.Scope)
+		}
+	}
+
+	return r0
+}
+
+// MockToken_GetScopes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetScopes'
+type MockToken_GetScopes_Call struct {
+	*mock.Call
+}
+
+// GetScopes is a helper method to define mock.On call
+func (_e *MockToken_Expecter) GetScopes() *MockToken_GetScopes_Call {
+	return &MockToken_GetScopes_Call{Call: _e.mock.On("GetScopes")}
+}
+
+func (_c *MockToken_GetScopes_Call) Run(run func()) *MockToken_GetScopes_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockToken_GetScopes_Call) Return(_a0 []scope.Scope) *MockToken_GetScopes_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockToken_GetScopes_Call) RunAndReturn(run func() []scope.Scope) *MockToken_GetScopes_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -157,96 +343,6 @@ func (_c *MockToken_GetValue_Call) Return(_a0 uuid.UUID) *MockToken_GetValue_Cal
 }
 
 func (_c *MockToken_GetValue_Call) RunAndReturn(run func() uuid.UUID) *MockToken_GetValue_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// HasExpired provides a mock function with no fields
-func (_m *MockToken) HasExpired() bool {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for HasExpired")
-	}
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func() bool); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// MockToken_HasExpired_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HasExpired'
-type MockToken_HasExpired_Call struct {
-	*mock.Call
-}
-
-// HasExpired is a helper method to define mock.On call
-func (_e *MockToken_Expecter) HasExpired() *MockToken_HasExpired_Call {
-	return &MockToken_HasExpired_Call{Call: _e.mock.On("HasExpired")}
-}
-
-func (_c *MockToken_HasExpired_Call) Run(run func()) *MockToken_HasExpired_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockToken_HasExpired_Call) Return(_a0 bool) *MockToken_HasExpired_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockToken_HasExpired_Call) RunAndReturn(run func() bool) *MockToken_HasExpired_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// IsBefore provides a mock function with no fields
-func (_m *MockToken) IsBefore() bool {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for IsBefore")
-	}
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func() bool); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
-// MockToken_IsBefore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsBefore'
-type MockToken_IsBefore_Call struct {
-	*mock.Call
-}
-
-// IsBefore is a helper method to define mock.On call
-func (_e *MockToken_Expecter) IsBefore() *MockToken_IsBefore_Call {
-	return &MockToken_IsBefore_Call{Call: _e.mock.On("IsBefore")}
-}
-
-func (_c *MockToken_IsBefore_Call) Run(run func()) *MockToken_IsBefore_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockToken_IsBefore_Call) Return(_a0 bool) *MockToken_IsBefore_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *MockToken_IsBefore_Call) RunAndReturn(run func() bool) *MockToken_IsBefore_Call {
 	_c.Call.Return(run)
 	return _c
 }
