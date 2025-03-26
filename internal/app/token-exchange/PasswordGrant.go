@@ -37,6 +37,7 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
 		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
 		RefreshToken: refreshToken.Value,
 		Scope:        scopes,
+		State:        request.State,
 	}
 }
 

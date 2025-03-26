@@ -10,6 +10,7 @@ type PasswordRequest struct {
 	Scopes    []scope.Scope
 	Username  string
 	Password  string
+	State     string
 }
 
 func (request PasswordRequest) getPrincipal() client.Principal {

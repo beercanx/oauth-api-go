@@ -15,6 +15,7 @@ func validatePasswordRequest(scopeService *scope.Service, principal client.Princ
 	scopeP, scopeOk := context.GetPostForm("scope")
 	rawScopes := strings.Split(scopeP, " ")
 	scopes := scopeService.Validate(rawScopes)
+	state, stateOk := context.GetPostForm("state")
 
 	switch {
 	case !principal.IsConfidential():
@@ -39,7 +40,11 @@ func validatePasswordRequest(scopeService *scope.Service, principal client.Princ
 	case !principal.CanBeIssued(scopes):
 		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
 
+	// If state is provided it cannot be a zero string.
+	case stateOk && state == "":
+		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: state"}
+
 	default:
-		return &PasswordRequest{Principal: principal, Scopes: scopes, Username: username, Password: password}, nil
+		return &PasswordRequest{Principal: principal, Scopes: scopes, Username: username, Password: password, State: state}, nil
 	}
 }
