@@ -1,8 +1,6 @@
 package token_exchange
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/grant"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -19,21 +17,13 @@ func Route(
 
 	return func(context *gin.Context) {
 
-		// TODO - Confidential and Public client based authentication
-		principal := client.Principal{
-			Id:                client.Id{Value: "aardvark"},
-			Type:              client.Confidential,
-			AllowedScopes:     []scope.Scope{scope.Basic},
-			AllowedGrantTypes: []grant.Type{grant.Password},
-		}
-
 		// TODO - Look at replacing with some middleware, this endpoint only supports URL encoded form posts, others may also.
 		if contentType := context.ContentType(); contentType != "application/x-www-form-urlencoded" {
 			context.JSON(http.StatusUnsupportedMediaType, Failed{Error: InvalidRequest, Description: "Unsupported Media Type: " + contentType})
 			return
 		}
 
-		request, invalid := validateRequest(scopeService, principal, context)
+		request, invalid := validateRequest(scopeService, context)
 		if invalid != nil {
 			// TODO - Can we combine Valid and Invalid to one return type and add a type case in the switch below?
 			context.JSON(http.StatusBadRequest, Failed(*invalid))

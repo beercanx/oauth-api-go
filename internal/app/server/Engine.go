@@ -2,6 +2,7 @@ package server
 
 import (
 	"baconi.co.uk/oauth/internal/app/token-exchange"
+	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
@@ -43,10 +44,20 @@ func Engine(
 
 	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticationService)
 
+	clientSecretRepository := client.NewInMemorySecretRepository()
+	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
+	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
+
 	//
 	// Add Routes
 	//
-	engine.POST("/token", token_exchange.Route(scopeService, passwordGrant))
+	engine.POST("/token",
+		client.AuthenticateConfidentialClient(clientAuthenticationService),
+		client.AuthenticatePublicClient(clientAuthenticationService),
+		client.RequireClientAuthentication,
+		// TODO - FormUrlEncodedRequired() ???
+		token_exchange.Route(scopeService, passwordGrant),
+	)
 
 	return engine, nil
 }

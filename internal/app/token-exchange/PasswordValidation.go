@@ -4,11 +4,12 @@ import (
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/grant"
 	"baconi.co.uk/oauth/internal/pkg/scope"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
 
-func validatePasswordRequest(scopeService *scope.Service, principal client.Principal, context *gin.Context) (*PasswordRequest, *Invalid) {
+func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) (*PasswordRequest, *Invalid) {
 
 	username, usernameOk := context.GetPostForm("username")
 	password, passwordOk := context.GetPostForm("password")
@@ -17,11 +18,11 @@ func validatePasswordRequest(scopeService *scope.Service, principal client.Princ
 	scopes := scopeService.Validate(rawScopes)
 	state, stateOk := context.GetPostForm("state")
 
+	principal := context.MustGet(client.AuthClientKey).(client.Principal)
+
 	switch {
-	case !principal.IsConfidential():
-		return nil, &Invalid{Error: UnauthorizedClient, Description: string("not authorized to: " + grant.Password)}
-	case !principal.Can(grant.Password):
-		return nil, &Invalid{Error: UnauthorizedClient, Description: string("not authorized to: " + grant.Password)}
+	case !principal.IsConfidential(), !principal.CanBeGranted(grant.Password):
+		return nil, &Invalid{Error: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.Id, grant.Password)}
 
 	case !usernameOk:
 		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: username"}

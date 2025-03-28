@@ -13,6 +13,8 @@ type PasswordRequest struct {
 	State     string
 }
 
+var _ Valid = (*PasswordRequest)(nil)
+
 func (request PasswordRequest) getPrincipal() client.Principal {
 	return request.Principal
 }
