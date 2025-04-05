@@ -18,7 +18,7 @@ type AccessTokenIssuer struct {
 func (issuer *AccessTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
-	scopes []scope.Scope,
+	scopes scope.Scopes,
 ) AccessToken {
 
 	issuedAt := time.Now()
@@ -27,13 +27,13 @@ func (issuer *AccessTokenIssuer) Issue(
 	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
 	accessToken := AccessToken{
-		value:     uuid.New(),
-		username:  username,
-		clientId:  clientId,
-		scopes:    scopes,
-		issuedAt:  issuedAt,
-		expiresAt: expiresAt,
-		notBefore: notBefore,
+		Value:     uuid.New(),
+		Username:  username,
+		ClientId:  clientId,
+		Scopes:    scopes,
+		IssuedAt:  issuedAt,
+		ExpiresAt: expiresAt,
+		NotBefore: notBefore,
 	}
 
 	if err := issuer.repository.Insert(accessToken); err != nil {

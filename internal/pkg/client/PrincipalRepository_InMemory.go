@@ -33,6 +33,7 @@ func NewInMemoryPrincipalRepository() *InMemoryPrincipalRepository {
 		Type:              Confidential,
 		AllowedScopes:     []scope.Scope{scope.Basic},
 		AllowedGrantTypes: []grant.Type{grant.Password},
+		AllowedActions:    []Action{Introspect},
 	})
 
 	return repository

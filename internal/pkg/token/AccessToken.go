@@ -9,42 +9,42 @@ import (
 )
 
 type AccessToken struct {
-	value     uuid.UUID
-	username  user.AuthenticatedUsername
-	clientId  client.Id
-	scopes    []scope.Scope
-	issuedAt  time.Time
-	expiresAt time.Time
-	notBefore time.Time
+	Value     uuid.UUID
+	Username  user.AuthenticatedUsername
+	ClientId  client.Id
+	Scopes    scope.Scopes
+	IssuedAt  time.Time
+	ExpiresAt time.Time
+	NotBefore time.Time
 }
 
 // assert AccessToken implements Token
 var _ Token = (*AccessToken)(nil)
 
 func (token AccessToken) GetValue() uuid.UUID {
-	return token.value
+	return token.Value
 }
 
 func (token AccessToken) GetUsername() user.AuthenticatedUsername {
-	return token.username
+	return token.Username
 }
 
 func (token AccessToken) GetClientId() client.Id {
-	return token.clientId
+	return token.ClientId
 }
 
-func (token AccessToken) GetScopes() []scope.Scope {
-	return token.scopes
+func (token AccessToken) GetScopes() scope.Scopes {
+	return token.Scopes
 }
 
 func (token AccessToken) GetIssuedAt() time.Time {
-	return token.issuedAt
+	return token.IssuedAt
 }
 
 func (token AccessToken) GetExpiresAt() time.Time {
-	return token.expiresAt
+	return token.ExpiresAt
 }
 
 func (token AccessToken) GetNotBefore() time.Time {
-	return token.notBefore
+	return token.NotBefore
 }

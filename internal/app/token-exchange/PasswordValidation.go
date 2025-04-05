@@ -34,12 +34,14 @@ func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) 
 		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: password"}
 
 	// The requested scope is invalid, unknown, or malformed.
-	case scopeOk && len(scopes) == 0:
+	case scopeOk && len(scopes.Value) == 0:
 		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
-	case len(rawScopes) != len(scopes):
+	case len(rawScopes) != len(scopes.Value):
 		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
-	case !principal.CanBeIssued(scopes):
+	case !principal.CanBeIssued(scopes.Value):
 		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
+
+	// TODO - Enforce unique scopes requested
 
 	// If state is provided it cannot be a zero string.
 	case stateOk && state == "":

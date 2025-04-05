@@ -6,6 +6,9 @@ inpackage: True
 dir: "{{.InterfaceDir}}"
 filename: "{{.InterfaceName}}_mock.go"
 packages:
+  baconi.co.uk/oauth/internal/app/token-introspection:
+    config:
+      all: True
   baconi.co.uk/oauth/internal/pkg/client:
     config:
       all: True

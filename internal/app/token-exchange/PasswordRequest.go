@@ -7,7 +7,7 @@ import (
 
 type PasswordRequest struct {
 	Principal client.Principal
-	Scopes    []scope.Scope
+	Scopes    scope.Scopes
 	Username  string
 	Password  string
 	State     string

@@ -12,7 +12,7 @@ type RefreshToken struct {
 	value     uuid.UUID
 	username  user.AuthenticatedUsername
 	clientId  client.Id
-	scopes    []scope.Scope
+	scopes    scope.Scopes
 	issuedAt  time.Time
 	expiresAt time.Time
 	notBefore time.Time
@@ -33,7 +33,7 @@ func (token RefreshToken) GetClientId() client.Id {
 	return token.clientId
 }
 
-func (token RefreshToken) GetScopes() []scope.Scope {
+func (token RefreshToken) GetScopes() scope.Scopes {
 	return token.scopes
 }
 

@@ -45,3 +45,14 @@ func RequireClientAuthentication(c *gin.Context) {
 		c.AbortWithStatus(401) // Cannot have both
 	}
 }
+
+func RequireConfidentialClientAuthentication(c *gin.Context) {
+
+	_, clientOk := c.Get(AuthClientKey)
+	_, confidentialOk := c.Get(AuthClientConfidentialKey)
+
+	if !clientOk || !confidentialOk {
+		// TODO - Do we need any response headers?
+		c.AbortWithStatus(401) // Cannot have none
+	}
+}

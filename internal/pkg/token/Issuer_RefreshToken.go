@@ -18,7 +18,7 @@ type RefreshTokenIssuer struct {
 func (issuer *RefreshTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
-	scopes []scope.Scope,
+	scopes scope.Scopes,
 ) RefreshToken {
 
 	issuedAt := time.Now()

@@ -209,20 +209,18 @@ func (_c *MockToken_GetNotBefore_Call) RunAndReturn(run func() time.Time) *MockT
 }
 
 // GetScopes provides a mock function with no fields
-func (_m *MockToken) GetScopes() []scope.Scope {
+func (_m *MockToken) GetScopes() scope.Scopes {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetScopes")
 	}
 
-	var r0 []scope.Scope
-	if rf, ok := ret.Get(0).(func() []scope.Scope); ok {
+	var r0 scope.Scopes
+	if rf, ok := ret.Get(0).(func() scope.Scopes); ok {
 		r0 = rf()
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]scope.Scope)
-		}
+		r0 = ret.Get(0).(scope.Scopes)
 	}
 
 	return r0
@@ -245,12 +243,12 @@ func (_c *MockToken_GetScopes_Call) Run(run func()) *MockToken_GetScopes_Call {
 	return _c
 }
 
-func (_c *MockToken_GetScopes_Call) Return(_a0 []scope.Scope) *MockToken_GetScopes_Call {
+func (_c *MockToken_GetScopes_Call) Return(_a0 scope.Scopes) *MockToken_GetScopes_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockToken_GetScopes_Call) RunAndReturn(run func() []scope.Scope) *MockToken_GetScopes_Call {
+func (_c *MockToken_GetScopes_Call) RunAndReturn(run func() scope.Scopes) *MockToken_GetScopes_Call {
 	_c.Call.Return(run)
 	return _c
 }

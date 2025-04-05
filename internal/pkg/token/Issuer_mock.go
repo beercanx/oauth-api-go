@@ -25,7 +25,7 @@ func (_m *MockIssuer[T]) EXPECT() *MockIssuer_Expecter[T] {
 }
 
 // Issue provides a mock function with given fields: username, clientId, scopes
-func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId client.Id, scopes []scope.Scope) T {
+func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId client.Id, scopes scope.Scopes) T {
 	ret := _m.Called(username, clientId, scopes)
 
 	if len(ret) == 0 {
@@ -33,7 +33,7 @@ func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId cli
 	}
 
 	var r0 T
-	if rf, ok := ret.Get(0).(func(user.AuthenticatedUsername, client.Id, []scope.Scope) T); ok {
+	if rf, ok := ret.Get(0).(func(user.AuthenticatedUsername, client.Id, scope.Scopes) T); ok {
 		r0 = rf(username, clientId, scopes)
 	} else {
 		if ret.Get(0) != nil {
@@ -52,14 +52,14 @@ type MockIssuer_Issue_Call[T Token] struct {
 // Issue is a helper method to define mock.On call
 //   - username user.AuthenticatedUsername
 //   - clientId client.Id
-//   - scopes []scope.Scope
+//   - scopes scope.Scopes
 func (_e *MockIssuer_Expecter[T]) Issue(username interface{}, clientId interface{}, scopes interface{}) *MockIssuer_Issue_Call[T] {
 	return &MockIssuer_Issue_Call[T]{Call: _e.mock.On("Issue", username, clientId, scopes)}
 }
 
-func (_c *MockIssuer_Issue_Call[T]) Run(run func(username user.AuthenticatedUsername, clientId client.Id, scopes []scope.Scope)) *MockIssuer_Issue_Call[T] {
+func (_c *MockIssuer_Issue_Call[T]) Run(run func(username user.AuthenticatedUsername, clientId client.Id, scopes scope.Scopes)) *MockIssuer_Issue_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(user.AuthenticatedUsername), args[1].(client.Id), args[2].([]scope.Scope))
+		run(args[0].(user.AuthenticatedUsername), args[1].(client.Id), args[2].(scope.Scopes))
 	})
 	return _c
 }
@@ -69,7 +69,7 @@ func (_c *MockIssuer_Issue_Call[T]) Return(_a0 T) *MockIssuer_Issue_Call[T] {
 	return _c
 }
 
-func (_c *MockIssuer_Issue_Call[T]) RunAndReturn(run func(user.AuthenticatedUsername, client.Id, []scope.Scope) T) *MockIssuer_Issue_Call[T] {
+func (_c *MockIssuer_Issue_Call[T]) RunAndReturn(run func(user.AuthenticatedUsername, client.Id, scope.Scopes) T) *MockIssuer_Issue_Call[T] {
 	_c.Call.Return(run)
 	return _c
 }

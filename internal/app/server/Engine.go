@@ -2,6 +2,7 @@ package server
 
 import (
 	"baconi.co.uk/oauth/internal/app/token-exchange"
+	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
@@ -48,6 +49,8 @@ func Engine(
 	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
+	tokenIntrospector := token_introspection.NewIntrospector(accessTokenRepository)
+
 	//
 	// Add Routes
 	//
@@ -58,6 +61,8 @@ func Engine(
 		// TODO - FormUrlEncodedRequired() ???
 		token_exchange.Route(scopeService, passwordGrant),
 	)
+
+	token_introspection.Route(engine, clientAuthenticationService, tokenIntrospector)
 
 	return engine, nil
 }

@@ -1,6 +1,7 @@
 package token_exchange
 
 import (
+	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"github.com/google/uuid"
 )
@@ -33,7 +34,7 @@ type Success struct {
 	// Scope OPTIONAL if identical to the scope requested by the client; otherwise,
 	// REQUIRED. The scope of the access token as described by
 	// https://www.rfc-editor.org/rfc/rfc6749#section-3.3
-	Scope string `json:"scope,omitzero"`
+	Scope scope.Scopes `json:"scope,omitzero"`
 
 	// State REQUIRED if the "state" parameter was present in the client
 	// authorization request. The exact value received from the client.

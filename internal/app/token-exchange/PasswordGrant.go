@@ -1,7 +1,6 @@
 package token_exchange
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
 	"math"
@@ -29,14 +28,12 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
 
 	refreshToken := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
 
-	scopes := scope.MarshalScopes(accessToken.GetScopes())
-
 	return Success{
 		AccessToken:  accessToken.GetValue(),
 		TokenType:    token.Bearer,
 		ExpiresIn:    secondsBetween(accessToken.GetExpiresAt(), accessToken.GetIssuedAt()),
 		RefreshToken: refreshToken.GetValue(),
-		Scope:        scopes,
+		Scope:        accessToken.GetScopes(),
 		State:        request.State,
 	}
 }

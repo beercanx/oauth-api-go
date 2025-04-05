@@ -12,7 +12,7 @@ type Token interface {
 	GetValue() uuid.UUID
 	GetUsername() user.AuthenticatedUsername
 	GetClientId() client.Id
-	GetScopes() []scope.Scope
+	GetScopes() scope.Scopes
 	GetIssuedAt() time.Time
 	GetExpiresAt() time.Time
 	GetNotBefore() time.Time

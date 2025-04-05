@@ -2,27 +2,27 @@ package scope
 
 import "strings"
 
-const blank = ""
+const empty = ""
 const space = " "
 
-func MarshalScopes(scopes []Scope) string {
+func marshalSpaceDelimited[T any](values []T, getValue func(T) string) string {
 
-	switch len(scopes) {
+	switch len(values) {
 	case 0:
-		return blank
+		return empty
 	case 1:
-		return scopes[0].value
+		return getValue(values[0])
 	}
 
 	var b strings.Builder
-	b.WriteString(scopes[0].value)
-	for _, s := range scopes[1:] {
+	b.WriteString(getValue(values[0]))
+	for _, s := range values[1:] {
 		b.WriteString(space)
-		b.WriteString(s.value)
+		b.WriteString(getValue(s))
 	}
 	return b.String()
 }
 
-//func UnmarshalScopes(scope string) []string {
+//func unmarshalScopes[T any](scope string, setValue func(string) T) []T {
 //	return strings.Split(scope, space)
 //}
