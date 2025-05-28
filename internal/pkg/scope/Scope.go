@@ -3,12 +3,14 @@ package scope
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Scope struct {
 	Value string
 }
 
+var _ fmt.Stringer = (*Scope)(nil)
 var _ json.Marshaler = (*Scope)(nil)
 var _ json.Unmarshaler = (*Scope)(nil)
 

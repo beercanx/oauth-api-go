@@ -3,12 +3,14 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type Id struct {
 	Value string
 }
 
+var _ fmt.Stringer = (*Id)(nil)
 var _ json.Marshaler = (*Id)(nil)
 var _ json.Unmarshaler = (*Id)(nil)
 

@@ -37,7 +37,7 @@ func (issuer *AccessTokenIssuer) Issue(
 	}
 
 	if err := issuer.repository.Insert(accessToken); err != nil {
-		panic(fmt.Errorf("issue access token failed: %w", err))
+		panic(fmt.Errorf("issue access token failed: %w", err)) // TODO - Decide if this is an anti pattern in Go.
 	}
 
 	return accessToken

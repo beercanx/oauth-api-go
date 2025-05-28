@@ -17,14 +17,14 @@ func (service *AuthenticationService) Authenticate(username string, password str
 	case errors.Is(err, ErrNoSuchCredential):
 		return nil, &Failure{Missing} // TODO - This is bad because of time-based attacks.
 	case err != nil:
-		panic(err)
+		panic(err) // TODO - Decide if this is an anti pattern in Go.
 	}
 
 	// TODO - How can this be made to check non existent hashes to reduce surface area of a time-based attack.
 	match, err := argon2id.ComparePasswordAndHash(password, credential.hashedSecret)
 	switch {
 	case err != nil:
-		panic(err)
+		panic(err) // TODO - Decide if this is an anti pattern in Go.
 	case !match:
 		return nil, &Failure{Mismatched}
 	}
@@ -34,7 +34,7 @@ func (service *AuthenticationService) Authenticate(username string, password str
 	case errors.Is(err, ErrNoSuchStatus):
 		return nil, &Failure{Missing}
 	case err != nil:
-		panic(err)
+		panic(err) // TODO - Decide if this is an anti pattern in Go.
 	case status.isLocked():
 		return nil, &Failure{Locked}
 	default:

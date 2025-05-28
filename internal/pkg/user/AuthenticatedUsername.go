@@ -3,12 +3,14 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type AuthenticatedUsername struct {
 	Value string
 }
 
+var _ fmt.Stringer = (*AuthenticatedUsername)(nil)
 var _ json.Marshaler = (*AuthenticatedUsername)(nil)
 var _ json.Unmarshaler = (*AuthenticatedUsername)(nil)
 

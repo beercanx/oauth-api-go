@@ -59,7 +59,7 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := NewMockStatusRepository(t)
 
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
-		statusRepository.EXPECT().FindByUsername(validUsername).Panic(statusRepoError.Error()).Maybe()
+		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, statusRepoError).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 

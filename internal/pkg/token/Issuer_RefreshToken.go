@@ -37,7 +37,7 @@ func (issuer *RefreshTokenIssuer) Issue(
 	}
 
 	if err := issuer.repository.Insert(refreshToken); err != nil {
-		panic(fmt.Errorf("issue refresh token failed: %w", err))
+		panic(fmt.Errorf("issue refresh token failed: %w", err)) // TODO - Decide if this is an anti pattern in Go.
 	}
 
 	return refreshToken
