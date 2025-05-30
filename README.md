@@ -20,7 +20,17 @@ Regardless, I have decided to continue with `gin` itself, but following the codi
 
 The standard Go approach to unit testing
 ```bash
-go test
+go test -v ./...
+```
+
+To include the benchmark tests
+```bash
+go test -v ./... -bench .
+```
+
+To only run the benchmark tests
+```bash
+go test -v ./... -bench . -run ^$
 ```
 
 ## Building
