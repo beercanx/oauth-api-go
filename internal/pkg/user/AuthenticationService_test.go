@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"github.com/alexedwards/argon2id"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -30,9 +31,8 @@ func TestAuthenticate(t *testing.T) {
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		assert.Panics(t, func() { // TODO - Check for credentialRepoError
-			underTest.Authenticate("cred-repo-error", validPassword)
-		})
+		_, err := underTest.Authenticate("cred-repo-error", validPassword)
+		assert.ErrorIs(t, err, credentialRepoError)
 	})
 
 	t.Run("when argon2 hash checking errors", func(t *testing.T) {
@@ -48,9 +48,8 @@ func TestAuthenticate(t *testing.T) {
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		assert.Panics(t, func() { // TODO - Check for argon2id.ErrInvalidHash
-			underTest.Authenticate("argon2-error", validPassword)
-		})
+		_, err := underTest.Authenticate("argon2-error", validPassword)
+		assert.ErrorIs(t, err, argon2id.ErrInvalidHash)
 	})
 
 	t.Run("when status repository errors", func(t *testing.T) {
@@ -63,9 +62,8 @@ func TestAuthenticate(t *testing.T) {
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
-		assert.Panics(t, func() { // TODO - Check for statusRepoError
-			underTest.Authenticate(validUsername, validPassword)
-		})
+		_, err := underTest.Authenticate(validUsername, validPassword)
+		assert.ErrorIs(t, err, statusRepoError)
 	})
 
 	//
@@ -82,9 +80,9 @@ func TestAuthenticate(t *testing.T) {
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, "badger")
-		assert.Nil(t, success, "success should be nil")
+		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.Equal(t, Missing, failure.Reason)
+		assert.ErrorIs(t, failure, Failure{Missing})
 	})
 
 	t.Run("when there is a credential mismatch", func(t *testing.T) {
@@ -97,9 +95,9 @@ func TestAuthenticate(t *testing.T) {
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, "badger")
-		assert.Nil(t, success, "success should be nil")
+		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.Equal(t, Mismatched, failure.Reason)
+		assert.ErrorIs(t, failure, Failure{Mismatched})
 	})
 
 	t.Run("when there is no such status", func(t *testing.T) {
@@ -113,9 +111,9 @@ func TestAuthenticate(t *testing.T) {
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, validPassword)
-		assert.Nil(t, success, "success should be nil")
+		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.Equal(t, Missing, failure.Reason)
+		assert.ErrorIs(t, failure, Failure{Missing})
 	})
 
 	t.Run("when there is a locked status set", func(t *testing.T) {
@@ -129,9 +127,9 @@ func TestAuthenticate(t *testing.T) {
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, validPassword)
-		assert.Nil(t, success, "success should be nil")
+		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.Equal(t, Locked, failure.Reason)
+		assert.ErrorIs(t, failure, Failure{Locked})
 	})
 
 	//

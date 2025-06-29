@@ -3,6 +3,7 @@ package token_exchange
 import (
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
+	"errors"
 	"math"
 	"time"
 )
@@ -17,11 +18,15 @@ func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refresh
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
-func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
+func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 
-	success, failure := grant.userAuthenticator.Authenticate(request.Username, request.Password)
-	if failure != nil {
-		return Failed{Error: InvalidGrant, Description: string(failure.Reason)}
+	success, err := grant.userAuthenticator.Authenticate(request.Username, request.Password)
+	var failure user.Failure
+	switch {
+	case errors.As(err, &failure):
+		return Success{}, Failed{Err: InvalidGrant, Description: string(failure.Reason)}
+	case err != nil:
+		return Success{}, err
 	}
 
 	accessToken := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
@@ -35,7 +40,7 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) Response {
 		RefreshToken: refreshToken.GetValue(),
 		Scope:        accessToken.GetScopes(),
 		State:        request.State,
-	}
+	}, nil
 }
 
 func secondsBetween(end time.Time, start time.Time) int64 {

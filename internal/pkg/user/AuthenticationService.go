@@ -10,35 +10,35 @@ type AuthenticationService struct {
 	statusRepository     StatusRepository
 }
 
-func (service *AuthenticationService) Authenticate(username string, password string) (*Success, *Failure) {
+func (service *AuthenticationService) Authenticate(username string, password string) (Success, error) {
 
 	credential, err := service.credentialRepository.FindByUsername(username)
 	switch {
 	case errors.Is(err, ErrNoSuchCredential):
-		return nil, &Failure{Missing} // TODO - This is bad because of time-based attacks.
+		return Success{}, Failure{Missing} // TODO - This is bad because of time-based attacks.
 	case err != nil:
-		panic(err) // TODO - Decide if this is an anti pattern in Go.
+		return Success{}, err
 	}
 
 	// TODO - How can this be made to check non existent hashes to reduce surface area of a time-based attack.
 	match, err := argon2id.ComparePasswordAndHash(password, credential.hashedSecret)
 	switch {
 	case err != nil:
-		panic(err) // TODO - Decide if this is an anti pattern in Go.
+		return Success{}, err
 	case !match:
-		return nil, &Failure{Mismatched}
+		return Success{}, Failure{Mismatched}
 	}
 
 	status, err := service.statusRepository.FindByUsername(username)
 	switch {
 	case errors.Is(err, ErrNoSuchStatus):
-		return nil, &Failure{Missing}
+		return Success{}, Failure{Missing}
 	case err != nil:
-		panic(err) // TODO - Decide if this is an anti pattern in Go.
+		return Success{}, err
 	case status.isLocked():
-		return nil, &Failure{Locked}
+		return Success{}, Failure{Locked}
 	default:
-		return &Success{AuthenticatedUsername{username}}, nil
+		return Success{AuthenticatedUsername{username}}, nil
 	}
 }
 

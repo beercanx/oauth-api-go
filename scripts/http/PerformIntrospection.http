@@ -1,6 +1,8 @@
 ### Introspect access token
-@client_id = aardvark
-@client_secret = badger
+< {%
+    request.variables.set('client_id', 'aardvark');
+    request.variables.set('client_secret', 'badger');
+%}
 
 // @no-redirect
 // @no-cookie-jar

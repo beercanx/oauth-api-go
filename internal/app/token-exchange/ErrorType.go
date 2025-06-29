@@ -4,8 +4,8 @@ type ErrorType string
 
 const (
 	// InvalidRequest The request is missing a required parameter, includes an
-	// unsupported parameter value (other than grant type), repeats a parameter,
-	// includes multiple credentials, utilizes more than one mechanism for
+	// unsupported parameter value (other than a grant type), repeats a parameter,
+	// includes multiple credentials, uses more than one mechanism for
 	// authenticating the client, or is otherwise malformed.
 	InvalidRequest ErrorType = "invalid_request"
 
@@ -29,7 +29,7 @@ const (
 	// the scope granted by the resource owner.
 	InvalidScope ErrorType = "invalid_scope"
 
-	// UnauthorizedClient The authenticated client is not authorised to use this
+	// UnauthorizedClient The authenticated client is not authorized to use this
 	// authorization grant type.
 	UnauthorizedClient ErrorType = "unauthorized_client"
 

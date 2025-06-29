@@ -2,6 +2,7 @@ package token_introspection
 
 import (
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/server"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -14,7 +15,7 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 		client.AuthenticateConfidentialClient(clientAuthenticator),
 		client.RequireConfidentialClientAuthentication,
 
-		// TODO - FormUrlEncodedRequired(), ???
+		server.RequireUrlEncodedForm,
 
 		func(context *gin.Context) {
 

@@ -22,30 +22,30 @@ func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) 
 
 	switch {
 	case !principal.IsConfidential(), !principal.CanBeGranted(grant.Password):
-		return nil, &Invalid{Error: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.Id, grant.Password)}
+		return nil, &Invalid{Err: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.Id, grant.Password)}
 
 	case !usernameOk:
-		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: username"}
+		return nil, &Invalid{Err: InvalidRequest, Description: "missing parameter: username"}
 	case username == "":
-		return nil, &Invalid{Error: InvalidRequest, Description: "invalid parameter: username"}
+		return nil, &Invalid{Err: InvalidRequest, Description: "invalid parameter: username"}
 
-	// As long as the password field is present we should not restrict what it contains.
+	// As long as the password field is present, we should not restrict what it contains.
 	case !passwordOk:
-		return nil, &Invalid{Error: InvalidRequest, Description: "missing parameter: password"}
+		return nil, &Invalid{Err: InvalidRequest, Description: "missing parameter: password"}
 
 	// The requested scope is invalid, unknown, or malformed.
 	case scopeOk && len(scopes.Value) == 0:
-		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
+		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
 	case len(rawScopes) != len(scopes.Value):
-		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
+		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
 	case !principal.CanBeIssued(scopes.Value):
-		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: scope"}
+		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
 
 	// TODO - Enforce unique scopes requested
 
 	// If state is provided it cannot be a zero string.
 	case stateOk && state == "":
-		return nil, &Invalid{Error: InvalidScope, Description: "invalid parameter: state"}
+		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: state"}
 
 	default:
 		return &PasswordRequest{Principal: principal, Scopes: scopes, Username: username, Password: password, State: state}, nil

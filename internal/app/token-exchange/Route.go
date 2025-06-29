@@ -1,7 +1,10 @@
 package token_exchange
 
 import (
+	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
+	"baconi.co.uk/oauth/internal/pkg/server"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -9,45 +12,49 @@ import (
 )
 
 func Route(
+	engine *gin.Engine,
+	clientAuthenticator client.Authenticator,
 	scopeService *scope.Service,
 	passwordGrant Grant[PasswordRequest],
-) gin.HandlerFunc {
+) {
 
-	// TODO - Open to do other setup, no stored state of course...
+	engine.POST("/token",
 
-	return func(context *gin.Context) {
+		client.AuthenticateConfidentialClient(clientAuthenticator),
+		client.AuthenticatePublicClient(clientAuthenticator),
+		client.RequireClientAuthentication,
 
-		// TODO - Look at replacing with some middleware, this endpoint only supports URL encoded form posts, others may also.
-		if contentType := context.ContentType(); contentType != "application/x-www-form-urlencoded" {
-			context.JSON(http.StatusUnsupportedMediaType, Failed{Error: InvalidRequest, Description: "Unsupported Media Type: " + contentType})
-			return
-		}
+		server.RequireUrlEncodedForm,
 
-		request, invalid := validateRequest(scopeService, context)
-		if invalid != nil {
-			// TODO - Can we combine Valid and Invalid to one return type and add a type case in the switch below?
-			context.JSON(http.StatusBadRequest, Failed(*invalid))
-			return
-		}
+		func(context *gin.Context) {
 
-		var result Response
+			request, invalid := validateRequest(scopeService, context)
+			if invalid != nil {
+				context.JSON(http.StatusBadRequest, Failed(*invalid))
+				return
+			}
 
-		switch valid := request.(type) {
-		// TODO - Add support for other grant types
-		case *PasswordRequest:
-			result = passwordGrant.Exchange(*valid)
-		default:
-			result = &Failed{Error: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
-		}
+			var result Success
+			var err error = nil
 
-		switch response := result.(type) {
-		case Failed:
-			context.JSON(http.StatusBadRequest, response)
-		case Success:
-			context.JSON(http.StatusOK, response)
-		default:
-			log.Println("[ERROR] No success or failure to reply with...", reflect.TypeOf(response).Name())
-			context.AbortWithStatus(http.StatusInternalServerError)
-		}
-	}
+			switch valid := request.(type) {
+			// TODO - Add support for other grant types
+			case *PasswordRequest:
+				result, err = passwordGrant.Exchange(*valid)
+			default:
+				err = Failed{Err: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
+			}
+
+			var failed Failed
+			switch {
+			case err != nil && errors.As(err, &failed):
+				context.JSON(http.StatusBadRequest, failed)
+			case err != nil:
+				log.Println("[ERROR] Some kind of error bubbled up...", reflect.TypeOf(err).Name(), err)
+				context.AbortWithStatus(http.StatusInternalServerError)
+			default:
+				context.JSON(http.StatusOK, result)
+			}
+		},
+	)
 }

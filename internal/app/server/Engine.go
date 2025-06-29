@@ -54,14 +54,7 @@ func Engine(
 	//
 	// Add Routes
 	//
-	engine.POST("/token",
-		client.AuthenticateConfidentialClient(clientAuthenticationService),
-		client.AuthenticatePublicClient(clientAuthenticationService),
-		client.RequireClientAuthentication,
-		// TODO - FormUrlEncodedRequired() ???
-		token_exchange.Route(scopeService, passwordGrant),
-	)
-
+	token_exchange.Route(engine, clientAuthenticationService, scopeService, passwordGrant)
 	token_introspection.Route(engine, clientAuthenticationService, tokenIntrospector)
 
 	return engine, nil

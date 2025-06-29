@@ -10,6 +10,7 @@ type InMemoryPrincipalRepository struct {
 }
 
 func (i InMemoryPrincipalRepository) insert(principal Principal) {
+	principal.verify()
 	i.byClientId[principal.Id.Value] = principal
 }
 

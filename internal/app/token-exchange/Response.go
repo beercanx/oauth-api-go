@@ -3,12 +3,9 @@ package token_exchange
 import (
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
+	"fmt"
 	"github.com/google/uuid"
 )
-
-type Response interface {
-	success() bool
-}
 
 // Success https://www.rfc-editor.org/rfc/rfc6749#section-5.1
 type Success struct {
@@ -41,27 +38,20 @@ type Success struct {
 	State string `json:"state,omitzero"`
 }
 
-// assert Success implements Response
-var _ Response = (*Success)(nil)
-
-func (s Success) success() bool {
-	return true
-}
-
 // Failed https://www.rfc-editor.org/rfc/rfc6749#section-5.2
 type Failed struct {
 
-	// Error A single ASCII error code from the defined list.
-	Error ErrorType `json:"error"`
+	// Err A single ASCII error code from the defined list.
+	Err ErrorType `json:"error"`
 
 	// Description Human-readable ASCII text providing additional information, used
 	// to assist the client developer in understanding the error that occurred.
 	Description string `json:"error_description"`
 }
 
-// assert Failed implements Response
-var _ Response = (*Failed)(nil)
-
-func (f Failed) success() bool {
-	return false
+func (f Failed) Error() string {
+	return fmt.Sprintf("Failed: %s,%s", f.Err, f.Description)
 }
+
+// assert Failed implements error
+var _ error = (*Failed)(nil)

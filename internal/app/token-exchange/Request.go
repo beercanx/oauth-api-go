@@ -7,6 +7,6 @@ type Valid interface {
 }
 
 type Invalid struct {
-	Error       ErrorType
+	Err         ErrorType
 	Description string
 }

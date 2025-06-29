@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 const AuthClientKey = "auth:client"
@@ -38,11 +39,11 @@ func RequireClientAuthentication(c *gin.Context) {
 
 	switch { // TODO - Do we need any response headers?
 	case !clientOk:
-		c.AbortWithStatus(401) // Cannot have none
+		c.AbortWithStatus(http.StatusUnauthorized) // Cannot have none
 	case !confidentialOk && !publicOk:
-		c.AbortWithStatus(401) // Cannot have none
+		c.AbortWithStatus(http.StatusUnauthorized) // Cannot have none
 	case confidentialOk && publicOk:
-		c.AbortWithStatus(401) // Cannot have both
+		c.AbortWithStatus(http.StatusUnauthorized) // Cannot have both
 	}
 }
 
@@ -53,6 +54,6 @@ func RequireConfidentialClientAuthentication(c *gin.Context) {
 
 	if !clientOk || !confidentialOk {
 		// TODO - Do we need any response headers?
-		c.AbortWithStatus(401) // Cannot have none
+		c.AbortWithStatus(http.StatusUnauthorized) // Cannot have none
 	}
 }
