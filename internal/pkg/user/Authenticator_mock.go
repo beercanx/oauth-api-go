@@ -18,22 +18,22 @@ func (_m *MockAuthenticator) EXPECT() *MockAuthenticator_Expecter {
 }
 
 // Authenticate provides a mock function with given fields: username, password
-func (_m *MockAuthenticator) Authenticate(username string, password string) (Success, error) {
+func (_m *MockAuthenticator) Authenticate(username string, password string) (Authenticated, error) {
 	ret := _m.Called(username, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Authenticate")
 	}
 
-	var r0 Success
+	var r0 Authenticated
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (Success, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, string) (Authenticated, error)); ok {
 		return rf(username, password)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) Success); ok {
+	if rf, ok := ret.Get(0).(func(string, string) Authenticated); ok {
 		r0 = rf(username, password)
 	} else {
-		r0 = ret.Get(0).(Success)
+		r0 = ret.Get(0).(Authenticated)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
@@ -64,12 +64,12 @@ func (_c *MockAuthenticator_Authenticate_Call) Run(run func(username string, pas
 	return _c
 }
 
-func (_c *MockAuthenticator_Authenticate_Call) Return(_a0 Success, _a1 error) *MockAuthenticator_Authenticate_Call {
+func (_c *MockAuthenticator_Authenticate_Call) Return(_a0 Authenticated, _a1 error) *MockAuthenticator_Authenticate_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockAuthenticator_Authenticate_Call) RunAndReturn(run func(string, string) (Success, error)) *MockAuthenticator_Authenticate_Call {
+func (_c *MockAuthenticator_Authenticate_Call) RunAndReturn(run func(string, string) (Authenticated, error)) *MockAuthenticator_Authenticate_Call {
 	_c.Call.Return(run)
 	return _c
 }

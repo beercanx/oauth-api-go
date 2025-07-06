@@ -19,7 +19,7 @@ func (issuer *RefreshTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes scope.Scopes,
-) RefreshToken {
+) (RefreshToken, error) {
 
 	issuedAt := time.Now()
 
@@ -37,10 +37,10 @@ func (issuer *RefreshTokenIssuer) Issue(
 	}
 
 	if err := issuer.repository.Insert(refreshToken); err != nil {
-		panic(fmt.Errorf("issue refresh token failed: %w", err)) // TODO - Decide if this is an anti pattern in Go.
+		return RefreshToken{}, fmt.Errorf("issue refresh token failed: %w", err)
 	}
 
-	return refreshToken
+	return refreshToken, nil
 }
 
 // assert RefreshTokenService implements Issuer

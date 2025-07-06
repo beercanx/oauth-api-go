@@ -10,17 +10,22 @@ type InMemoryPrincipalRepository struct {
 }
 
 func (i InMemoryPrincipalRepository) insert(principal Principal) {
-	principal.verify()
 	i.byClientId[principal.Id.Value] = principal
 }
 
 func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, bool) {
 	principal, ok := i.byClientId[id.Value]
+	if ok {
+		principal.verify()
+	}
 	return principal, ok
 }
 
 func (i InMemoryPrincipalRepository) FindByClientId(clientId string) (Principal, bool) {
 	principal, ok := i.byClientId[clientId]
+	if ok {
+		principal.verify()
+	}
 	return principal, ok
 }
 

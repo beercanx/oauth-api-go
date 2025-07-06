@@ -10,35 +10,35 @@ type AuthenticationService struct {
 	statusRepository     StatusRepository
 }
 
-func (service *AuthenticationService) Authenticate(username string, password string) (Success, error) {
+func (service *AuthenticationService) Authenticate(username string, password string) (Authenticated, error) {
 
 	credential, err := service.credentialRepository.FindByUsername(username)
 	switch {
 	case errors.Is(err, ErrNoSuchCredential):
-		return Success{}, Failure{Missing} // TODO - This is bad because of time-based attacks.
+		return Authenticated{}, AuthenticationFailure{Missing} // TODO - This is bad because of time-based attacks.
 	case err != nil:
-		return Success{}, err
+		return Authenticated{}, err
 	}
 
 	// TODO - How can this be made to check non existent hashes to reduce surface area of a time-based attack.
 	match, err := argon2id.ComparePasswordAndHash(password, credential.hashedSecret)
 	switch {
 	case err != nil:
-		return Success{}, err
+		return Authenticated{}, err
 	case !match:
-		return Success{}, Failure{Mismatched}
+		return Authenticated{}, AuthenticationFailure{Mismatched}
 	}
 
 	status, err := service.statusRepository.FindByUsername(username)
 	switch {
 	case errors.Is(err, ErrNoSuchStatus):
-		return Success{}, Failure{Missing}
+		return Authenticated{}, AuthenticationFailure{Missing}
 	case err != nil:
-		return Success{}, err
+		return Authenticated{}, err
 	case status.isLocked():
-		return Success{}, Failure{Locked}
+		return Authenticated{}, AuthenticationFailure{Locked}
 	default:
-		return Success{AuthenticatedUsername{username}}, nil
+		return Authenticated{AuthenticatedUsername{username}}, nil
 	}
 }
 

@@ -19,7 +19,7 @@ func (issuer *AccessTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes scope.Scopes,
-) AccessToken {
+) (AccessToken, error) {
 
 	issuedAt := time.Now()
 
@@ -37,10 +37,10 @@ func (issuer *AccessTokenIssuer) Issue(
 	}
 
 	if err := issuer.repository.Insert(accessToken); err != nil {
-		panic(fmt.Errorf("issue access token failed: %w", err)) // TODO - Decide if this is an anti pattern in Go.
+		return AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
 	}
 
-	return accessToken
+	return accessToken, nil
 }
 
 // assert AccessTokenIssuer implements Issuer

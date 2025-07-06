@@ -25,7 +25,7 @@ func (_m *MockIssuer[T]) EXPECT() *MockIssuer_Expecter[T] {
 }
 
 // Issue provides a mock function with given fields: username, clientId, scopes
-func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId client.Id, scopes scope.Scopes) T {
+func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId client.Id, scopes scope.Scopes) (T, error) {
 	ret := _m.Called(username, clientId, scopes)
 
 	if len(ret) == 0 {
@@ -33,6 +33,10 @@ func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId cli
 	}
 
 	var r0 T
+	var r1 error
+	if rf, ok := ret.Get(0).(func(user.AuthenticatedUsername, client.Id, scope.Scopes) (T, error)); ok {
+		return rf(username, clientId, scopes)
+	}
 	if rf, ok := ret.Get(0).(func(user.AuthenticatedUsername, client.Id, scope.Scopes) T); ok {
 		r0 = rf(username, clientId, scopes)
 	} else {
@@ -41,7 +45,13 @@ func (_m *MockIssuer[T]) Issue(username user.AuthenticatedUsername, clientId cli
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(user.AuthenticatedUsername, client.Id, scope.Scopes) error); ok {
+		r1 = rf(username, clientId, scopes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockIssuer_Issue_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Issue'
@@ -64,12 +74,12 @@ func (_c *MockIssuer_Issue_Call[T]) Run(run func(username user.AuthenticatedUser
 	return _c
 }
 
-func (_c *MockIssuer_Issue_Call[T]) Return(_a0 T) *MockIssuer_Issue_Call[T] {
-	_c.Call.Return(_a0)
+func (_c *MockIssuer_Issue_Call[T]) Return(_a0 T, _a1 error) *MockIssuer_Issue_Call[T] {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockIssuer_Issue_Call[T]) RunAndReturn(run func(user.AuthenticatedUsername, client.Id, scope.Scopes) T) *MockIssuer_Issue_Call[T] {
+func (_c *MockIssuer_Issue_Call[T]) RunAndReturn(run func(user.AuthenticatedUsername, client.Id, scope.Scopes) (T, error)) *MockIssuer_Issue_Call[T] {
 	_c.Call.Return(run)
 	return _c
 }

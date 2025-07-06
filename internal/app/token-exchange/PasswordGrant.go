@@ -21,7 +21,7 @@ func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refresh
 func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 
 	success, err := grant.userAuthenticator.Authenticate(request.Username, request.Password)
-	var failure user.Failure
+	var failure user.AuthenticationFailure
 	switch {
 	case errors.As(err, &failure):
 		return Success{}, Failed{Err: InvalidGrant, Description: string(failure.Reason)}
@@ -29,9 +29,15 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 		return Success{}, err
 	}
 
-	accessToken := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	if err != nil {
+		return Success{}, err
+	}
 
-	refreshToken := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	if err != nil {
+		return Success{}, err
+	}
 
 	return Success{
 		AccessToken:  accessToken.GetValue(),

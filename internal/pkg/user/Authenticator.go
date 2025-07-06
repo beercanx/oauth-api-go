@@ -2,20 +2,20 @@ package user
 
 import "fmt"
 
-type Success struct {
+type Authenticated struct {
 	Username AuthenticatedUsername
 }
 
-type Failure struct {
+type AuthenticationFailure struct {
 	Reason Reason
 }
 
-func (f Failure) Error() string {
-	return fmt.Sprintf("Failure: %s", f.Reason)
+func (f AuthenticationFailure) Error() string {
+	return fmt.Sprintf("AuthenticationFailure: %s", f.Reason)
 }
 
-// assert Failure implements error
-var _ error = (*Failure)(nil)
+// assert AuthenticationFailure implements error
+var _ error = (*AuthenticationFailure)(nil)
 
 type Reason string
 
@@ -26,5 +26,5 @@ const (
 )
 
 type Authenticator interface {
-	Authenticate(username string, password string) (Success, error)
+	Authenticate(username string, password string) (Authenticated, error)
 }

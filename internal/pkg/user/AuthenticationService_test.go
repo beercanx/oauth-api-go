@@ -67,7 +67,7 @@ func TestAuthenticate(t *testing.T) {
 	})
 
 	//
-	// Failure
+	// AuthenticationFailure
 	//
 
 	t.Run("when there is no such credential", func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestAuthenticate(t *testing.T) {
 		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.ErrorIs(t, failure, Failure{Missing})
+		assert.ErrorIs(t, failure, AuthenticationFailure{Missing})
 	})
 
 	t.Run("when there is a credential mismatch", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestAuthenticate(t *testing.T) {
 		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.ErrorIs(t, failure, Failure{Mismatched})
+		assert.ErrorIs(t, failure, AuthenticationFailure{Mismatched})
 	})
 
 	t.Run("when there is no such status", func(t *testing.T) {
@@ -113,7 +113,7 @@ func TestAuthenticate(t *testing.T) {
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.ErrorIs(t, failure, Failure{Missing})
+		assert.ErrorIs(t, failure, AuthenticationFailure{Missing})
 	})
 
 	t.Run("when there is a locked status set", func(t *testing.T) {
@@ -129,11 +129,11 @@ func TestAuthenticate(t *testing.T) {
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Zero(t, success, "success should be nil")
 		assert.NotNil(t, failure, "failure should not be nil")
-		assert.ErrorIs(t, failure, Failure{Locked})
+		assert.ErrorIs(t, failure, AuthenticationFailure{Locked})
 	})
 
 	//
-	// Success
+	// Authenticated
 	//
 
 	t.Run("when it is all successful", func(t *testing.T) {
