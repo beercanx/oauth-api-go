@@ -18,9 +18,6 @@ jobs:
       with:
         go-version: '1.24'
 
-    - name: "Build: Hello, World! http server"
-      run: go build -x ./cmd/http
-
     - name: "Build: The OAuth server"
       run: go build -x ./cmd/server
 

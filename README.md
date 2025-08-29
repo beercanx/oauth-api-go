@@ -67,15 +67,6 @@ Which is just a different way to doing
 mockery
 ```
 
-### Hello, World!
-A hello world HTTP server, using just the built-in GO [http](https://pkg.go.dev/net/http) library.
-```bash
-go build ./cmd/http
-```
-```bash
-./http
-```
-
 ### The OAuth server
 An OAuth server, using mostly the [Gin web framework](https://github.com/gin-gonic/gin) that wraps around the Go [http](https://pkg.go.dev/net/http) library.
 ```bash
