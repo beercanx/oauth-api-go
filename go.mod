@@ -1,6 +1,6 @@
 module baconi.co.uk/oauth
 
-go 1.24
+go 1.25
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
