@@ -1,9 +1,10 @@
 package token
 
 import (
+	"errors"
+
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/user"
-	"errors"
 	"github.com/google/uuid"
 )
 

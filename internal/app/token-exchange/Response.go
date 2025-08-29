@@ -1,9 +1,10 @@
 package token_exchange
 
 import (
+	"fmt"
+
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
-	"fmt"
 	"github.com/google/uuid"
 )
 

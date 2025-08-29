@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+
 	"github.com/google/uuid"
 )
 

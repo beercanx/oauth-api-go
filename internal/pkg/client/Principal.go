@@ -1,10 +1,11 @@
 package client
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/grant"
-	"baconi.co.uk/oauth/internal/pkg/scope"
 	"fmt"
 	"slices"
+
+	"baconi.co.uk/oauth/internal/pkg/grant"
+	"baconi.co.uk/oauth/internal/pkg/scope"
 )
 
 type Principal struct {

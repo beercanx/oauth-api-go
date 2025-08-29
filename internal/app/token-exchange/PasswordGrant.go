@@ -1,11 +1,12 @@
 package token_exchange
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/token"
-	"baconi.co.uk/oauth/internal/pkg/user"
 	"errors"
 	"math"
 	"time"
+
+	"baconi.co.uk/oauth/internal/pkg/token"
+	"baconi.co.uk/oauth/internal/pkg/user"
 )
 
 type PasswordGrant struct {

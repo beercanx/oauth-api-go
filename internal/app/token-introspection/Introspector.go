@@ -1,8 +1,9 @@
 package token_introspection
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/token"
 	"errors"
+
+	"baconi.co.uk/oauth/internal/pkg/token"
 )
 
 type Introspector interface {

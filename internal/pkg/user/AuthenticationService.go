@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+
 	"github.com/alexedwards/argon2id"
 )
 
