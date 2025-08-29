@@ -13,7 +13,7 @@ Went back a day later and continued to re-read the "after 13 years" blog post to
 Regardless, I have decided to continue with `gin` itself, but following the coding styles suggested; such as not storing dependencies in a `struct` but passing them through the functions. 
 
 ## Requirements
-* Go 1.24
+* Go 1.25
 * Mockery 2.53 https://github.com/vektra/mockery/releases
 
 ## Structure
