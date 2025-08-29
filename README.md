@@ -16,6 +16,28 @@ Regardless, I have decided to continue with `gin` itself, but following the codi
 * Go 1.24
 * Mockery 2.53 https://github.com/vektra/mockery/releases
 
+## Structure
+This project attempts to follow the standard Go project layout as defined here: https://github.com/golang-standards/project-layout/blob/master/README.md
+```
+├── cmd                         # Main applications for this project.
+│   └── server
+│       └── main.go
+├── internal                    # Private application and library code. 
+│   ├── app
+│   │   ├── token-exchange
+│   │   ├── token-introspection
+│   │   ├── token-revocation
+│   │   └── ...etc
+│   └── pkg
+│       ├── client
+│       ├── grant
+│       ├── scope
+│       └── ...etc
+├── scripts
+│   └── http                    # Jetbrains HTTP Client requests
+└── README.md
+```
+
 ## Testing
 
 The standard Go approach to unit testing
