@@ -2,10 +2,11 @@ package user
 
 import (
 	"errors"
-	"github.com/alexedwards/argon2id"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/alexedwards/argon2id"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthenticate(t *testing.T) {

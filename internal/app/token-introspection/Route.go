@@ -1,12 +1,13 @@
 package token_introspection
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/server"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/server"
+	"github.com/gin-gonic/gin"
 )
 
 func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introspector Introspector) {

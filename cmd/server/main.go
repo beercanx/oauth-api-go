@@ -1,16 +1,17 @@
 package main
 
 import (
-	"baconi.co.uk/oauth/internal/app/server"
 	"context"
 	"errors"
-	"github.com/codingconcepts/env"
 	"log"
 	"net"
 	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"baconi.co.uk/oauth/internal/app/server"
+	"github.com/codingconcepts/env"
 )
 
 func main() {

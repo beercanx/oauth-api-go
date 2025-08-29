@@ -1,12 +1,13 @@
 package token_exchange
 
 import (
+	"fmt"
+	"strings"
+
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/grant"
 	"baconi.co.uk/oauth/internal/pkg/scope"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"strings"
 )
 
 func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) (*PasswordRequest, *Invalid) {

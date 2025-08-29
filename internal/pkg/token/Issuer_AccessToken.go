@@ -1,12 +1,13 @@
 package token
 
 import (
+	"fmt"
+	"time"
+
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/user"
-	"fmt"
 	"github.com/google/uuid"
-	"time"
 )
 
 type AccessTokenIssuer struct {

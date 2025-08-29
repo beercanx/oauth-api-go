@@ -1,9 +1,10 @@
 package user
 
 import (
-	"github.com/alexedwards/argon2id"
 	"strings"
 	"time"
+
+	"github.com/alexedwards/argon2id"
 )
 
 type InMemoryCredentialRepository struct {
