@@ -37,8 +37,11 @@ func NewInMemorySecretRepository() *InMemorySecretRepository {
 	repository := &InMemorySecretRepository{make(map[uuid.UUID]Secret), make(map[string][]Secret)}
 
 	// TODO - Remove once we've got a means of creating new clients
-	hash, _ := argon2id.CreateHash("badger", argon2id.DefaultParams)
-	repository.insert(Secret{uuid.New(), Id{"aardvark"}, hash})
+	aardvarkHash, _ := argon2id.CreateHash("badger", argon2id.DefaultParams)
+	repository.insert(Secret{uuid.New(), Id{"aardvark"}, aardvarkHash})
+
+	dodoHash, _ := argon2id.CreateHash("echidna", argon2id.DefaultParams)
+	repository.insert(Secret{uuid.New(), Id{"dodo"}, dodoHash})
 
 	return repository
 }
