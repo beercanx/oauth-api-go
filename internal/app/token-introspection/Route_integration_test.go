@@ -9,12 +9,14 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -128,9 +130,43 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			assert.Equal(t, UnauthorizedClient, result.ErrorType)
 			assert.Equal(t, "client is not allowed to introspect", result.Description)
 		})
+	})
 
-		// TODO - Will be replaced by TokenState::missingToken
-		t.Run("accept a valid client using basic authentication", func(t *testing.T) {
+	t.Run("should allow only url encoded form requests", func(t *testing.T) {
+
+		for contentType, contentBody := range map[string]string{
+			"json": `{"token":"94efe4d7-7dbe-455f-b974-46656fd8d035"}`,
+			"xml":  `<request><token>94efe4d7-7dbe-455f-b974-46656fd8d035</token></request>`,
+		} {
+			t.Run(fmt.Sprintf("reject %s body requests", contentType), func(t *testing.T) {
+
+				testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(contentBody))
+				testRequest.Header.Set("Content-Type", fmt.Sprintf("application/%s", contentType))
+				testRequest.SetBasicAuth("aardvark", "badger")
+
+				recorder := httptest.NewRecorder()
+
+				router.ServeHTTP(recorder, testRequest)
+
+				assert.Equal(t, http.StatusUnsupportedMediaType, recorder.Code)
+
+				var result invalid
+				err := json.Unmarshal(recorder.Body.Bytes(), &result)
+				assert.Nil(t, err)
+				assert.Equal(t, InvalidRequest, result.ErrorType)
+				assert.Equal(t, "Content-Type must be application/x-www-form-urlencoded", result.Description)
+			})
+		}
+	})
+
+	// TODO: InvalidBodyContent
+	// 	- missing token
+	// 	- blank token
+	// 	- non uuid token
+
+	t.Run("should handle various token states", func(t *testing.T) {
+
+		t.Run("return an inactive response for an access token that does not exist", func(t *testing.T) {
 
 			formBody := url.Values{"token": {"94efe4d7-7dbe-455f-b974-46656fd8d035"}}
 			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
@@ -144,61 +180,63 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			assert.Equal(t, http.StatusOK, recorder.Code)
 			assert.Equal(t, `{"active":false}`, recorder.Body.String())
 		})
-	})
 
-	t.Run("should allow only url encoded form requests", func(t *testing.T) {
+		t.Run("return an inactive response for an access token that has expired", func(t *testing.T) {
 
-		t.Run("reject JSON body requests", func(t *testing.T) {
+			accessToken := token.AccessToken{
+				Value:     uuid.New(),
+				IssuedAt:  time.Now(),
+				ExpiresAt: time.Now().Add(-(10 * time.Minute)),
+				NotBefore: time.Now().Add(-(20 * time.Minute)),
+			}
 
-			jsonBody := `{"token":"94efe4d7-7dbe-455f-b974-46656fd8d035"}`
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(jsonBody))
-			testRequest.Header.Set("Content-Type", "application/json")
-			testRequest.SetBasicAuth("aardvark", "badger")
+			assert.Nil(t, accessTokenRepository.Insert(accessToken))
 
-			recorder := httptest.NewRecorder()
-
-			router.ServeHTTP(recorder, testRequest)
-
-			assert.Equal(t, http.StatusUnsupportedMediaType, recorder.Code)
-			assert.Equal(t, `{"error":"invalid_request","description":"Content-Type must be application/x-www-form-urlencoded"}`, recorder.Body.String())
-		})
-
-		t.Run("reject XML body requests", func(t *testing.T) {
-
-			xmlBody := `<request><token>94efe4d7-7dbe-455f-b974-46656fd8d035</token></request>`
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(xmlBody))
-			testRequest.Header.Set("Content-Type", "application/xml")
-			testRequest.SetBasicAuth("aardvark", "badger")
-
-			recorder := httptest.NewRecorder()
-
-			router.ServeHTTP(recorder, testRequest)
-
-			assert.Equal(t, http.StatusUnsupportedMediaType, recorder.Code)
-			assert.Equal(t, `{"error":"invalid_request","description":"Content-Type must be application/x-www-form-urlencoded"}`, recorder.Body.String())
-		})
-
-		t.Run("reject non url encoded form posts", func(t *testing.T) {
-
-			formBody := url.Values{"token": {"a"}}
+			formBody := url.Values{"token": {accessToken.Value.String()}}
 			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
 
 			recorder := httptest.NewRecorder()
 
 			router.ServeHTTP(recorder, testRequest)
 
-			assert.Equal(t, http.StatusUnsupportedMediaType, recorder.Code)
-			assert.Equal(t, `{"error":"invalid_request","description":"Content-Type must be application/x-www-form-urlencoded"}`, recorder.Body.String())
+			assert.Equal(t, http.StatusOK, recorder.Code)
+			assert.Equal(t, `{"active":false}`, recorder.Body.String())
 		})
 
-		// TODO - Will be replaced by TokenState::activeToken
-		t.Run("accept URL encoded form body requests", func(t *testing.T) {
+		t.Run("return an inactive response for an access token that is in the future", func(t *testing.T) {
+
+			accessToken := token.AccessToken{
+				Value:     uuid.New(),
+				IssuedAt:  time.Now(),
+				ExpiresAt: time.Now().Add(20 * time.Minute),
+				NotBefore: time.Now().Add(10 * time.Minute),
+			}
+
+			assert.Nil(t, accessTokenRepository.Insert(accessToken))
+
+			formBody := url.Values{"token": {accessToken.Value.String()}}
+			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			testRequest.SetBasicAuth("aardvark", "badger")
+
+			recorder := httptest.NewRecorder()
+
+			router.ServeHTTP(recorder, testRequest)
+
+			assert.Equal(t, http.StatusOK, recorder.Code)
+			assert.Equal(t, `{"active":false}`, recorder.Body.String())
+		})
+
+		t.Run("return an active response for an access token that is active", func(t *testing.T) {
 
 			accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
+
 			username := user.AuthenticatedUsername{Value: "ant"}
 			clientId := client.Id{Value: "dodo"}
-			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scope.Scopes{})
+			scopes := scope.Scopes{Value: []scope.Scope{{Value: "basic"}}}
+			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
 			assert.Nil(t, issueError)
 
 			formBody := url.Values{"token": {accessToken.Value.String()}}
@@ -222,21 +260,11 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			assert.Contains(t, result, "expiration_time")
 			assert.Contains(t, result, "issued_at")
 			assert.Contains(t, result, "not_before")
+			assert.Equal(t, "basic", result["scope"])
 			assert.Equal(t, "ant", result["sub"])
 			assert.Equal(t, "bearer", result["token_type"])
 			assert.Equal(t, "ant", result["username"])
-			assert.Len(t, result, 8)
+			assert.Len(t, result, 9)
 		})
 	})
-
-	// TODO: InvalidBodyContent
-	// 	- missing token
-	// 	- blank token
-	// 	- non uuid token
-
-	// TODO: TokenStates
-	// 	- missing token
-	// 	- expired token
-	// 	- future token
-	// 	- active token
 }
