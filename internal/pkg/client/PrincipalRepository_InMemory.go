@@ -42,5 +42,23 @@ func NewInMemoryPrincipalRepository() *InMemoryPrincipalRepository {
 		AllowedActions:    []Action{Introspect},
 	})
 
+	repository.insert(Principal{
+		Id:                Id{"cicada"},
+		Type:              Public,
+		RedirectUris:      []string{"https://cicada.baconi.co.uk/callback"},
+		AllowedScopes:     []scope.Scope{scope.Basic},
+		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
+		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
+	})
+
+	repository.insert(Principal{
+		Id:                Id{"dodo"},
+		Type:              Confidential,
+		RedirectUris:      []string{"https://dodo.baconi.co.uk/callback"},
+		AllowedScopes:     []scope.Scope{scope.Basic},
+		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
+		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
+	})
+
 	return repository
 }
