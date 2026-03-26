@@ -159,10 +159,37 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		}
 	})
 
-	// TODO: InvalidBodyContent
-	// 	- missing token
-	// 	- blank token
-	// 	- non uuid token
+	t.Run("should handle invalid body content", func(t *testing.T) {
+
+		for _, data := range []struct {
+			state    string
+			body     url.Values
+			expected string
+		}{
+			{"missing", url.Values{}, "missing parameter: token"},
+			{"blank", url.Values{"token": {""}}, "invalid parameter: token"},
+			{"non uuid", url.Values{"token": {"aardvark"}}, "invalid parameter: token"},
+		} {
+			t.Run(fmt.Sprintf("return invalid request on %s token", data.state), func(t *testing.T) {
+
+				testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(data.body.Encode()))
+				testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+				testRequest.SetBasicAuth("aardvark", "badger")
+
+				recorder := httptest.NewRecorder()
+
+				router.ServeHTTP(recorder, testRequest)
+
+				assert.Equal(t, http.StatusBadRequest, recorder.Code)
+
+				var result invalid
+				err := json.Unmarshal(recorder.Body.Bytes(), &result)
+				assert.Nil(t, err)
+				assert.Equal(t, InvalidRequest, result.ErrorType)
+				assert.Equal(t, data.expected, result.Description)
+			})
+		}
+	})
 
 	t.Run("should handle various token states", func(t *testing.T) {
 
