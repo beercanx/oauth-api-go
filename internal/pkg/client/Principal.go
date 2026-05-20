@@ -30,16 +30,16 @@ func (p Principal) verify() {
 		require(p.Type == Public, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
 		require(!p.CanPerformAction(Introspect), fmt.Sprintf("public clients must not be allowed to introspect: %s", p.Id))
 		require(!p.CanBeGranted(grant.Password), fmt.Sprintf("public clients must not use password grant: %s", p.Id))
-		require(!(p.CanBeGranted(grant.AuthorisationCode) && !p.CanPerformAction(ProofKeyForCodeExchange)),
+		require(!p.CanBeGranted(grant.AuthorisationCode) || p.CanPerformAction(ProofKeyForCodeExchange),
 			fmt.Sprintf("public clients must not use authorisation code grant without PKCE: %s", p.Id),
 		)
 	}
 
-	require(!(p.CanPerformAction(Authorise) && !p.CanBeGranted(grant.AuthorisationCode)), // TODO - Replace with implied action based on grant type?
+	require(!p.CanPerformAction(Authorise) || p.CanBeGranted(grant.AuthorisationCode), // TODO - Replace with implied action based on grant type?
 		fmt.Sprintf("clients with 'Authorise' must have 'AuthorisationCode': %s", p.Id),
 	)
 
-	require(!(p.CanPerformAction(Authorise) && len(p.RedirectUris) <= 0),
+	require(!p.CanPerformAction(Authorise) || len(p.RedirectUris) != 0,
 		fmt.Sprintf("clients with 'Authorise' must have some 'RedirectUris': %s", p.Id),
 	)
 }

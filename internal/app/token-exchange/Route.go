@@ -36,7 +36,7 @@ func Route(
 			}
 
 			var result Success
-			var err error = nil
+			var err error
 
 			switch valid := request.(type) {
 			// TODO - Add support for other grant types

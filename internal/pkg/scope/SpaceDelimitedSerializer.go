@@ -23,6 +23,6 @@ func marshalSpaceDelimited[T any](values []T, getValue func(T) string) string {
 	return b.String()
 }
 
-//func unmarshalScopes[T any](scope string, setValue func(string) T) []T {
-//	return strings.Split(scope, space)
-//}
+// func unmarshalScopes[T any](scope string, setValue func(string) T) []T {
+// 	return strings.Split(scope, space)
+// }

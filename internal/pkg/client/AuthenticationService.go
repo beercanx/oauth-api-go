@@ -25,7 +25,7 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 
 	var secret Secret
 	var matched = false
-	for _, s := range secrets {
+	loop: for _, s := range secrets {
 		match, err := argon2id.ComparePasswordAndHash(clientSecret, s.hashedSecret)
 		switch {
 		case err != nil:
@@ -33,7 +33,7 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 		case match:
 			secret = s
 			matched = true
-			break
+			break loop
 		}
 	}
 
