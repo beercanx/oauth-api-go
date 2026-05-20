@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTokenIntrospectionRequests(t *testing.T) {
@@ -51,7 +52,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		} {
 			t.Run(fmt.Sprintf("reject %s", invalidMethod), func(t *testing.T) {
 
-				testRequest := httptest.NewRequest(invalidMethod, "/introspect", nil)
+				testRequest := httptest.NewRequestWithContext(t.Context(), invalidMethod, "/introspect", nil)
 
 				recorder := httptest.NewRecorder()
 
@@ -60,7 +61,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 				assert.Equal(t, http.StatusMethodNotAllowed, recorder.Code)
 				assert.NotEmpty(t, recorder.Header())
 				assert.Equal(t, http.MethodPost, recorder.Header().Get("Allow"))
-				assert.Zero(t, recorder.Header().Get("WWW-Authenticate"))
+				assert.Empty(t, recorder.Header().Get("WWW-Authenticate"))
 			})
 		}
 	})
@@ -69,7 +70,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("reject missing authentication", func(t *testing.T) {
 
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", nil)
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", nil)
 
 			recorder := httptest.NewRecorder()
 
@@ -82,7 +83,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("reject invalid basic authentication", func(t *testing.T) {
 
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", nil)
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", nil)
 			testRequest.SetBasicAuth("invalid", "invalid")
 
 			recorder := httptest.NewRecorder()
@@ -97,7 +98,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		t.Run("reject public client authentication", func(t *testing.T) {
 
 			formBody := url.Values{"client_id": {"cicada"}, "token": {"a"}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			recorder := httptest.NewRecorder()
@@ -112,7 +113,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		t.Run("reject a valid client missing the introspection allowed action", func(t *testing.T) {
 
 			formBody := url.Values{"token": {"a"}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("dodo", "echidna")
 
@@ -126,7 +127,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			var result invalid
 			err := json.Unmarshal(recorder.Body.Bytes(), &result)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, UnauthorizedClient, result.ErrorType)
 			assert.Equal(t, "client is not allowed to introspect", result.Description)
 		})
@@ -140,7 +141,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		} {
 			t.Run(fmt.Sprintf("reject %s body requests", contentType), func(t *testing.T) {
 
-				testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(contentBody))
+				testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(contentBody))
 				testRequest.Header.Set("Content-Type", fmt.Sprintf("application/%s", contentType))
 				testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -152,7 +153,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 				var result invalid
 				err := json.Unmarshal(recorder.Body.Bytes(), &result)
-				assert.Nil(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, InvalidRequest, result.ErrorType)
 				assert.Equal(t, "Content-Type must be application/x-www-form-urlencoded", result.Description)
 			})
@@ -172,7 +173,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		} {
 			t.Run(fmt.Sprintf("return invalid request on %s token", data.state), func(t *testing.T) {
 
-				testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(data.body.Encode()))
+				testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(data.body.Encode()))
 				testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 				testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -184,7 +185,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 				var result invalid
 				err := json.Unmarshal(recorder.Body.Bytes(), &result)
-				assert.Nil(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, InvalidRequest, result.ErrorType)
 				assert.Equal(t, data.expected, result.Description)
 			})
@@ -196,7 +197,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		t.Run("return an inactive response for an access token that does not exist", func(t *testing.T) {
 
 			formBody := url.Values{"token": {"94efe4d7-7dbe-455f-b974-46656fd8d035"}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -217,10 +218,10 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 				NotBefore: time.Now().Add(-(20 * time.Minute)),
 			}
 
-			assert.Nil(t, accessTokenRepository.Insert(accessToken))
+			require.NoError(t, accessTokenRepository.Insert(accessToken))
 
 			formBody := url.Values{"token": {accessToken.Value.String()}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -241,10 +242,10 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 				NotBefore: time.Now().Add(10 * time.Minute),
 			}
 
-			assert.Nil(t, accessTokenRepository.Insert(accessToken))
+			require.NoError(t, accessTokenRepository.Insert(accessToken))
 
 			formBody := url.Values{"token": {accessToken.Value.String()}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -264,10 +265,10 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			clientId := client.Id{Value: "dodo"}
 			scopes := scope.Scopes{Value: []scope.Scope{{Value: "basic"}}}
 			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
-			assert.Nil(t, issueError)
+			require.NoError(t, issueError)
 
 			formBody := url.Values{"token": {accessToken.Value.String()}}
-			testRequest := httptest.NewRequest(http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
+			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
 
@@ -281,7 +282,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			var result map[string]any
 			unmarshalError := json.Unmarshal(recorder.Body.Bytes(), &result)
-			assert.Nil(t, unmarshalError)
+			require.NoError(t, unmarshalError)
 			assert.Equal(t, true, result["active"])
 			assert.Equal(t, "dodo", result["client_id"])
 			assert.Contains(t, result, "expiration_time")

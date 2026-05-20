@@ -30,5 +30,5 @@ func (s Scope) UnmarshalJSON(_ []byte) error {
 
 // Basic scope
 //
-// Deprecated: To be replaced by config sourced Clients
+// TODO: To be replaced by configuration sourced Clients
 var Basic = Scope{"basic"}

@@ -1,0 +1,39 @@
+version: "2"
+
+linters:
+  enable:
+    # Correctness / bugs
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - unused
+    - nilerr
+    - nilnil
+    - bodyclose
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+
+    # Security
+    - gosec
+
+    # Code quality / maintainability
+    #- revive
+    - gocritic
+    - unconvert
+    - unparam
+    - prealloc
+    - misspell
+    - dupword
+
+    # Complexity
+    - gocyclo
+    #- cyclop
+    #- funlen
+    #- maintidx
+
+    # Tests
+    - testifylint
+    - tparallel
+    - thelper

@@ -16,7 +16,7 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatalf("%s\n", err)
+		log.Fatalln("Error initializing server: ", err)
 	}
 }
 
@@ -35,21 +35,27 @@ func run() error {
 	}
 
 	httpServer := &http.Server{
-		Addr:    net.JoinHostPort(config.HttpHost, config.HttpPort),
-		Handler: engine,
+		Addr:              net.JoinHostPort(config.HttpHost, config.HttpPort),
+		Handler:           engine,
+		ReadHeaderTimeout: 1 * time.Second,
 	}
 
 	log.Printf("Listening and serving HTTP on http://%s\n", httpServer.Addr)
 
 	// Initializing the server in a goroutine so that it won't block the graceful shutdown handling below.
+	listenErrCh := make(chan error, 1)
 	go func() {
 		if listenErr := httpServer.ListenAndServe(); listenErr != nil && !errors.Is(listenErr, http.ErrServerClosed) {
-			log.Fatalln("Server listen failed: ", listenErr)
+			listenErrCh <- listenErr
 		}
 	}()
 
 	// Listen for the interrupt signal.
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+	case listenErr := <-listenErrCh:
+		return listenErr
+	}
 
 	// Restore default behavior on the interrupt signal and notify user of shutdown.
 	stop()
@@ -59,7 +65,8 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := httpServer.Shutdown(ctx); err != nil {
-		log.Fatalln("Server forced to shutdown: ", err)
+		log.Println("Server forced to shutdown: ", err)
+		return err
 	}
 
 	log.Println("Server exiting.")

@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIntrospector(t *testing.T) {
@@ -30,8 +31,8 @@ func TestIntrospector(t *testing.T) {
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
-		assert.NotNil(t, err)
-		assert.ErrorIs(t, err, noDatabase)
+		require.Error(t, err)
+		require.ErrorIs(t, err, noDatabase)
 		assert.Zero(t, result)
 		assert.IsType(t, response{}, result)
 	})
@@ -48,7 +49,7 @@ func TestIntrospector(t *testing.T) {
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, response{Active: false}, result)
 	})
 
@@ -66,7 +67,7 @@ func TestIntrospector(t *testing.T) {
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, response{Active: false}, result)
 	})
 
@@ -84,7 +85,7 @@ func TestIntrospector(t *testing.T) {
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, response{Active: false}, result)
 	})
 
@@ -112,7 +113,7 @@ func TestIntrospector(t *testing.T) {
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: accessToken.Value})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.NotZero(t, result)
 		assert.Equal(t, response{
 			Active:         true,

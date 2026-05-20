@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAuthenticatedUsername(t *testing.T) {
@@ -16,15 +17,15 @@ func TestAuthenticatedUsername(t *testing.T) {
 
 	t.Run("when marshalling to JSON", func(t *testing.T) {
 		result, err := json.Marshal(AuthenticatedUsername{"AARDVARK"})
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, `"AARDVARK"`, string(result))
 	})
 
 	t.Run("when unmarshalling from JSON", func(t *testing.T) {
 		var underTest AuthenticatedUsername
 		err := json.Unmarshal([]byte(`"badger"`), &underTest)
-		assert.NotNil(t, err)
-		assert.ErrorIs(t, err, errors.ErrUnsupported)
+		require.Error(t, err)
+		require.ErrorIs(t, err, errors.ErrUnsupported)
 		assert.Zero(t, underTest)
 	})
 }
