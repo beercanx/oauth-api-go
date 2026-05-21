@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAuthenticate(t *testing.T) {
+var errorCredentialRepo = errors.New("credential repository error")
+var errorStatusRepo = errors.New("status repository error")
 
-	credentialRepoError := errors.New("credential repository error")
-	statusRepoError := errors.New("status repository error")
+func TestAuthenticate(t *testing.T) {
 
 	validUsername := "aardvark"
 	validPassword := "P@55w0rd"
@@ -29,12 +29,12 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository := NewMockCredentialRepository(t)
 		statusRepository := NewMockStatusRepository(t)
 
-		credentialRepository.EXPECT().FindByUsername("cred-repo-error").Return(Credential{}, credentialRepoError).Once()
+		credentialRepository.EXPECT().FindByUsername("cred-repo-error").Return(Credential{}, errorCredentialRepo).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		_, err := underTest.Authenticate("cred-repo-error", validPassword)
-		require.ErrorIs(t, err, credentialRepoError)
+		require.ErrorIs(t, err, errorCredentialRepo)
 	})
 
 	t.Run("when argon2 hash checking errors", func(t *testing.T) {
@@ -60,12 +60,12 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := NewMockStatusRepository(t)
 
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
-		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, statusRepoError).Once()
+		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, errorStatusRepo).Once()
 
 		underTest := NewAuthenticationService(credentialRepository, statusRepository)
 
 		_, err := underTest.Authenticate(validUsername, validPassword)
-		require.ErrorIs(t, err, statusRepoError)
+		require.ErrorIs(t, err, errorStatusRepo)
 	})
 
 	//

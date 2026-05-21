@@ -15,24 +15,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var errorNoDatabase = errors.New("no database")
+
 func TestIntrospector(t *testing.T) {
 
 	t.Run("when token repository errors", func(t *testing.T) {
-
-		noDatabase := errors.New("no database")
 
 		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{}, noDatabase).
+			Return(token.AccessToken{}, errorNoDatabase).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
 		require.Error(t, err)
-		require.ErrorIs(t, err, noDatabase)
+		require.ErrorIs(t, err, errorNoDatabase)
 		assert.Zero(t, result)
 		assert.IsType(t, response{}, result)
 	})
