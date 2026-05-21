@@ -28,7 +28,6 @@ linters:
     - gosec
 
     # Code quality / maintainability
-    #- revive
     - gocritic
     - unconvert
     - unparam
@@ -38,9 +37,14 @@ linters:
     - mirror
     - intrange
     - exhaustive
+    - gochecknoglobals
+    - fatcontext
+    - forbidigo
+    - errchkjson
 
     # Complexity
     - gocyclo
+    - gocognit
     #- cyclop
     #- funlen
     #- maintidx

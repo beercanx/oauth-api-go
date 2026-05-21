@@ -27,8 +27,3 @@ func (s Scope) MarshalJSON() ([]byte, error) {
 func (s Scope) UnmarshalJSON(_ []byte) error {
 	return errors.ErrUnsupported
 }
-
-// Basic scope
-//
-// TODO: To be replaced by configuration sourced Clients
-var Basic = Scope{"basic"}
