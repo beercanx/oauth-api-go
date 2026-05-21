@@ -49,4 +49,4 @@ linters:
     - testifylint
     - tparallel
     - thelper
-#    - paralleltest
+    - paralleltest

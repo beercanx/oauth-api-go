@@ -18,8 +18,10 @@ import (
 var errorNoDatabase = errors.New("no database")
 
 func TestIntrospector(t *testing.T) {
+	t.Parallel()
 
 	t.Run("when token repository errors", func(t *testing.T) {
+		t.Parallel()
 
 		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
 		accessTokenRepository.
@@ -38,6 +40,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token does not exist", func(t *testing.T) {
+		t.Parallel()
 
 		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
 		accessTokenRepository.
@@ -54,6 +57,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token has expired", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 
@@ -72,6 +76,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token is not yet valid", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 
@@ -90,6 +95,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token is just right", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 
