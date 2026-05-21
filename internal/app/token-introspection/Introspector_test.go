@@ -15,29 +15,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var errorNoDatabase = errors.New("no database")
+
 func TestIntrospector(t *testing.T) {
+	t.Parallel()
 
 	t.Run("when token repository errors", func(t *testing.T) {
-
-		noDatabase := errors.New("no database")
+		t.Parallel()
 
 		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{}, noDatabase).
+			Return(token.AccessToken{}, errorNoDatabase).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
 
 		result, err := underTest.introspect(request{token: uuid.New()})
 		require.Error(t, err)
-		require.ErrorIs(t, err, noDatabase)
+		require.ErrorIs(t, err, errorNoDatabase)
 		assert.Zero(t, result)
 		assert.IsType(t, response{}, result)
 	})
 
 	t.Run("when token does not exist", func(t *testing.T) {
+		t.Parallel()
 
 		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
 		accessTokenRepository.
@@ -54,6 +57,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token has expired", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 
@@ -72,6 +76,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token is not yet valid", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 
@@ -90,6 +95,7 @@ func TestIntrospector(t *testing.T) {
 	})
 
 	t.Run("when token is just right", func(t *testing.T) {
+		t.Parallel()
 
 		now := time.Now()
 

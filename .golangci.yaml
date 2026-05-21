@@ -14,21 +14,37 @@ linters:
     - noctx
     - rowserrcheck
     - sqlclosecheck
+    - iface
+    - loggercheck
+    - errorlint
+    - exptostd
+    - err113
+    - durationcheck
+    - contextcheck
+    - asasalint
+    - importas
 
     # Security
     - gosec
 
     # Code quality / maintainability
-    #- revive
     - gocritic
     - unconvert
     - unparam
     - prealloc
     - misspell
     - dupword
+    - mirror
+    - intrange
+    - exhaustive
+    - gochecknoglobals
+    - fatcontext
+    - forbidigo
+    - errchkjson
 
     # Complexity
     - gocyclo
+    - gocognit
     #- cyclop
     #- funlen
     #- maintidx
@@ -37,3 +53,4 @@ linters:
     - testifylint
     - tparallel
     - thelper
+    - paralleltest
