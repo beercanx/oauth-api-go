@@ -102,7 +102,7 @@ func TestIntrospector(t *testing.T) {
 		accessToken := token.AccessToken{
 			Value:     uuid.New(),
 			Username:  user.AuthenticatedUsername{Value: "aardvark"},
-			Scopes:    scope.Scopes{Value: []scope.Scope{{Value: "basic"}}},
+			Scopes:    scope.Scopes{{Value: "basic"}},
 			ClientId:  client.Id{Value: "v"},
 			IssuedAt:  now,
 			ExpiresAt: now.Add(time.Minute),
@@ -123,7 +123,7 @@ func TestIntrospector(t *testing.T) {
 		assert.NotZero(t, result)
 		assert.Equal(t, response{
 			Active:         true,
-			Scope:          scope.Scopes{Value: []scope.Scope{{Value: "basic"}}},
+			Scope:          scope.Scopes{{Value: "basic"}},
 			Subject:        user.AuthenticatedUsername{Value: "aardvark"},
 			Username:       user.AuthenticatedUsername{Value: "aardvark"},
 			ClientId:       client.Id{Value: "v"},

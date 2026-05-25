@@ -2,11 +2,10 @@ package scope
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
-type Scope struct {
+type Scope struct { // TODO: Should this be a type string rather than struct?
 	Value string
 }
 
@@ -18,12 +17,10 @@ func (s Scope) String() string {
 	return s.Value
 }
 
-// MarshalJSON always returns unsupported because nothing should call this.
 func (s Scope) MarshalJSON() ([]byte, error) {
-	return nil, errors.ErrUnsupported
+	return json.Marshal(s.Value)
 }
 
-// UnmarshalJSON always returns unsupported because nothing should call this.
-func (s Scope) UnmarshalJSON(_ []byte) error {
-	return errors.ErrUnsupported
+func (s Scope) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &s.Value)
 }

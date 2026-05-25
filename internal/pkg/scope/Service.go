@@ -6,7 +6,7 @@ type Service struct {
 
 func (service *Service) Validate(inputs []string) Scopes {
 
-	var result []Scope
+	var result Scopes
 
 	for _, input := range inputs {
 
@@ -16,7 +16,7 @@ func (service *Service) Validate(inputs []string) Scopes {
 		}
 	}
 
-	return Scopes{result}
+	return result
 }
 
 func NewService(repository Repository) *Service {

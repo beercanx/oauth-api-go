@@ -280,7 +280,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			username := user.AuthenticatedUsername{Value: "ant"}
 			clientId := client.Id{Value: "dodo"}
-			scopes := scope.Scopes{Value: []scope.Scope{{Value: "basic"}}}
+			scopes := scope.Scopes{{Value: "basic"}}
 			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
 			require.NoError(t, issueError)
 
