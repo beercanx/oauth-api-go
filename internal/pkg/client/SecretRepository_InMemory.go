@@ -7,12 +7,12 @@ import (
 
 type InMemorySecretRepository struct {
 	byId       map[uuid.UUID]Secret
-	byClientId map[string][]Secret
+	byClientId map[Id][]Secret
 }
 
 func (i InMemorySecretRepository) insert(secret Secret) {
 	i.byId[secret.id] = secret
-	i.byClientId[secret.clientId.Value] = append(i.byClientId[secret.clientId.Value], secret)
+	i.byClientId[secret.clientId] = append(i.byClientId[secret.clientId], secret)
 }
 
 func (i InMemorySecretRepository) FindById(id uuid.UUID) (Secret, bool) {
@@ -21,12 +21,12 @@ func (i InMemorySecretRepository) FindById(id uuid.UUID) (Secret, bool) {
 }
 
 func (i InMemorySecretRepository) FindByClient(client Id) ([]Secret, bool) {
-	secrets, ok := i.byClientId[client.Value]
+	secrets, ok := i.byClientId[client]
 	return secrets, ok
 }
 
 func (i InMemorySecretRepository) FindByClientId(clientId string) ([]Secret, bool) {
-	secrets, ok := i.byClientId[clientId]
+	secrets, ok := i.byClientId[Id(clientId)]
 	return secrets, ok
 }
 
@@ -34,14 +34,14 @@ func (i InMemorySecretRepository) FindByClientId(clientId string) ([]Secret, boo
 var _ SecretRepository = (*InMemorySecretRepository)(nil)
 
 func NewInMemorySecretRepository() *InMemorySecretRepository {
-	repository := &InMemorySecretRepository{make(map[uuid.UUID]Secret), make(map[string][]Secret)}
+	repository := &InMemorySecretRepository{make(map[uuid.UUID]Secret), make(map[Id][]Secret)}
 
 	// TODO - Remove once we've got a means of creating new clients
 	aardvarkHash, _ := argon2id.CreateHash("badger", argon2id.DefaultParams)
-	repository.insert(Secret{uuid.New(), Id{"aardvark"}, aardvarkHash})
+	repository.insert(Secret{uuid.New(), "aardvark", aardvarkHash})
 
 	dodoHash, _ := argon2id.CreateHash("echidna", argon2id.DefaultParams)
-	repository.insert(Secret{uuid.New(), Id{"dodo"}, dodoHash})
+	repository.insert(Secret{uuid.New(), "dodo", dodoHash})
 
 	return repository
 }

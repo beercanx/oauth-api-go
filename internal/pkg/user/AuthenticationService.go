@@ -39,7 +39,7 @@ func (service *AuthenticationService) Authenticate(username string, password str
 	case status.isLocked():
 		return Authenticated{}, AuthenticationFailure{Locked}
 	default:
-		return Authenticated{AuthenticatedUsername{username}}, nil
+		return Authenticated{AuthenticatedUsername(username)}, nil
 	}
 }
 

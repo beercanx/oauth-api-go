@@ -3,29 +3,30 @@ package token
 import (
 	"fmt"
 
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"github.com/google/uuid"
 )
 
 type AccessTokenAuthenticator struct {
-	repository Repository[AccessToken]
+	repository Repository[db.AccessToken]
 }
 
-func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (AccessToken, error) {
+func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (db.AccessToken, error) {
 
 	accessToken, err := service.repository.FindById(token)
 	switch {
 
 	case err != nil:
-		return AccessToken{}, fmt.Errorf("authenticate access token failed: %w", err)
+		return db.AccessToken{}, fmt.Errorf("authenticate access token failed: %w", err)
 
-	case HasExpired(accessToken):
+	case accessToken.HasExpired():
 		if err = service.repository.DeleteByRecord(accessToken); err != nil {
-			return AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
+			return db.AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
 		}
-		return AccessToken{}, ErrAccessTokenHasExpired
+		return db.AccessToken{}, ErrAccessTokenHasExpired
 
-	case IsBefore(accessToken):
-		return AccessToken{}, ErrAccessTokenIsBefore
+	case accessToken.IsBefore():
+		return db.AccessToken{}, ErrAccessTokenIsBefore
 
 	default:
 		return accessToken, nil
@@ -33,9 +34,9 @@ func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (AccessTo
 }
 
 // assert AccessTokenAuthenticator implements Authenticator
-var _ Authenticator[AccessToken] = (*AccessTokenAuthenticator)(nil)
+var _ Authenticator[db.AccessToken] = (*AccessTokenAuthenticator)(nil)
 
-func NewAccessTokenAuthenticator(repository Repository[AccessToken]) *AccessTokenAuthenticator {
+func NewAccessTokenAuthenticator(repository Repository[db.AccessToken]) *AccessTokenAuthenticator {
 	return &AccessTokenAuthenticator{
 		repository: repository,
 	}

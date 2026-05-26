@@ -11,6 +11,6 @@ var (
 	ErrAccessTokenIsBefore   = errors.New("access token is before")
 )
 
-type Authenticator[T Token] interface {
+type Authenticator[T any] interface {
 	Authenticate(token uuid.UUID) (T, error)
 }

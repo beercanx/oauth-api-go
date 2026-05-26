@@ -10,6 +10,11 @@ type InMemoryRepository[T Token] struct {
 	store map[uuid.UUID]T
 }
 
+func (i *InMemoryRepository[T]) Migrate() error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i *InMemoryRepository[T]) Insert(new T) error {
 	i.store[new.GetValue()] = new
 	return nil
@@ -19,9 +24,8 @@ func (i *InMemoryRepository[T]) FindById(id uuid.UUID) (T, error) {
 	value, ok := i.store[id]
 	if ok {
 		return value, nil
-	} else {
-		return *new(T), ErrNoSuchToken
 	}
+	return *new(T), ErrNoSuchToken
 }
 
 func (i *InMemoryRepository[T]) FindAllByUsername(username user.AuthenticatedUsername) ([]T, error) {
@@ -65,7 +69,6 @@ func (i *InMemoryRepository[T]) DeletedExpired() error {
 }
 
 // assert InMemoryRepository implements Repository
-var _ Repository[AccessToken] = (*InMemoryRepository[AccessToken])(nil)
 var _ Repository[RefreshToken] = (*InMemoryRepository[RefreshToken])(nil)
 
 func NewInMemoryRepository[T Token]() *InMemoryRepository[T] {

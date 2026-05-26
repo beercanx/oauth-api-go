@@ -24,8 +24,7 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 
 			if validationError != nil {
 
-				var failedValidation invalid
-				if errors.As(validationError, &failedValidation) {
+				if failedValidation, ok := errors.AsType[invalid](validationError); ok {
 
 					switch failedValidation.ErrorType {
 

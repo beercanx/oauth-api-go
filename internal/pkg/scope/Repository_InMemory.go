@@ -8,9 +8,8 @@ func (repository *InMemoryRepository) FindById(id string) (Scope, error) {
 	scope, ok := repository.store[id]
 	if ok {
 		return scope, nil
-	} else {
-		return Scope{}, ErrNoSuchScope
 	}
+	return "", ErrNoSuchScope
 }
 
 // assert InMemoryRepository implements Repository
@@ -18,6 +17,6 @@ var _ Repository = (*InMemoryRepository)(nil)
 
 func NewInMemoryRepository() *InMemoryRepository {
 	repository := &InMemoryRepository{make(map[string]Scope)}
-	repository.store["basic"] = Scope{"basic"}
+	repository.store["basic"] = "basic"
 	return repository
 }

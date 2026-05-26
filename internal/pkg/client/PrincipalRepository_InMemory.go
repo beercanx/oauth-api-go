@@ -6,15 +6,15 @@ import (
 )
 
 type InMemoryPrincipalRepository struct {
-	byClientId map[string]Principal
+	byClientId map[Id]Principal
 }
 
 func (i InMemoryPrincipalRepository) insert(principal Principal) {
-	i.byClientId[principal.Id.Value] = principal
+	i.byClientId[principal.Id] = principal
 }
 
 func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, bool) {
-	principal, ok := i.byClientId[id.Value]
+	principal, ok := i.byClientId[id]
 	if ok {
 		principal.verify()
 	}
@@ -22,7 +22,7 @@ func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, bool) {
 }
 
 func (i InMemoryPrincipalRepository) FindByClientId(clientId string) (Principal, bool) {
-	principal, ok := i.byClientId[clientId]
+	principal, ok := i.byClientId[Id(clientId)]
 	if ok {
 		principal.verify()
 	}
@@ -32,30 +32,30 @@ func (i InMemoryPrincipalRepository) FindByClientId(clientId string) (Principal,
 var _ PrincipalRepository = (*InMemoryPrincipalRepository)(nil)
 
 func NewInMemoryPrincipalRepository() *InMemoryPrincipalRepository {
-	repository := &InMemoryPrincipalRepository{make(map[string]Principal)}
+	repository := &InMemoryPrincipalRepository{make(map[Id]Principal)}
 
 	repository.insert(Principal{
-		Id:                Id{"aardvark"},
+		Id:                "aardvark",
 		Type:              Confidential,
-		AllowedScopes:     []scope.Scope{{Value: "basic"}},
+		AllowedScopes:     []scope.Scope{"basic"},
 		AllowedGrantTypes: []grant.Type{grant.Password},
 		AllowedActions:    []Action{Introspect},
 	})
 
 	repository.insert(Principal{
-		Id:                Id{"cicada"},
+		Id:                "cicada",
 		Type:              Public,
 		RedirectUris:      []string{"https://cicada.baconi.co.uk/callback"},
-		AllowedScopes:     []scope.Scope{{Value: "basic"}},
+		AllowedScopes:     []scope.Scope{"basic"},
 		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
 		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
 	})
 
 	repository.insert(Principal{
-		Id:                Id{"dodo"},
+		Id:                "dodo",
 		Type:              Confidential,
 		RedirectUris:      []string{"https://dodo.baconi.co.uk/callback"},
-		AllowedScopes:     []scope.Scope{{Value: "basic"}},
+		AllowedScopes:     []scope.Scope{"basic"},
 		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
 		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
 	})

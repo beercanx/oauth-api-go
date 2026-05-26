@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+
 	"baconi.co.uk/oauth/internal/app/token-exchange"
 	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
@@ -11,6 +13,7 @@ import (
 )
 
 func Engine(
+	ctx context.Context,
 	config *Config,
 ) (*gin.Engine, error) {
 
@@ -30,7 +33,10 @@ func Engine(
 	//
 	// Create stuff to be injected
 	//
-	accessTokenRepository := token.NewInMemoryRepository[token.AccessToken]()
+	accessTokenRepository, atrError := token.NewAccessTokenRepository(ctx)
+	if atrError != nil {
+		return nil, atrError
+	}
 	accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 
 	refreshTokenRepository := token.NewInMemoryRepository[token.RefreshToken]()

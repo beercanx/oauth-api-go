@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
@@ -23,11 +24,11 @@ func TestIntrospector(t *testing.T) {
 	t.Run("when token repository errors", func(t *testing.T) {
 		t.Parallel()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockRepository[db.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{}, errorNoDatabase).
+			Return(db.AccessToken{}, errorNoDatabase).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
@@ -42,11 +43,11 @@ func TestIntrospector(t *testing.T) {
 	t.Run("when token does not exist", func(t *testing.T) {
 		t.Parallel()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockRepository[db.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{}, token.ErrNoSuchToken).
+			Return(db.AccessToken{}, token.ErrNoSuchToken).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
@@ -61,11 +62,11 @@ func TestIntrospector(t *testing.T) {
 
 		now := time.Now()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockRepository[db.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{IssuedAt: now, ExpiresAt: now.Add(-time.Hour), NotBefore: now.Add(-time.Hour)}, nil).
+			Return(db.AccessToken{IssuedAt: now, ExpiresAt: now.Add(-time.Hour), NotBefore: now.Add(-time.Hour)}, nil).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
@@ -80,11 +81,11 @@ func TestIntrospector(t *testing.T) {
 
 		now := time.Now()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockRepository[db.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{IssuedAt: now, ExpiresAt: now.Add(time.Minute), NotBefore: now.Add(time.Minute)}, nil).
+			Return(db.AccessToken{IssuedAt: now, ExpiresAt: now.Add(time.Minute), NotBefore: now.Add(time.Minute)}, nil).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
@@ -99,34 +100,34 @@ func TestIntrospector(t *testing.T) {
 
 		now := time.Now()
 
-		accessToken := token.AccessToken{
-			Value:     uuid.New(),
-			Username:  user.AuthenticatedUsername{Value: "aardvark"},
-			Scopes:    scope.Scopes{{Value: "basic"}},
-			ClientId:  client.Id{Value: "v"},
+		accessToken := db.AccessToken{
+			ID:        uuid.New(),
+			Username:  user.AuthenticatedUsername("aardvark"),
+			Scopes:    scope.Scopes{"basic"},
+			ClientID:  client.Id("v"),
 			IssuedAt:  now,
 			ExpiresAt: now.Add(time.Minute),
 			NotBefore: now.Add(-time.Minute),
 		}
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockRepository[db.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
-			FindById(accessToken.Value).
+			FindById(accessToken.ID).
 			Return(accessToken, nil).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
 
-		result, err := underTest.introspect(request{token: accessToken.Value})
+		result, err := underTest.introspect(request{token: accessToken.ID})
 		require.NoError(t, err)
 		assert.NotZero(t, result)
 		assert.Equal(t, response{
 			Active:         true,
-			Scope:          scope.Scopes{{Value: "basic"}},
-			Subject:        user.AuthenticatedUsername{Value: "aardvark"},
-			Username:       user.AuthenticatedUsername{Value: "aardvark"},
-			ClientId:       client.Id{Value: "v"},
+			Scope:          scope.Scopes{"basic"},
+			Subject:        "aardvark",
+			Username:       "aardvark",
+			ClientId:       "v",
 			TokenType:      token.Bearer,
 			IssuedAt:       now.Unix(),
 			NotBefore:      now.Add(-time.Minute).Unix(),

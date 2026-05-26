@@ -160,6 +160,6 @@ func TestAuthenticate(t *testing.T) {
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		require.NoError(t, failure, "failure should be nil")
 		assert.NotNil(t, success, "success should not be nil")
-		assert.Equal(t, AuthenticatedUsername{validUsername}, success.Username)
+		assert.Equal(t, AuthenticatedUsername(validUsername), success.Username)
 	})
 }

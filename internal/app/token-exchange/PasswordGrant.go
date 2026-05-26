@@ -5,17 +5,18 @@ import (
 	"math"
 	"time"
 
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
 )
 
 type PasswordGrant struct {
-	accessTokenIssuer  token.Issuer[token.AccessToken]
+	accessTokenIssuer  token.Issuer[db.AccessToken]
 	refreshTokenIssuer token.Issuer[token.RefreshToken]
 	userAuthenticator  user.Authenticator
 }
 
-func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) *PasswordGrant {
+func NewPasswordGrant(accessTokenIssuer token.Issuer[db.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) *PasswordGrant {
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
@@ -41,11 +42,11 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 	}
 
 	return Success{
-		AccessToken:  accessToken.GetValue(),
+		AccessToken:  accessToken.ID,
 		TokenType:    token.Bearer,
-		ExpiresIn:    secondsBetween(accessToken.GetExpiresAt(), accessToken.GetIssuedAt()),
+		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
 		RefreshToken: refreshToken.GetValue(),
-		Scope:        accessToken.GetScopes(),
+		Scope:        accessToken.Scopes,
 		State:        request.State,
 	}, nil
 }

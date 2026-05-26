@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
@@ -24,7 +25,8 @@ import (
 func TestTokenIntrospectionRequests(t *testing.T) {
 	t.Parallel()
 
-	accessTokenRepository := token.NewInMemoryRepository[token.AccessToken]()
+	accessTokenRepository := token.NewInMemoryAccessTokenRepository(t.Context())
+	require.NoError(t, accessTokenRepository.Migrate())
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
 	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
@@ -226,8 +228,10 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		t.Run("return an inactive response for an access token that has expired", func(t *testing.T) {
 			t.Parallel()
 
-			accessToken := token.AccessToken{
-				Value:     uuid.New(),
+			accessToken := db.AccessToken{
+				ID:        uuid.New(),
+				Username:  "expired",
+				ClientID:  "expired",
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(-(10 * time.Minute)),
 				NotBefore: time.Now().Add(-(20 * time.Minute)),
@@ -235,7 +239,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			require.NoError(t, accessTokenRepository.Insert(accessToken))
 
-			formBody := url.Values{"token": {accessToken.Value.String()}}
+			formBody := url.Values{"token": {accessToken.ID.String()}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
@@ -251,8 +255,10 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		t.Run("return an inactive response for an access token that is in the future", func(t *testing.T) {
 			t.Parallel()
 
-			accessToken := token.AccessToken{
-				Value:     uuid.New(),
+			accessToken := db.AccessToken{
+				ID:        uuid.New(),
+				Username:  "future",
+				ClientID:  "future",
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(20 * time.Minute),
 				NotBefore: time.Now().Add(10 * time.Minute),
@@ -260,7 +266,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			require.NoError(t, accessTokenRepository.Insert(accessToken))
 
-			formBody := url.Values{"token": {accessToken.Value.String()}}
+			formBody := url.Values{"token": {accessToken.ID.String()}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
@@ -278,13 +284,13 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 			accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 
-			username := user.AuthenticatedUsername{Value: "ant"}
-			clientId := client.Id{Value: "dodo"}
-			scopes := scope.Scopes{{Value: "basic"}}
+			username := user.AuthenticatedUsername("ant")
+			clientId := client.Id("dodo")
+			scopes := scope.Scopes{"basic"}
 			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
 			require.NoError(t, issueError)
 
-			formBody := url.Values{"token": {accessToken.Value.String()}}
+			formBody := url.Values{"token": {accessToken.ID.String()}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
 			testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			testRequest.SetBasicAuth("aardvark", "badger")
@@ -300,6 +306,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			var result map[string]any
 			unmarshalError := json.Unmarshal(recorder.Body.Bytes(), &result)
 			require.NoError(t, unmarshalError)
+			assert.Len(t, result, 9)
 			assert.Equal(t, true, result["active"])
 			assert.Equal(t, "dodo", result["client_id"])
 			assert.Contains(t, result, "expiration_time")
@@ -309,7 +316,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			assert.Equal(t, "ant", result["sub"])
 			assert.Equal(t, "bearer", result["token_type"])
 			assert.Equal(t, "ant", result["username"])
-			assert.Len(t, result, 9)
 		})
 	})
 }

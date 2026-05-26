@@ -3,6 +3,7 @@ package token_introspection
 import (
 	"errors"
 
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/token"
 )
 
@@ -10,12 +11,12 @@ type Introspector interface {
 	introspect(request) (response, error)
 }
 
-func NewIntrospector(accessTokenRepository token.Repository[token.AccessToken]) Introspector {
+func NewIntrospector(accessTokenRepository token.Repository[db.AccessToken]) Introspector {
 	return &introspector{accessTokenRepository: accessTokenRepository}
 }
 
 type introspector struct {
-	accessTokenRepository token.Repository[token.AccessToken]
+	accessTokenRepository token.Repository[db.AccessToken]
 }
 
 // assert introspector implements Introspector
@@ -33,10 +34,10 @@ func (service introspector) introspect(r request) (response, error) {
 	case err != nil:
 		return response{}, err
 
-	case token.HasExpired(accessToken):
+	case accessToken.HasExpired():
 		return response{Active: false}, nil
 
-	case token.IsBefore(accessToken):
+	case accessToken.IsBefore():
 		return response{Active: false}, nil
 
 	// TODO - Decide out if we want to block any Confident client from introspecting any token.
@@ -44,14 +45,14 @@ func (service introspector) introspect(r request) (response, error) {
 	default:
 		return response{
 			Active:         true,
-			Scope:          accessToken.GetScopes(),
-			Subject:        accessToken.GetUsername(),
-			Username:       accessToken.GetUsername(),
-			ClientId:       accessToken.GetClientId(),
+			Scope:          accessToken.Scopes,
+			Subject:        accessToken.Username,
+			Username:       accessToken.Username,
+			ClientId:       accessToken.ClientID,
 			TokenType:      token.Bearer,
-			IssuedAt:       accessToken.GetIssuedAt().Unix(),
-			NotBefore:      accessToken.GetNotBefore().Unix(),
-			ExpirationTime: accessToken.GetExpiresAt().Unix(),
+			IssuedAt:       accessToken.IssuedAt.Unix(),
+			NotBefore:      accessToken.NotBefore.Unix(),
+			ExpirationTime: accessToken.ExpiresAt.Unix(),
 		}, nil
 	}
 }

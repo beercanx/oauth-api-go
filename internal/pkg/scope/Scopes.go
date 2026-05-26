@@ -17,7 +17,7 @@ var _ sql.Scanner = (*Scopes)(nil)
 
 func (scopes Scopes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshalSpaceDelimited(scopes, func(scope Scope) string {
-		return scope.Value
+		return string(scope)
 	}))
 }
 
@@ -26,14 +26,15 @@ func (scopes Scopes) UnmarshalJSON(_ []byte) error {
 }
 
 func (scopes Scopes) Value() (driver.Value, error) {
-	marshaled, err := json.Marshal(scopes)
+	marshaled, err := json.Marshal([]Scope(scopes))
 	if err != nil {
 		return nil, err
 	}
 	return string(marshaled), nil
 }
 
-func (scopes Scopes) Scan(src any) error {
+//goland:noinspection GoMixedReceiverTypes
+func (scopes *Scopes) Scan(src any) error {
 	var source string
 	switch v := src.(type) {
 	case string:
@@ -43,5 +44,10 @@ func (scopes Scopes) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported type for Scopes: %T", src)
 	}
-	return json.Unmarshal([]byte(source), &scopes)
+	var rawScopes []Scope
+	if err := json.Unmarshal([]byte(source), &rawScopes); err != nil {
+		return err
+	}
+	*scopes = rawScopes
+	return nil
 }
