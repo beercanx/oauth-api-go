@@ -33,6 +33,8 @@ func (scopes Scopes) Value() (driver.Value, error) {
 	return string(marshaled), nil
 }
 
+var ErrUnsupportedScopeType = errors.New("unsupported type for Scopes")
+
 //goland:noinspection GoMixedReceiverTypes
 func (scopes *Scopes) Scan(src any) error {
 	var source string
@@ -42,7 +44,7 @@ func (scopes *Scopes) Scan(src any) error {
 	case []byte:
 		source = string(v)
 	default:
-		return fmt.Errorf("unsupported type for Scopes: %T", src)
+		return fmt.Errorf("%w: %T", ErrUnsupportedScopeType, src)
 	}
 	var rawScopes []Scope
 	if err := json.Unmarshal([]byte(source), &rawScopes); err != nil {
