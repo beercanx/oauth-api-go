@@ -11,7 +11,7 @@ type InMemoryRepository[T Token] struct {
 }
 
 func (i *InMemoryRepository[T]) Migrate() error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
