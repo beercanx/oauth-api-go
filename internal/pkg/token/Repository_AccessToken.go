@@ -38,7 +38,10 @@ func (r accessTokenRepository) Migrate() error {
 
 	for _, file := range files {
 
-		content, readError := os.ReadFile(file)
+		cleanFile := filepath.Clean(file)
+		log.Printf("Reading migration: %s", cleanFile)
+
+		content, readError := os.ReadFile(cleanFile)
 		if readError != nil {
 			return fmt.Errorf("reading migration file %s: %w", file, readError)
 		}
