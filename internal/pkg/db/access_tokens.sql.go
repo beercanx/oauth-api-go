@@ -63,6 +63,22 @@ func (q *Queries) DeleteAccessToken(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteExpiredAccessTokens = `-- name: DeleteExpiredAccessTokens :exec
+DELETE
+FROM access_tokens
+WHERE datetime(expires_at) <= CURRENT_TIMESTAMP
+`
+
+// DeleteExpiredAccessTokens
+//
+//	DELETE
+//	FROM access_tokens
+//	WHERE datetime(expires_at) <= CURRENT_TIMESTAMP
+func (q *Queries) DeleteExpiredAccessTokens(ctx context.Context) error {
+	_, err := q.exec(ctx, q.deleteExpiredAccessTokensStmt, deleteExpiredAccessTokens)
+	return err
+}
+
 const getAccessToken = `-- name: GetAccessToken :one
 SELECT id, username, client_id, scopes, issued_at, expires_at, not_before
 FROM access_tokens

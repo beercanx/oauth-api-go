@@ -10,21 +10,40 @@ import (
 	"os"
 	"path/filepath"
 
-	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/db"
-	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 
 	_ "github.com/ncruces/go-sqlite3/driver"
 )
 
-func NewAccessTokenRepository(ctx context.Context) (Repository[db.AccessToken], error) {
-	return newAccessTokenRepository(ctx, "file:out/database.sqlite")
+type accessTokenRepository struct {
+	ctx     context.Context
+	dbtx    db.DBTX
+	queries *db.Queries
 }
 
-type RepositoryWithMigrations[T any] interface {
-	Repository[T]
-	Migrate() error
+func (r accessTokenRepository) Insert(new db.AccessToken) error {
+	return r.queries.CreateAccessToken(r.ctx, db.CreateAccessTokenParams(new))
+}
+
+func (r accessTokenRepository) FindById(id uuid.UUID) (db.AccessToken, error) {
+	token, err := r.queries.GetAccessToken(r.ctx, id)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return db.AccessToken{}, ErrNoSuchToken
+	}
+	return token, err
+}
+
+func (r accessTokenRepository) DeleteById(id uuid.UUID) error {
+	return r.queries.DeleteAccessToken(r.ctx, id)
+}
+
+func (r accessTokenRepository) DeleteByRecord(record db.AccessToken) error {
+	return r.DeleteById(record.ID)
+}
+
+func (r accessTokenRepository) DeletedExpired() error {
+	return r.queries.DeleteExpiredAccessTokens(r.ctx)
 }
 
 func (r accessTokenRepository) Migrate() error {
@@ -56,6 +75,13 @@ func (r accessTokenRepository) Migrate() error {
 	return nil
 }
 
+var _ Repository[db.AccessToken] = (*accessTokenRepository)(nil)
+var _ RepositoryWithMigrations[db.AccessToken] = (*accessTokenRepository)(nil)
+
+func NewAccessTokenRepository(ctx context.Context) (Repository[db.AccessToken], error) {
+	return newAccessTokenRepository(ctx, "file:out/database.sqlite")
+}
+
 // NewInMemoryAccessTokenRepository should only be used in unit/integration tests
 func NewInMemoryAccessTokenRepository(ctx context.Context) RepositoryWithMigrations[db.AccessToken] {
 	repo, err := newAccessTokenRepository(ctx, "file:access_tokens?mode=memory&cache=shared")
@@ -75,44 +101,4 @@ func newAccessTokenRepository(ctx context.Context, source string) (RepositoryWit
 	queries := db.New(connection)
 
 	return &accessTokenRepository{ctx, connection, queries}, nil
-}
-
-type accessTokenRepository struct {
-	ctx     context.Context
-	dbtx    db.DBTX
-	queries *db.Queries
-}
-
-var _ Repository[db.AccessToken] = (*accessTokenRepository)(nil)
-
-func (r accessTokenRepository) Insert(new db.AccessToken) error {
-	return r.queries.CreateAccessToken(r.ctx, db.CreateAccessTokenParams(new))
-}
-
-func (r accessTokenRepository) FindById(id uuid.UUID) (db.AccessToken, error) {
-	token, err := r.queries.GetAccessToken(r.ctx, id)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return db.AccessToken{}, ErrNoSuchToken
-	}
-	return token, err
-}
-
-func (r accessTokenRepository) FindAllByUsername(username user.AuthenticatedUsername) ([]db.AccessToken, error) {
-	panic("implement me")
-}
-
-func (r accessTokenRepository) FindAllByClientId(clientId client.Id) ([]db.AccessToken, error) {
-	panic("implement me")
-}
-
-func (r accessTokenRepository) DeleteById(id uuid.UUID) error { // TODO - Add integration test for safe deleting
-	return r.queries.DeleteAccessToken(r.ctx, id)
-}
-
-func (r accessTokenRepository) DeleteByRecord(record db.AccessToken) error { // TODO - Add integration test for safe deleting
-	return r.DeleteById(record.ID)
-}
-
-func (r accessTokenRepository) DeletedExpired() error { // TODO - Add integration test for safe deleting
-	panic("implement me")
 }

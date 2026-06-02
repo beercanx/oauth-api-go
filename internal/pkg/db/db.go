@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteAccessTokenStmt, err = db.PrepareContext(ctx, deleteAccessToken); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteAccessToken: %w", err)
 	}
+	if q.deleteExpiredAccessTokensStmt, err = db.PrepareContext(ctx, deleteExpiredAccessTokens); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteExpiredAccessTokens: %w", err)
+	}
 	if q.getAccessTokenStmt, err = db.PrepareContext(ctx, getAccessToken); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAccessToken: %w", err)
 	}
@@ -46,6 +49,11 @@ func (q *Queries) Close() error {
 	if q.deleteAccessTokenStmt != nil {
 		if cerr := q.deleteAccessTokenStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteAccessTokenStmt: %w", cerr)
+		}
+	}
+	if q.deleteExpiredAccessTokensStmt != nil {
+		if cerr := q.deleteExpiredAccessTokensStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteExpiredAccessTokensStmt: %w", cerr)
 		}
 	}
 	if q.getAccessTokenStmt != nil {
@@ -90,19 +98,21 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	createAccessTokenStmt *sql.Stmt
-	deleteAccessTokenStmt *sql.Stmt
-	getAccessTokenStmt    *sql.Stmt
+	db                            DBTX
+	tx                            *sql.Tx
+	createAccessTokenStmt         *sql.Stmt
+	deleteAccessTokenStmt         *sql.Stmt
+	deleteExpiredAccessTokensStmt *sql.Stmt
+	getAccessTokenStmt            *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		createAccessTokenStmt: q.createAccessTokenStmt,
-		deleteAccessTokenStmt: q.deleteAccessTokenStmt,
-		getAccessTokenStmt:    q.getAccessTokenStmt,
+		db:                            tx,
+		tx:                            tx,
+		createAccessTokenStmt:         q.createAccessTokenStmt,
+		deleteAccessTokenStmt:         q.deleteAccessTokenStmt,
+		deleteExpiredAccessTokensStmt: q.deleteExpiredAccessTokensStmt,
+		getAccessTokenStmt:            q.getAccessTokenStmt,
 	}
 }

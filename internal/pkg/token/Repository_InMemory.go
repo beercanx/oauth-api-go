@@ -1,18 +1,11 @@
 package token
 
 import (
-	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 )
 
 type InMemoryRepository[T Token] struct {
 	store map[uuid.UUID]T
-}
-
-func (i *InMemoryRepository[T]) Migrate() error {
-	// TODO implement me
-	panic("implement me")
 }
 
 func (i *InMemoryRepository[T]) Insert(new T) error {
@@ -26,26 +19,6 @@ func (i *InMemoryRepository[T]) FindById(id uuid.UUID) (T, error) {
 		return value, nil
 	}
 	return *new(T), ErrNoSuchToken
-}
-
-func (i *InMemoryRepository[T]) FindAllByUsername(username user.AuthenticatedUsername) ([]T, error) {
-	v := make([]T, 0, len(i.store))
-	for _, value := range i.store {
-		if value.GetUsername() == username {
-			v = append(v, value)
-		}
-	}
-	return v, nil
-}
-
-func (i *InMemoryRepository[T]) FindAllByClientId(clientId client.Id) ([]T, error) {
-	v := make([]T, 0, len(i.store))
-	for _, value := range i.store {
-		if value.GetClientId() == clientId {
-			v = append(v, value)
-		}
-	}
-	return v, nil
 }
 
 func (i *InMemoryRepository[T]) DeleteById(id uuid.UUID) error {

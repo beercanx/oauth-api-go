@@ -95,5 +95,5 @@ go build ./cmd/server
 #### Check out the password grant
 So yeah, the password grant is deprecated; but it's a quick lazy way to start.
 ```bash
-curl -vvv -X POST -H 'Content-Type: application/x-www-form-urlencoded' -u 'aardvark:badger' -d 'grant_type=password&scope=basic&username=aardvark&password=P%4055w0rd' http://127.0.0.1:8080/token
+curl -v -X POST -H 'Content-Type: application/x-www-form-urlencoded' -u 'aardvark:badger' -d 'grant_type=password&scope=basic&username=aardvark&password=P%4055w0rd' http://127.0.0.1:8080/token
 ```

@@ -207,10 +207,8 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	})
 
 	t.Run("should handle various token states", func(t *testing.T) {
-		t.Parallel()
 
 		t.Run("return an inactive response for an access token that does not exist", func(t *testing.T) {
-			t.Parallel()
 
 			formBody := url.Values{"token": {"94efe4d7-7dbe-455f-b974-46656fd8d035"}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
@@ -226,12 +224,12 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("return an inactive response for an access token that has expired", func(t *testing.T) {
-			t.Parallel()
 
 			accessToken := db.AccessToken{
 				ID:        uuid.New(),
 				Username:  "expired",
 				ClientID:  "expired",
+				Scopes: 	 scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(-(10 * time.Minute)),
 				NotBefore: time.Now().Add(-(20 * time.Minute)),
@@ -253,12 +251,12 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("return an inactive response for an access token that is in the future", func(t *testing.T) {
-			t.Parallel()
 
 			accessToken := db.AccessToken{
 				ID:        uuid.New(),
 				Username:  "future",
 				ClientID:  "future",
+				Scopes: 	 scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(20 * time.Minute),
 				NotBefore: time.Now().Add(10 * time.Minute),
@@ -280,7 +278,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("return an active response for an access token that is active", func(t *testing.T) {
-			t.Parallel()
 
 			accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 

@@ -44,7 +44,7 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 	principal, ok := a.principalRepository.FindById(secret.clientId)
 	switch {
 	case !ok:
-		return principal, false
+		return Principal{}, false
 	case !principal.IsConfidential():
 		return Principal{}, false
 	default:
