@@ -1,8 +1,8 @@
-CREATE TABLE access_tokens
+CREATE TABLE refresh_tokens
 (
-    id         VARCHAR(36) PRIMARY KEY NOT NULL,
+    id         VARCHAR(32) PRIMARY KEY NOT NULL,
     username   VARCHAR(64)             NOT NULL,
-    client_id  VARCHAR(64)             NOT NULL,
+    client_id  VARCHAR(64)             NOT NULL REFERENCES client_configurations (client_id) ON DELETE CASCADE,
     scopes     JSONB                   NOT NULL,
     issued_at  TIMESTAMP               NOT NULL,
     expires_at TIMESTAMP               NOT NULL,
@@ -13,9 +13,6 @@ CREATE TABLE access_tokens
 
     CHECK (LENGTH(username) > 0),
     CHECK (LENGTH(username) <= 64),
-
-    CHECK (LENGTH(client_id) > 0),
-    CHECK (LENGTH(client_id) <= 64),
 
     CHECK (json_valid(scopes)),
     CHECK (json_type(scopes) = 'array'),

@@ -2,7 +2,7 @@ package db
 
 import "database/sql"
 
-func Connect(source string) (DBTX, error) {
+func Connect(source string) (*sql.DB, error) {
 
 	connection, err := sql.Open("sqlite3", source)
 	if err != nil {

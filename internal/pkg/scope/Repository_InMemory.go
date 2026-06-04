@@ -18,5 +18,7 @@ var _ Repository = (*InMemoryRepository)(nil)
 func NewInMemoryRepository() *InMemoryRepository {
 	repository := &InMemoryRepository{make(map[string]Scope)}
 	repository.store["basic"] = "basic"
+	repository.store["read"] = "read"
+	repository.store["write"] = "write"
 	return repository
 }

@@ -8,12 +8,38 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/grant"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 )
 
 type AccessToken struct {
+	ID        uuid.UUID                  `db:"id"`
+	Username  user.AuthenticatedUsername `db:"username"`
+	ClientID  client.Id                  `db:"client_id"`
+	Scopes    scope.Scopes               `db:"scopes"`
+	IssuedAt  time.Time                  `db:"issued_at"`
+	ExpiresAt time.Time                  `db:"expires_at"`
+	NotBefore time.Time                  `db:"not_before"`
+}
+
+type ClientConfiguration struct {
+	ClientID          client.Id           `db:"client_id"`
+	ClientType        client.Type         `db:"client_type"`
+	RedirectUris      client.RedirectUris `db:"redirect_uris"`
+	AllowedScopes     scope.Scopes        `db:"allowed_scopes"`
+	AllowedActions    client.Actions      `db:"allowed_actions"`
+	AllowedGrantTypes grant.Types         `db:"allowed_grant_types"`
+}
+
+type ClientSecret struct {
+	ID       uuid.UUID `db:"id"`
+	ClientID client.Id `db:"client_id"`
+	Hash     string    `db:"hash"`
+}
+
+type RefreshToken struct {
 	ID        uuid.UUID                  `db:"id"`
 	Username  user.AuthenticatedUsername `db:"username"`
 	ClientID  client.Id                  `db:"client_id"`

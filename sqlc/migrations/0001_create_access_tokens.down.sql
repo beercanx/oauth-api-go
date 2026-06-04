@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS access_tokens;
+DROP TABLE access_tokens;

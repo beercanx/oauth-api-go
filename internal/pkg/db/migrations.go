@@ -1,37 +1,30 @@
 package db
 
 import (
-	"context"
+	"database/sql"
+	"errors"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/ncruces/go-sqlite3/driver"
 )
 
-func RunMigrations(ctx context.Context, database DBTX) error {
+func RunMigrations(database *sql.DB, migrations string) error {
 
-	files, globError := filepath.Glob("../../../sqlc/migrations/*.up.sql")
-	if globError != nil {
-		return fmt.Errorf("finding migration files: %w", globError)
+	driver, driverError := sqlite3.WithInstance(database, &sqlite3.Config{})
+	if driverError != nil {
+		return fmt.Errorf("initializing sqlite3 driver: %w", driverError)
 	}
 
-	log.Printf("Migrating database: %s", files)
+	migrator, migratorError := migrate.NewWithDatabaseInstance(migrations, "sqlite3", driver)
+	if migratorError != nil {
+		return fmt.Errorf("initializing migration: %w", migratorError)
+	}
 
-	for _, dirtyFile := range files {
-
-		cleanFile := filepath.Clean(dirtyFile)
-		log.Printf("Reading migration: %s", cleanFile)
-
-		content, readError := os.ReadFile(cleanFile)
-		if readError != nil {
-			return fmt.Errorf("reading migration file %s: %w", cleanFile, readError)
-		}
-
-		log.Printf("Running migration: %s", content)
-
-		if _, execError := database.ExecContext(ctx, string(content)); execError != nil {
-			return fmt.Errorf("executing migration %s: %w", cleanFile, execError)
-		}
+	if migrationError := migrator.Up(); migrationError != nil && !errors.Is(migrationError, migrate.ErrNoChange) {
+		return migrationError
 	}
 
 	return nil

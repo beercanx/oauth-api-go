@@ -15,7 +15,7 @@ import (
 
 func Engine(
 	ctx context.Context,
-	config *Config,
+	config Config,
 ) (*gin.Engine, error) {
 
 	// TODO - gin.SetMode(gin.ReleaseMode)
@@ -37,6 +37,9 @@ func Engine(
 	database, databaseError := db.Connect(config.DatabaseSource)
 	if databaseError != nil {
 		return nil, databaseError
+	}
+	if databaseMigrationsError := db.RunMigrations(database, config.DatabaseMigrations); databaseMigrationsError != nil {
+		return nil, databaseMigrationsError
 	}
 
 	accessTokenRepository := token.NewAccessTokenRepository(ctx, database)

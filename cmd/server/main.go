@@ -29,7 +29,7 @@ func run() error {
 		return configError
 	}
 
-	engine, engineError := server.Engine(ctx, &config)
+	engine, engineError := server.Engine(ctx, config)
 	if engineError != nil {
 		return engineError
 	}

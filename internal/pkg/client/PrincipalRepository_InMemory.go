@@ -37,7 +37,7 @@ func NewInMemoryPrincipalRepository() *InMemoryPrincipalRepository {
 	repository.insert(Principal{
 		Id:                "aardvark",
 		Type:              Confidential,
-		AllowedScopes:     []scope.Scope{"basic"},
+		AllowedScopes:     []scope.Scope{"basic", "read", "write"},
 		AllowedGrantTypes: []grant.Type{grant.Password},
 		AllowedActions:    []Action{Introspect},
 	})

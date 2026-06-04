@@ -8,3 +8,5 @@ const (
 	RefreshToken      Type = "refresh_token"
 	Assertion         Type = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 )
+
+type Types []Type

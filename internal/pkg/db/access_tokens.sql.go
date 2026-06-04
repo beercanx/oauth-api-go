@@ -80,7 +80,7 @@ func (q *Queries) DeleteExpiredAccessTokens(ctx context.Context) error {
 }
 
 const getAccessToken = `-- name: GetAccessToken :one
-SELECT id, username, client_id, scopes, issued_at, expires_at, not_before
+SELECT id, username, client_id, json(scopes), issued_at, expires_at, not_before
 FROM access_tokens
 WHERE id = ?
 LIMIT 1
@@ -88,7 +88,7 @@ LIMIT 1
 
 // GetAccessToken
 //
-//	SELECT id, username, client_id, scopes, issued_at, expires_at, not_before
+//	SELECT id, username, client_id, json(scopes), issued_at, expires_at, not_before
 //	FROM access_tokens
 //	WHERE id = ?
 //	LIMIT 1

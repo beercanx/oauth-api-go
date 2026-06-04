@@ -32,14 +32,14 @@ func TestAccessTokenRepository(t *testing.T) {
 
 	database, databaseError := db.Connect("file:access_tokens_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
-	require.NoError(t, db.RunMigrations(t.Context(), database))
+	require.NoError(t, db.RunMigrations(database, "file:../../../sqlc/migrations"))
 
 	underTest := NewAccessTokenRepository(t.Context(), database)
 
 	validAccessToken := db.CreateAccessTokenParams{
 		ID:        uuid.MustParse("dad063b2-bf86-4aed-a505-a8329535c0a8"),
-		Username:  "aardvark badger cicada echidna firefly gorilla hippopotamus ibis",
-		ClientID:  "ibis hippopotamus gorilla firefly echidna cicada badger aardvark",
+		Username:  "aardvark",
+		ClientID:  "badger",
 		Scopes:    scope.Scopes{"basic", "read", "write"},
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(time.Hour),
@@ -74,13 +74,13 @@ func TestAccessTokenRepository(t *testing.T) {
 		t.Run("should reject if client ID is blank", func(t *testing.T) {
 			blankClientID := validAccessToken
 			blankClientID.ClientID = ""
-			require.ErrorContains(t, underTest.Insert(blankClientID), "CHECK constraint failed: LENGTH(client_id) > 0")
+			require.ErrorContains(t, underTest.Insert(blankClientID), "FOREIGN KEY constraint failed")
 		})
 
 		t.Run("should reject if client ID is too long", func(t *testing.T) {
 			tooLongClientID := validAccessToken
 			tooLongClientID.ClientID = client.Id(strings.Repeat("a", 65))
-			require.ErrorContains(t, underTest.Insert(tooLongClientID), "CHECK constraint failed: LENGTH(client_id) <= 64")
+			require.ErrorContains(t, underTest.Insert(tooLongClientID), "FOREIGN KEY constraint failed")
 		})
 
 		t.Run("should reject if issued at is default", func(t *testing.T) {

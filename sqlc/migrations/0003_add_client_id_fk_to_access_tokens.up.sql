@@ -1,8 +1,8 @@
-CREATE TABLE access_tokens
+CREATE TABLE access_tokens_temp
 (
-    id         VARCHAR(36) PRIMARY KEY NOT NULL,
+    id         VARCHAR(32) PRIMARY KEY NOT NULL,
     username   VARCHAR(64)             NOT NULL,
-    client_id  VARCHAR(64)             NOT NULL,
+    client_id  VARCHAR(64)             NOT NULL REFERENCES client_configurations (client_id) ON DELETE CASCADE,
     scopes     JSONB                   NOT NULL,
     issued_at  TIMESTAMP               NOT NULL,
     expires_at TIMESTAMP               NOT NULL,
@@ -14,9 +14,6 @@ CREATE TABLE access_tokens
     CHECK (LENGTH(username) > 0),
     CHECK (LENGTH(username) <= 64),
 
-    CHECK (LENGTH(client_id) > 0),
-    CHECK (LENGTH(client_id) <= 64),
-
     CHECK (json_valid(scopes)),
     CHECK (json_type(scopes) = 'array'),
 
@@ -24,3 +21,9 @@ CREATE TABLE access_tokens
     CHECK (expires_at != '0001-01-01T00:00:00Z'),
     CHECK (not_before != '0001-01-01T00:00:00Z')
 );
+
+INSERT INTO access_tokens_temp SELECT * FROM access_tokens;
+
+DROP TABLE access_tokens;
+
+ALTER TABLE access_tokens_temp RENAME TO access_tokens;

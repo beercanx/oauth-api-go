@@ -27,7 +27,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 	database, databaseError := db.Connect("file:token_introspection_route_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
-	require.NoError(t, db.RunMigrations(t.Context(), database))
+	require.NoError(t, db.RunMigrations(database, "file:../../../sqlc/migrations"))
 
 	accessTokenRepository := token.NewAccessTokenRepository(t.Context(), database)
 	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
@@ -232,8 +232,8 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "expired",
-				ClientID:  "expired",
-				Scopes: 	 scope.Scopes{},
+				ClientID:  "badger",
+				Scopes:    scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(-(10 * time.Minute)),
 				NotBefore: time.Now().Add(-(20 * time.Minute)),
@@ -259,8 +259,8 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "future",
-				ClientID:  "future",
-				Scopes: 	 scope.Scopes{},
+				ClientID:  "badger",
+				Scopes:    scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(20 * time.Minute),
 				NotBefore: time.Now().Add(10 * time.Minute),
@@ -286,7 +286,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 
 			username := user.AuthenticatedUsername("ant")
-			clientId := client.Id("dodo")
+			clientId := client.Id("badger")
 			scopes := scope.Scopes{"basic"}
 			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
 			require.NoError(t, issueError)
@@ -309,7 +309,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			require.NoError(t, unmarshalError)
 			assert.Len(t, result, 9)
 			assert.Equal(t, true, result["active"])
-			assert.Equal(t, "dodo", result["client_id"])
+			assert.Equal(t, "badger", result["client_id"])
 			assert.Contains(t, result, "expiration_time")
 			assert.Contains(t, result, "issued_at")
 			assert.Contains(t, result, "not_before")

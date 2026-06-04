@@ -7,3 +7,5 @@ const (
 	Introspect              Action = "introspect"
 	ProofKeyForCodeExchange Action = "pkce"
 )
+
+type Actions []Action

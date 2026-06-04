@@ -8,8 +8,6 @@ import (
 
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"github.com/google/uuid"
-
-	_ "github.com/ncruces/go-sqlite3/driver"
 )
 
 type accessTokenRepository struct {
