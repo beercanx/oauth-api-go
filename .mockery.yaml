@@ -1,5 +1,5 @@
 dir: '{{.InterfaceDir}}'
-filename: '{{.InterfaceName}}_mock.go'
+filename: 'mocks.go'
 template: testify
 template-data:
   unroll-variadic: true
