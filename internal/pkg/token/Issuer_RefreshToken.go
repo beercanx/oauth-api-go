@@ -11,7 +11,7 @@ import (
 )
 
 type RefreshTokenIssuer struct {
-	repository     Repository[RefreshToken]
+	repository     RepositoryCreate[RefreshToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
 }
@@ -47,7 +47,7 @@ func (issuer *RefreshTokenIssuer) Issue(
 // assert RefreshTokenService implements Issuer
 var _ Issuer[RefreshToken] = (*RefreshTokenIssuer)(nil)
 
-func NewRefreshTokenIssuer(repository Repository[RefreshToken]) *RefreshTokenIssuer {
+func NewRefreshTokenIssuer(repository RepositoryCreate[RefreshToken]) *RefreshTokenIssuer {
 	return &RefreshTokenIssuer{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,

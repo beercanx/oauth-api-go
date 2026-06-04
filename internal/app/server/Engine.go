@@ -6,6 +6,7 @@ import (
 	"baconi.co.uk/oauth/internal/app/token-exchange"
 	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
@@ -33,11 +34,14 @@ func Engine(
 	//
 	// Create stuff to be injected
 	//
-	accessTokenRepository, atrError := token.NewAccessTokenRepository(ctx)
-	if atrError != nil {
-		return nil, atrError
+	database, databaseError := db.Connect(config.DatabaseSource)
+	if databaseError != nil {
+		return nil, databaseError
 	}
+
+	accessTokenRepository := token.NewAccessTokenRepository(ctx, database)
 	accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
+	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
 	refreshTokenRepository := token.NewInMemoryRepository[token.RefreshToken]()
 	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
@@ -55,7 +59,7 @@ func Engine(
 	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
-	tokenIntrospector := token_introspection.NewIntrospector(accessTokenRepository)
+	tokenIntrospector := token_introspection.NewIntrospector(accessTokenAuthenticator)
 
 	//
 	// Add Routes

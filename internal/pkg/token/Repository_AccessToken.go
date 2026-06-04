@@ -5,10 +5,6 @@ import (
 	"database/sql"
 	_ "embed"
 	"errors"
-	"fmt"
-	"log"
-	"os"
-	"path/filepath"
 
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"github.com/google/uuid"
@@ -22,8 +18,8 @@ type accessTokenRepository struct {
 	queries *db.Queries
 }
 
-func (r accessTokenRepository) Insert(new db.AccessToken) error {
-	return r.queries.CreateAccessToken(r.ctx, db.CreateAccessTokenParams(new))
+func (r accessTokenRepository) Insert(new db.CreateAccessTokenParams) error {
+	return r.queries.CreateAccessToken(r.ctx, new)
 }
 
 func (r accessTokenRepository) FindById(id uuid.UUID) (db.AccessToken, error) {
@@ -46,59 +42,8 @@ func (r accessTokenRepository) DeletedExpired() error {
 	return r.queries.DeleteExpiredAccessTokens(r.ctx)
 }
 
-func (r accessTokenRepository) Migrate() error {
+var _ Repository[db.CreateAccessTokenParams, db.AccessToken] = (*accessTokenRepository)(nil)
 
-	files, globError := filepath.Glob("../../../sqlc/migrations/*.up.sql")
-	if globError != nil {
-		return fmt.Errorf("finding migration files: %w", globError)
-	}
-
-	log.Printf("Migrating database: %s", files)
-
-	for _, file := range files {
-
-		cleanFile := filepath.Clean(file)
-		log.Printf("Reading migration: %s", cleanFile)
-
-		content, readError := os.ReadFile(cleanFile)
-		if readError != nil {
-			return fmt.Errorf("reading migration file %s: %w", file, readError)
-		}
-
-		log.Printf("Running migration: %s", content)
-
-		if _, execError := r.dbtx.ExecContext(r.ctx, string(content)); execError != nil {
-			return fmt.Errorf("executing migration %s: %w", file, execError)
-		}
-	}
-
-	return nil
-}
-
-var _ Repository[db.AccessToken] = (*accessTokenRepository)(nil)
-var _ RepositoryWithMigrations[db.AccessToken] = (*accessTokenRepository)(nil)
-
-func NewAccessTokenRepository(ctx context.Context) (Repository[db.AccessToken], error) {
-	return newAccessTokenRepository(ctx, "file:out/database.sqlite")
-}
-
-// NewInMemoryAccessTokenRepository should only be used in unit/integration tests
-func NewInMemoryAccessTokenRepository(ctx context.Context) RepositoryWithMigrations[db.AccessToken] {
-	repo, err := newAccessTokenRepository(ctx, "file:access_tokens?mode=memory&cache=shared")
-	if err != nil {
-		panic(err)
-	}
-	return repo
-}
-
-func newAccessTokenRepository(ctx context.Context, source string) (RepositoryWithMigrations[db.AccessToken], error) {
-
-	connection, err := sql.Open("sqlite3", source)
-	if err != nil {
-		return nil, err
-	}
-
-	queries := db.New(connection)
-
-	return &accessTokenRepository{ctx, connection, queries}, nil
+func NewAccessTokenRepository(ctx context.Context, connection db.DBTX) Repository[db.CreateAccessTokenParams, db.AccessToken] {
+	return &accessTokenRepository{ctx, connection, db.New(connection)}
 }

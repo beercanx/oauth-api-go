@@ -11,12 +11,12 @@ type Introspector interface {
 	introspect(request) (response, error)
 }
 
-func NewIntrospector(accessTokenRepository token.Repository[db.AccessToken]) Introspector {
-	return &introspector{accessTokenRepository: accessTokenRepository}
+func NewIntrospector(authenticator token.Authenticator[db.AccessToken]) Introspector {
+	return &introspector{authenticator}
 }
 
 type introspector struct {
-	accessTokenRepository token.Repository[db.AccessToken]
+	authenticator token.Authenticator[db.AccessToken]
 }
 
 // assert introspector implements Introspector
@@ -24,21 +24,21 @@ var _ Introspector = (*introspector)(nil)
 
 func (service introspector) introspect(r request) (response, error) {
 
-	accessToken, err := service.accessTokenRepository.FindById(r.token)
+	accessToken, err := service.authenticator.Authenticate(r.token)
 
 	switch {
 
 	case err != nil && errors.Is(err, token.ErrNoSuchToken):
 		return response{Active: false}, nil
 
+	case err != nil && errors.Is(err, token.ErrTokenHasExpired):
+		return response{Active: false}, nil
+
+	case err != nil && errors.Is(err, token.ErrTokenIsBefore):
+		return response{Active: false}, nil
+
 	case err != nil:
 		return response{}, err
-
-	case accessToken.HasExpired():
-		return response{Active: false}, nil
-
-	case accessToken.IsBefore():
-		return response{Active: false}, nil
 
 	// TODO - Decide out if we want to block any Confident client from introspecting any token.
 

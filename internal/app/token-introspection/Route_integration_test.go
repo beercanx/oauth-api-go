@@ -25,14 +25,18 @@ import (
 func TestTokenIntrospectionRequests(t *testing.T) {
 	t.Parallel()
 
-	accessTokenRepository := token.NewInMemoryAccessTokenRepository(t.Context())
-	require.NoError(t, accessTokenRepository.Migrate())
+	database, databaseError := db.Connect("file:token_introspection_route_integration_tests?mode=memory&cache=shared")
+	require.NoError(t, databaseError)
+	require.NoError(t, db.RunMigrations(t.Context(), database))
+
+	accessTokenRepository := token.NewAccessTokenRepository(t.Context(), database)
+	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
 	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
-	tokenIntrospector := NewIntrospector(accessTokenRepository)
+	tokenIntrospector := NewIntrospector(accessTokenAuthenticator)
 
 	router := gin.New(func(engine *gin.Engine) {
 		engine.HandleMethodNotAllowed = true
@@ -225,7 +229,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("return an inactive response for an access token that has expired", func(t *testing.T) {
 
-			accessToken := db.AccessToken{
+			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "expired",
 				ClientID:  "expired",
@@ -252,7 +256,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("return an inactive response for an access token that is in the future", func(t *testing.T) {
 
-			accessToken := db.AccessToken{
+			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "future",
 				ClientID:  "future",

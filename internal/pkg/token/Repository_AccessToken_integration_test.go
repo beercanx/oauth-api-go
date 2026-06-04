@@ -30,10 +30,13 @@ func assertAccessTokensEqual(t *testing.T, expected db.AccessToken, actual db.Ac
 func TestAccessTokenRepository(t *testing.T) {
 	t.Parallel()
 
-	underTest := NewInMemoryAccessTokenRepository(t.Context())
-	require.NoError(t, underTest.Migrate())
+	database, databaseError := db.Connect("file:access_tokens_integration_tests?mode=memory&cache=shared")
+	require.NoError(t, databaseError)
+	require.NoError(t, db.RunMigrations(t.Context(), database))
 
-	validAccessToken := db.AccessToken{
+	underTest := NewAccessTokenRepository(t.Context(), database)
+
+	validAccessToken := db.CreateAccessTokenParams{
 		ID:        uuid.MustParse("dad063b2-bf86-4aed-a505-a8329535c0a8"),
 		Username:  "aardvark badger cicada echidna firefly gorilla hippopotamus ibis",
 		ClientID:  "ibis hippopotamus gorilla firefly echidna cicada badger aardvark",
@@ -46,7 +49,7 @@ func TestAccessTokenRepository(t *testing.T) {
 	t.Run("insert access token", func(t *testing.T) {
 
 		t.Run("should reject if access token is zero", func(t *testing.T) {
-			result := underTest.Insert(db.AccessToken{})
+			result := underTest.Insert(db.CreateAccessTokenParams{})
 			require.ErrorContains(t, result, "sqlite3: constraint failed")
 		})
 
@@ -119,7 +122,7 @@ func TestAccessTokenRepository(t *testing.T) {
 		t.Run("should return access token if found", func(t *testing.T) {
 			result, err := underTest.FindById(validAccessToken.ID)
 			require.NoError(t, err)
-			assertAccessTokensEqual(t, validAccessToken, result)
+			assertAccessTokensEqual(t, db.AccessToken(validAccessToken), result)
 		})
 	})
 
@@ -151,7 +154,7 @@ func TestAccessTokenRepository(t *testing.T) {
 		})
 
 		t.Run("should return no error if access token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(validAccessToken))
+			require.NoError(t, underTest.DeleteByRecord(db.AccessToken(validAccessToken)))
 			_, err := underTest.FindById(validAccessToken.ID)
 			require.ErrorIs(t, err, ErrNoSuchToken)
 		})

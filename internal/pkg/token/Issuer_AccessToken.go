@@ -11,13 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type AccessTokenIssuer struct {
-	repository     Repository[db.AccessToken]
+type accessTokenIssuer struct {
+	repository     RepositoryCreate[db.CreateAccessTokenParams]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
 }
 
-func (issuer *AccessTokenIssuer) Issue(
+func (issuer *accessTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes scope.Scopes,
@@ -28,7 +28,7 @@ func (issuer *AccessTokenIssuer) Issue(
 	expiresAt := issuedAt.Add(issuer.tokenAge)
 	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
-	accessToken := db.AccessToken{
+	accessToken := db.CreateAccessTokenParams{
 		ID:        uuid.New(),
 		Username:  username,
 		ClientID:  clientId,
@@ -42,14 +42,14 @@ func (issuer *AccessTokenIssuer) Issue(
 		return db.AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
 	}
 
-	return accessToken, nil
+	return db.AccessToken(accessToken), nil
 }
 
-// assert AccessTokenIssuer implements Issuer
-var _ Issuer[db.AccessToken] = (*AccessTokenIssuer)(nil)
+// assert accessTokenIssuer implements Issuer
+var _ Issuer[db.AccessToken] = (*accessTokenIssuer)(nil)
 
-func NewAccessTokenIssuer(repository Repository[db.AccessToken]) *AccessTokenIssuer {
-	return &AccessTokenIssuer{
+func NewAccessTokenIssuer(repository RepositoryCreate[db.CreateAccessTokenParams]) Issuer[db.AccessToken] {
+	return &accessTokenIssuer{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,
 		tokenAge:       2 * time.Hour,

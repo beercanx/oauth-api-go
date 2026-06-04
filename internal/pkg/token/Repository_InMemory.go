@@ -42,7 +42,7 @@ func (i *InMemoryRepository[T]) DeletedExpired() error {
 }
 
 // assert InMemoryRepository implements Repository
-var _ Repository[RefreshToken] = (*InMemoryRepository[RefreshToken])(nil)
+var _ Repository[RefreshToken, RefreshToken] = (*InMemoryRepository[RefreshToken])(nil)
 
 func NewInMemoryRepository[T Token]() *InMemoryRepository[T] {
 	return &InMemoryRepository[T]{store: make(map[uuid.UUID]T)}

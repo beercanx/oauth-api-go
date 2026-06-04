@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type AccessTokenAuthenticator struct {
-	repository Repository[db.AccessToken]
+type accessTokenAuthenticator struct {
+	repository RepositoryReadDelete[db.AccessToken]
 }
 
-func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (db.AccessToken, error) {
+func (service *accessTokenAuthenticator) Authenticate(token uuid.UUID) (db.AccessToken, error) {
 
 	accessToken, err := service.repository.FindById(token)
 	switch {
@@ -23,21 +23,21 @@ func (service *AccessTokenAuthenticator) Authenticate(token uuid.UUID) (db.Acces
 		if err = service.repository.DeleteByRecord(accessToken); err != nil {
 			return db.AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
 		}
-		return db.AccessToken{}, ErrAccessTokenHasExpired
+		return db.AccessToken{}, ErrTokenHasExpired
 
 	case accessToken.IsBefore():
-		return db.AccessToken{}, ErrAccessTokenIsBefore
+		return db.AccessToken{}, ErrTokenIsBefore
 
 	default:
 		return accessToken, nil
 	}
 }
 
-// assert AccessTokenAuthenticator implements Authenticator
-var _ Authenticator[db.AccessToken] = (*AccessTokenAuthenticator)(nil)
+// assert accessTokenAuthenticator implements Authenticator
+var _ Authenticator[db.AccessToken] = (*accessTokenAuthenticator)(nil)
 
-func NewAccessTokenAuthenticator(repository Repository[db.AccessToken]) *AccessTokenAuthenticator {
-	return &AccessTokenAuthenticator{
+func NewAccessTokenAuthenticator(repository RepositoryReadDelete[db.AccessToken]) Authenticator[db.AccessToken] {
+	return &accessTokenAuthenticator{
 		repository: repository,
 	}
 }
