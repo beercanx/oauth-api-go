@@ -11,14 +11,21 @@ import (
 type Principal struct {
 	Id                Id
 	Type              Type
-	RedirectUris      []string
-	AllowedScopes     []scope.Scope
-	AllowedActions    []Action
-	AllowedGrantTypes []grant.Type
+	RedirectUris      RedirectUris
+	AllowedScopes     scope.Scopes
+	AllowedActions    Actions
+	AllowedGrantTypes grant.Types
 }
 
-// Verify that the Principal is configured correctly for its Type. TODO - Work out if we still want this and where it goes.
-func (p Principal) verify() {
+// Verify that the Principal is configured correctly for its Type.
+func (p Principal) Verify() (err error) {
+
+	// Handle the `require` panics by converting into a return error
+	defer func() { // TODO - Review if we can make this as "clean" with explicit returns instead.
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
 
 	require(p.Type == Public || p.Type == Confidential, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
 
@@ -42,6 +49,8 @@ func (p Principal) verify() {
 	require(!p.CanPerformAction(Authorise) || len(p.RedirectUris) != 0,
 		fmt.Sprintf("clients with 'Authorise' must have some 'RedirectUris': %s", p.Id),
 	)
+
+	return nil
 }
 
 func (p Principal) IsPublic() bool {

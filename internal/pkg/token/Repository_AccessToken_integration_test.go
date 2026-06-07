@@ -39,7 +39,7 @@ func TestAccessTokenRepository(t *testing.T) {
 	validAccessToken := db.CreateAccessTokenParams{
 		ID:        uuid.MustParse("dad063b2-bf86-4aed-a505-a8329535c0a8"),
 		Username:  "aardvark",
-		ClientID:  "badger",
+		ClientID:  "dodo",
 		Scopes:    scope.Scopes{"basic", "read", "write"},
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(time.Hour),

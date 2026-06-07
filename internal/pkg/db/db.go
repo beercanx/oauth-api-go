@@ -36,6 +36,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAccessTokenStmt, err = db.PrepareContext(ctx, getAccessToken); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAccessToken: %w", err)
 	}
+	if q.getClientConfigurationStmt, err = db.PrepareContext(ctx, getClientConfiguration); err != nil {
+		return nil, fmt.Errorf("error preparing query GetClientConfiguration: %w", err)
+	}
 	return &q, nil
 }
 
@@ -59,6 +62,11 @@ func (q *Queries) Close() error {
 	if q.getAccessTokenStmt != nil {
 		if cerr := q.getAccessTokenStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAccessTokenStmt: %w", cerr)
+		}
+	}
+	if q.getClientConfigurationStmt != nil {
+		if cerr := q.getClientConfigurationStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getClientConfigurationStmt: %w", cerr)
 		}
 	}
 	return err
@@ -104,6 +112,7 @@ type Queries struct {
 	deleteAccessTokenStmt         *sql.Stmt
 	deleteExpiredAccessTokensStmt *sql.Stmt
 	getAccessTokenStmt            *sql.Stmt
+	getClientConfigurationStmt    *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -114,5 +123,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteAccessTokenStmt:         q.deleteAccessTokenStmt,
 		deleteExpiredAccessTokensStmt: q.deleteExpiredAccessTokensStmt,
 		getAccessTokenStmt:            q.getAccessTokenStmt,
+		getClientConfigurationStmt:    q.getClientConfigurationStmt,
 	}
 }

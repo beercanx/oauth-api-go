@@ -13,51 +13,50 @@ func (i InMemoryPrincipalRepository) insert(principal Principal) {
 	i.byClientId[principal.Id] = principal
 }
 
-func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, bool) {
+func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, error) {
 	principal, ok := i.byClientId[id]
-	if ok {
-		principal.verify()
+	if !ok {
+		return Principal{}, ErrNoSuchClient
 	}
-	return principal, ok
+	if verifyError := principal.Verify(); verifyError != nil {
+		return Principal{}, verifyError
+	}
+	return principal, nil
 }
 
-func (i InMemoryPrincipalRepository) FindByClientId(clientId string) (Principal, bool) {
-	principal, ok := i.byClientId[Id(clientId)]
-	if ok {
-		principal.verify()
-	}
-	return principal, ok
+func (i InMemoryPrincipalRepository) FindByClientId(clientId string) (Principal, error) {
+	return i.FindById(Id(clientId))
 }
 
 var _ PrincipalRepository = (*InMemoryPrincipalRepository)(nil)
 
-func NewInMemoryPrincipalRepository() *InMemoryPrincipalRepository {
+func NewInMemoryPrincipalRepository() PrincipalRepository {
 	repository := &InMemoryPrincipalRepository{make(map[Id]Principal)}
 
 	repository.insert(Principal{
 		Id:                "aardvark",
 		Type:              Confidential,
-		AllowedScopes:     []scope.Scope{"basic", "read", "write"},
-		AllowedGrantTypes: []grant.Type{grant.Password},
-		AllowedActions:    []Action{Introspect},
+		AllowedScopes:     scope.Scopes{"basic", "read", "write"},
+		AllowedGrantTypes: grant.Types{grant.Password},
+		AllowedActions:    Actions{Introspect},
 	})
 
 	repository.insert(Principal{
 		Id:                "cicada",
 		Type:              Public,
-		RedirectUris:      []string{"https://cicada.baconi.co.uk/callback"},
-		AllowedScopes:     []scope.Scope{"basic"},
-		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
-		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
+		RedirectUris:      RedirectUris{"https://cicada.baconi.co.uk/callback"},
+		AllowedScopes:     scope.Scopes{"basic"},
+		AllowedGrantTypes: grant.Types{grant.AuthorisationCode},
+		AllowedActions:    Actions{Authorise, ProofKeyForCodeExchange},
 	})
 
 	repository.insert(Principal{
 		Id:                "dodo",
 		Type:              Confidential,
-		RedirectUris:      []string{"https://dodo.baconi.co.uk/callback"},
-		AllowedScopes:     []scope.Scope{"basic"},
-		AllowedGrantTypes: []grant.Type{grant.AuthorisationCode},
-		AllowedActions:    []Action{Authorise, ProofKeyForCodeExchange},
+		RedirectUris:      RedirectUris{"https://dodo.baconi.co.uk/callback"},
+		AllowedScopes:     scope.Scopes{"basic"},
+		AllowedGrantTypes: grant.Types{grant.AuthorisationCode},
+		AllowedActions:    Actions{Authorise, ProofKeyForCodeExchange},
 	})
 
 	return repository

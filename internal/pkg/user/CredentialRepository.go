@@ -7,6 +7,6 @@ var (
 )
 
 type CredentialRepository interface {
-	Insert(new Credential) error                        // TODO - Verify if Go DB libraries panic or return errors
-	FindByUsername(username string) (Credential, error) // TODO - Verify if Go DB libraries panic or return errors
+	Insert(new Credential) error
+	FindByUsername(username string) (Credential, error)
 }

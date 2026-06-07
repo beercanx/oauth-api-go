@@ -232,7 +232,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "expired",
-				ClientID:  "badger",
+				ClientID:  "cicada",
 				Scopes:    scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(-(10 * time.Minute)),
@@ -259,7 +259,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessToken := db.CreateAccessTokenParams{
 				ID:        uuid.New(),
 				Username:  "future",
-				ClientID:  "badger",
+				ClientID:  "cicada",
 				Scopes:    scope.Scopes{},
 				IssuedAt:  time.Now(),
 				ExpiresAt: time.Now().Add(20 * time.Minute),
@@ -286,7 +286,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 
 			username := user.AuthenticatedUsername("ant")
-			clientId := client.Id("badger")
+			clientId := client.Id("dodo")
 			scopes := scope.Scopes{"basic"}
 			accessToken, issueError := accessTokenIssuer.Issue(username, clientId, scopes)
 			require.NoError(t, issueError)
@@ -309,7 +309,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			require.NoError(t, unmarshalError)
 			assert.Len(t, result, 9)
 			assert.Equal(t, true, result["active"])
-			assert.Equal(t, "badger", result["client_id"])
+			assert.Equal(t, "dodo", result["client_id"])
 			assert.Contains(t, result, "expiration_time")
 			assert.Contains(t, result, "issued_at")
 			assert.Contains(t, result, "not_before")

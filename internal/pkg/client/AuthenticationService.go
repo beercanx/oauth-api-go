@@ -1,6 +1,10 @@
 package client
 
-import "github.com/alexedwards/argon2id"
+import (
+	"log"
+
+	"github.com/alexedwards/argon2id"
+)
 
 type AuthenticationService struct {
 	secretRepository    SecretRepository
@@ -8,9 +12,10 @@ type AuthenticationService struct {
 }
 
 func (a AuthenticationService) AuthenticateAsPublic(clientId string) (Principal, bool) {
-	principal, ok := a.principalRepository.FindByClientId(clientId)
+	principal, err := a.principalRepository.FindByClientId(clientId)
 	switch {
-	case !ok:
+	case err != nil:
+		log.Printf("Failed to retrieve public client %s: %v", clientId, err)
 		return principal, false
 	case !principal.IsPublic():
 		return Principal{}, false
@@ -25,7 +30,8 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 
 	var secret Secret
 	var matched = false
-	loop: for _, s := range secrets {
+loop:
+	for _, s := range secrets {
 		match, err := argon2id.ComparePasswordAndHash(clientSecret, s.hashedSecret)
 		switch {
 		case err != nil:
@@ -41,9 +47,10 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 		return Principal{}, false
 	}
 
-	principal, ok := a.principalRepository.FindById(secret.clientId)
+	principal, err := a.principalRepository.FindById(secret.clientId)
 	switch {
-	case !ok:
+	case err != nil:
+		log.Printf("Failed to retrieve confidential client %s: %v", secret.clientId, err)
 		return Principal{}, false
 	case !principal.IsConfidential():
 		return Principal{}, false

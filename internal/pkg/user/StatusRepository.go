@@ -7,6 +7,6 @@ var (
 )
 
 type StatusRepository interface {
-	Insert(status Status) error                     // TODO - Verify if Go DB libraries panic or return errors
-	FindByUsername(username string) (Status, error) // TODO - Verify if Go DB libraries panic or return errors
+	Insert(status Status) error
+	FindByUsername(username string) (Status, error)
 }
