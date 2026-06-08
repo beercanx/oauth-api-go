@@ -6,6 +6,7 @@ import (
 	"baconi.co.uk/oauth/internal/app/token-exchange"
 	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
+	clientSql "baconi.co.uk/oauth/internal/pkg/client/sql"
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
@@ -27,8 +28,8 @@ func Engine(
 	})
 
 	// Because GO likes to have errors returned.
-	if err := engine.SetTrustedProxies(nil); err != nil {
-		return nil, err
+	if proxyError := engine.SetTrustedProxies(nil); proxyError != nil {
+		return nil, proxyError
 	}
 
 	//
@@ -59,7 +60,7 @@ func Engine(
 	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticationService)
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
-	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
+	clientPrincipalRepository := clientSql.NewSqlPrincipalRepository(ctx, database)
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := token_introspection.NewIntrospector(accessTokenAuthenticator)
