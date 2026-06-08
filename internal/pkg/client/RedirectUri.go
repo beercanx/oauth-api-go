@@ -3,6 +3,7 @@ package client
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -11,6 +12,8 @@ type RedirectUris []RedirectUri
 
 var _ sql.Scanner = (*RedirectUris)(nil)
 
+var ErrUnsupportedRedirectUrisSource = errors.New("unsupported source type for RedirectUris")
+
 func (r *RedirectUris) Scan(raw any) error {
 	switch source := raw.(type) {
 	case string:
@@ -18,6 +21,6 @@ func (r *RedirectUris) Scan(raw any) error {
 	case []byte:
 		return json.Unmarshal(source, r)
 	default:
-		return fmt.Errorf("unsupported source type for RedirectUris: %T", raw)
+		return fmt.Errorf("%w: %T", ErrUnsupportedRedirectUrisSource, raw)
 	}
 }

@@ -3,6 +3,7 @@ package grant
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -19,6 +20,8 @@ type Types []Type
 
 var _ sql.Scanner = (*Types)(nil)
 
+var ErrUnsupportedGrantTypeSource = errors.New("unsupported source type for grant Type")
+
 func (r *Types) Scan(raw any) error {
 	switch source := raw.(type) {
 	case string:
@@ -26,6 +29,6 @@ func (r *Types) Scan(raw any) error {
 	case []byte:
 		return json.Unmarshal(source, r)
 	default:
-		return fmt.Errorf("unsupported source type for Types: %T", raw)
+		return fmt.Errorf("%w: %T", ErrUnsupportedGrantTypeSource, raw)
 	}
 }

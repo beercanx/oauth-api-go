@@ -18,8 +18,8 @@ func (i InMemoryPrincipalRepository) FindById(id Id) (Principal, error) {
 	if !ok {
 		return Principal{}, ErrNoSuchClient
 	}
-	if verifyError := principal.Verify(); verifyError != nil {
-		return Principal{}, verifyError
+	if validateError := principal.Validate(); validateError != nil {
+		return Principal{}, validateError
 	}
 	return principal, nil
 }

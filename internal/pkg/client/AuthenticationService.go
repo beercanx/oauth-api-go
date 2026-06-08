@@ -32,9 +32,10 @@ func (a AuthenticationService) AuthenticateAsConfidential(clientId string, clien
 	var matched = false
 loop:
 	for _, s := range secrets {
-		match, err := argon2id.ComparePasswordAndHash(clientSecret, s.hashedSecret)
+		match, matchError := argon2id.ComparePasswordAndHash(clientSecret, s.hashedSecret)
 		switch {
-		case err != nil:
+		case matchError != nil:
+			log.Printf("Failed to compare client secret: %v", matchError)
 			continue
 		case match:
 			secret = s
@@ -47,10 +48,10 @@ loop:
 		return Principal{}, false
 	}
 
-	principal, err := a.principalRepository.FindById(secret.clientId)
+	principal, repositoryError := a.principalRepository.FindById(secret.clientId)
 	switch {
-	case err != nil:
-		log.Printf("Failed to retrieve confidential client %s: %v", secret.clientId, err)
+	case repositoryError != nil:
+		log.Printf("Failed to retrieve confidential client %s: %v", secret.clientId, repositoryError)
 		return Principal{}, false
 	case !principal.IsConfidential():
 		return Principal{}, false

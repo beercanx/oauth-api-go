@@ -38,7 +38,7 @@ func TestSqlPrincipalRepository_FindById(t *testing.T) {
 	for _, clientId := range []string{"", " ", "no-such-client"} {
 		t.Run(fmt.Sprintf("should return error on no such client: %s", clientId), func(t *testing.T) {
 			principal, err := underTest.FindById(client.Id(clientId))
-			assert.ErrorIs(t, err, client.ErrNoSuchClient)
+			require.ErrorIs(t, err, client.ErrNoSuchClient)
 			assert.Zero(t, principal)
 		})
 	}
@@ -54,14 +54,15 @@ func TestSqlPrincipalRepository_FindById(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("should return error on invalid client configuration: %s", name), func(t *testing.T) {
 			principal, err := underTest.FindById(client.Id(name))
-			assert.ErrorContains(t, err, expectedError)
+			require.ErrorIs(t, err, client.ErrPrincipalIsInvalid)
+			require.ErrorContains(t, err, expectedError)
 			assert.Zero(t, principal)
 		})
 	}
 
 	t.Run("should be able to return a valid public client", func(t *testing.T) {
 		principal, err := underTest.FindById("cicada")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, client.Principal{
 			Id:                "cicada",
 			Type:              client.Public,
@@ -74,7 +75,7 @@ func TestSqlPrincipalRepository_FindById(t *testing.T) {
 
 	t.Run("should be able to return a valid confidential client", func(t *testing.T) {
 		principal, err := underTest.FindById("aardvark")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, client.Principal{
 			Id:                "aardvark",
 			Type:              client.Confidential,

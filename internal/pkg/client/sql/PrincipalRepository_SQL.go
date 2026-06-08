@@ -34,9 +34,9 @@ func (r sqlPrincipalRepository) FindById(id client.Id) (client.Principal, error)
 		AllowedActions:    clientConfiguration.AllowedActions,
 		AllowedGrantTypes: clientConfiguration.AllowedGrantTypes,
 	}
-	
-	if verifyError := principal.Verify(); verifyError != nil {
-		return client.Principal{}, verifyError
+
+	if validateError := principal.Validate(); validateError != nil {
+		return client.Principal{}, validateError
 	}
 
 	return principal, nil

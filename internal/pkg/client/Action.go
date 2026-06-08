@@ -3,6 +3,7 @@ package client
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -18,6 +19,8 @@ type Actions []Action
 
 var _ sql.Scanner = (*Actions)(nil)
 
+var ErrUnsupportedActionsSource = errors.New("unsupported source type for Actions")
+
 func (r *Actions) Scan(raw any) error {
 	switch source := raw.(type) {
 	case string:
@@ -25,6 +28,6 @@ func (r *Actions) Scan(raw any) error {
 	case []byte:
 		return json.Unmarshal(source, r)
 	default:
-		return fmt.Errorf("unsupported source type for Actions: %T", raw)
+		return fmt.Errorf("%w: %T", ErrUnsupportedActionsSource, raw)
 	}
 }

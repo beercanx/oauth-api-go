@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
@@ -17,38 +18,43 @@ type Principal struct {
 	AllowedGrantTypes grant.Types
 }
 
-// Verify that the Principal is configured correctly for its Type.
-func (p Principal) Verify() (err error) {
+var ErrPrincipalIsInvalid = errors.New("principal is invalid")
 
-	// Handle the `require` panics by converting into a return error
-	defer func() { // TODO - Review if we can make this as "clean" with explicit returns instead.
-		if r := recover(); r != nil {
-			err = r.(error)
-		}
-	}()
+// Validate that the Principal is configured correctly for its Type.
+func (p Principal) Validate() (err error) {
 
-	require(p.Type == Public || p.Type == Confidential, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
+	if p.Type != Public && p.Type != Confidential {
+		return fmt.Errorf("[%s] type cannot be [%s]: %w", p.Id, p.Type, ErrPrincipalIsInvalid)
+	}
 
 	if p.IsConfidential() {
-		require(p.Type == Confidential, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
+		if p.Type != Confidential {
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.Id, p.Type, ErrPrincipalIsInvalid)
+		}
 	}
 
 	if p.IsPublic() {
-		require(p.Type == Public, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
-		require(!p.CanPerformAction(Introspect), fmt.Sprintf("public clients must not be allowed to introspect: %s", p.Id))
-		require(!p.CanBeGranted(grant.Password), fmt.Sprintf("public clients must not use password grant: %s", p.Id))
-		require(!p.CanBeGranted(grant.AuthorisationCode) || p.CanPerformAction(ProofKeyForCodeExchange),
-			fmt.Sprintf("public clients must not use authorisation code grant without PKCE: %s", p.Id),
-		)
+		if p.Type != Public {
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.Id, p.Type, ErrPrincipalIsInvalid)
+		}
+		if p.CanPerformAction(Introspect) {
+			return fmt.Errorf("[%s] public clients must not be allowed to introspect: %w", p.Id, ErrPrincipalIsInvalid)
+		}
+		if p.CanBeGranted(grant.Password) {
+			return fmt.Errorf("[%s] public clients must not use password grant: %w", p.Id, ErrPrincipalIsInvalid)
+		}
+		if p.CanBeGranted(grant.AuthorisationCode) && !p.CanPerformAction(ProofKeyForCodeExchange) {
+			return fmt.Errorf("[%s] public clients must not use authorisation code grant without PKCE: %w", p.Id, ErrPrincipalIsInvalid)
+		}
 	}
 
-	require(!p.CanPerformAction(Authorise) || p.CanBeGranted(grant.AuthorisationCode), // TODO - Replace with implied action based on grant type?
-		fmt.Sprintf("clients with 'Authorise' must have 'AuthorisationCode': %s", p.Id),
-	)
+	if p.CanPerformAction(Authorise) && !p.CanBeGranted(grant.AuthorisationCode) {
+		return fmt.Errorf("[%s] clients with 'Authorise' must have 'AuthorisationCode': %w", p.Id, ErrPrincipalIsInvalid)
+	}
 
-	require(!p.CanPerformAction(Authorise) || len(p.RedirectUris) != 0,
-		fmt.Sprintf("clients with 'Authorise' must have some 'RedirectUris': %s", p.Id),
-	)
+	if p.CanPerformAction(Authorise) && len(p.RedirectUris) == 0 {
+		return fmt.Errorf("[%s] clients with 'Authorise' must have some 'RedirectUris': %w", p.Id, ErrPrincipalIsInvalid)
+	}
 
 	return nil
 }
