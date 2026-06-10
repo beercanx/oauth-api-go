@@ -33,7 +33,7 @@ func TestAuthenticate(t *testing.T) {
 
 		credentialRepository.EXPECT().FindByUsername("cred-repo-error").Return(Credential{}, errorCredentialRepo).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		_, err := underTest.Authenticate("cred-repo-error", validPassword)
 		require.ErrorIs(t, err, errorCredentialRepo)
@@ -51,7 +51,7 @@ func TestAuthenticate(t *testing.T) {
 			Return(Credential{"argon2-error", "aardvark", time.Now(), time.Now()}, nil).
 			Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		_, err := underTest.Authenticate("argon2-error", validPassword)
 		require.ErrorIs(t, err, argon2id.ErrInvalidHash)
@@ -66,7 +66,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
 		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, errorStatusRepo).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		_, err := underTest.Authenticate(validUsername, validPassword)
 		require.ErrorIs(t, err, errorStatusRepo)
@@ -84,7 +84,7 @@ func TestAuthenticate(t *testing.T) {
 
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(Credential{}, ErrNoSuchCredential).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Zero(t, success, "success should be nil")
@@ -100,7 +100,7 @@ func TestAuthenticate(t *testing.T) {
 
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, "badger")
 		assert.Zero(t, success, "success should be nil")
@@ -117,7 +117,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
 		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, ErrNoSuchStatus).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Zero(t, success, "success should be nil")
@@ -134,7 +134,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
 		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{validUsername, true}, nil).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		assert.Zero(t, success, "success should be nil")
@@ -155,7 +155,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
 		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{validUsername, false}, nil).Once()
 
-		underTest := NewAuthenticationService(credentialRepository, statusRepository)
+		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
 		success, failure := underTest.Authenticate(validUsername, validPassword)
 		require.NoError(t, failure, "failure should be nil")

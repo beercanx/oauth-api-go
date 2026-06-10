@@ -25,7 +25,7 @@ LIMIT 1
 //	WHERE client_id = ?
 //	LIMIT 1
 func (q *Queries) GetClientConfiguration(ctx context.Context, clientID client.Id) (ClientConfiguration, error) {
-	row := q.queryRow(ctx, q.getClientConfigurationStmt, getClientConfiguration, clientID)
+	row := q.db.QueryRowContext(ctx, getClientConfiguration, clientID)
 	var i ClientConfiguration
 	err := row.Scan(
 		&i.ClientID,

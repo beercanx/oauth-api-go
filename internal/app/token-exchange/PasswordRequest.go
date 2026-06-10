@@ -12,9 +12,3 @@ type PasswordRequest struct {
 	Password  string
 	State     string
 }
-
-var _ Valid = (*PasswordRequest)(nil)
-
-func (request PasswordRequest) getPrincipal() client.Principal {
-	return request.Principal
-}

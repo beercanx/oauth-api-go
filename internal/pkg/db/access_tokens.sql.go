@@ -35,7 +35,7 @@ type CreateAccessTokenParams struct {
 //	INSERT INTO access_tokens (id, username, client_id, scopes, issued_at, expires_at, not_before)
 //	VALUES (?, ?, ?, ?, ?, ?, ?)
 func (q *Queries) CreateAccessToken(ctx context.Context, arg CreateAccessTokenParams) error {
-	_, err := q.exec(ctx, q.createAccessTokenStmt, createAccessToken,
+	_, err := q.db.ExecContext(ctx, createAccessToken,
 		arg.ID,
 		arg.Username,
 		arg.ClientID,
@@ -59,7 +59,7 @@ WHERE id = ?
 //	FROM access_tokens
 //	WHERE id = ?
 func (q *Queries) DeleteAccessToken(ctx context.Context, id uuid.UUID) error {
-	_, err := q.exec(ctx, q.deleteAccessTokenStmt, deleteAccessToken, id)
+	_, err := q.db.ExecContext(ctx, deleteAccessToken, id)
 	return err
 }
 
@@ -75,7 +75,7 @@ WHERE datetime(expires_at) <= CURRENT_TIMESTAMP
 //	FROM access_tokens
 //	WHERE datetime(expires_at) <= CURRENT_TIMESTAMP
 func (q *Queries) DeleteExpiredAccessTokens(ctx context.Context) error {
-	_, err := q.exec(ctx, q.deleteExpiredAccessTokensStmt, deleteExpiredAccessTokens)
+	_, err := q.db.ExecContext(ctx, deleteExpiredAccessTokens)
 	return err
 }
 
@@ -93,7 +93,7 @@ LIMIT 1
 //	WHERE id = ?
 //	LIMIT 1
 func (q *Queries) GetAccessToken(ctx context.Context, id uuid.UUID) (AccessToken, error) {
-	row := q.queryRow(ctx, q.getAccessTokenStmt, getAccessToken, id)
+	row := q.db.QueryRowContext(ctx, getAccessToken, id)
 	var i AccessToken
 	err := row.Scan(
 		&i.ID,

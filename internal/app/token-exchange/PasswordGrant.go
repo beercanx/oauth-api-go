@@ -16,7 +16,9 @@ type PasswordGrant struct {
 	userAuthenticator  user.Authenticator
 }
 
-func NewPasswordGrant(accessTokenIssuer token.Issuer[db.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) *PasswordGrant {
+var _ Grant[PasswordRequest] = (*PasswordGrant)(nil)
+
+func NewPasswordGrant(accessTokenIssuer token.Issuer[db.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) Grant[PasswordRequest] {
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
@@ -31,12 +33,12 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 		return Success{}, err
 	}
 
-	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.ClientID, request.Scopes)
 	if err != nil {
 		return Success{}, err
 	}
 
-	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.Id, request.Scopes)
+	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.ClientID, request.Scopes)
 	if err != nil {
 		return Success{}, err
 	}

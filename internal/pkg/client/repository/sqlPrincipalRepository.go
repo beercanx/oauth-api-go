@@ -1,4 +1,4 @@
-package sql
+package repository
 
 import (
 	"context"
@@ -26,14 +26,7 @@ func (r sqlPrincipalRepository) FindById(id client.Id) (client.Principal, error)
 		return client.Principal{}, queryError
 	}
 
-	principal := client.Principal{
-		Id:                clientConfiguration.ClientID,
-		Type:              clientConfiguration.ClientType,
-		RedirectUris:      clientConfiguration.RedirectUris,
-		AllowedScopes:     clientConfiguration.AllowedScopes,
-		AllowedActions:    clientConfiguration.AllowedActions,
-		AllowedGrantTypes: clientConfiguration.AllowedGrantTypes,
-	}
+	principal := client.Principal(clientConfiguration)
 
 	if validateError := principal.Validate(); validateError != nil {
 		return client.Principal{}, validateError

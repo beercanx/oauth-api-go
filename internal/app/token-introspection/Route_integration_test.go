@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
+	"baconi.co.uk/oauth/internal/pkg/client/repository"
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
@@ -33,7 +34,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
-	clientPrincipalRepository := client.NewInMemoryPrincipalRepository()
+	clientPrincipalRepository := repository.NewSqlPrincipalRepository(t.Context(), database)
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := NewIntrospector(accessTokenAuthenticator)

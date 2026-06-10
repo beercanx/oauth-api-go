@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func validateRequest(scopeService *scope.Service, context *gin.Context) (Valid, *Invalid) {
+func validateRequest(scopeService *scope.Service, context *gin.Context) (any, *Invalid) {
 
 	switch grantType := context.PostForm("grant_type"); grantType {
 

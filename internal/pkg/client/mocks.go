@@ -190,7 +190,7 @@ func (_m *MockPrincipalRepository) EXPECT() *MockPrincipalRepository_Expecter {
 }
 
 // FindByClientId provides a mock function for the type MockPrincipalRepository
-func (_mock *MockPrincipalRepository) FindByClientId(clientId string) (Principal, bool) {
+func (_mock *MockPrincipalRepository) FindByClientId(clientId string) (Principal, error) {
 	ret := _mock.Called(clientId)
 
 	if len(ret) == 0 {
@@ -198,8 +198,8 @@ func (_mock *MockPrincipalRepository) FindByClientId(clientId string) (Principal
 	}
 
 	var r0 Principal
-	var r1 bool
-	if returnFunc, ok := ret.Get(0).(func(string) (Principal, bool)); ok {
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (Principal, error)); ok {
 		return returnFunc(clientId)
 	}
 	if returnFunc, ok := ret.Get(0).(func(string) Principal); ok {
@@ -207,10 +207,10 @@ func (_mock *MockPrincipalRepository) FindByClientId(clientId string) (Principal
 	} else {
 		r0 = ret.Get(0).(Principal)
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
 		r1 = returnFunc(clientId)
 	} else {
-		r1 = ret.Get(1).(bool)
+		r1 = ret.Error(1)
 	}
 	return r0, r1
 }
@@ -239,18 +239,18 @@ func (_c *MockPrincipalRepository_FindByClientId_Call) Run(run func(clientId str
 	return _c
 }
 
-func (_c *MockPrincipalRepository_FindByClientId_Call) Return(principal Principal, b bool) *MockPrincipalRepository_FindByClientId_Call {
-	_c.Call.Return(principal, b)
+func (_c *MockPrincipalRepository_FindByClientId_Call) Return(principal Principal, err error) *MockPrincipalRepository_FindByClientId_Call {
+	_c.Call.Return(principal, err)
 	return _c
 }
 
-func (_c *MockPrincipalRepository_FindByClientId_Call) RunAndReturn(run func(clientId string) (Principal, bool)) *MockPrincipalRepository_FindByClientId_Call {
+func (_c *MockPrincipalRepository_FindByClientId_Call) RunAndReturn(run func(clientId string) (Principal, error)) *MockPrincipalRepository_FindByClientId_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // FindById provides a mock function for the type MockPrincipalRepository
-func (_mock *MockPrincipalRepository) FindById(id Id) (Principal, bool) {
+func (_mock *MockPrincipalRepository) FindById(id Id) (Principal, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
@@ -258,8 +258,8 @@ func (_mock *MockPrincipalRepository) FindById(id Id) (Principal, bool) {
 	}
 
 	var r0 Principal
-	var r1 bool
-	if returnFunc, ok := ret.Get(0).(func(Id) (Principal, bool)); ok {
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(Id) (Principal, error)); ok {
 		return returnFunc(id)
 	}
 	if returnFunc, ok := ret.Get(0).(func(Id) Principal); ok {
@@ -267,10 +267,10 @@ func (_mock *MockPrincipalRepository) FindById(id Id) (Principal, bool) {
 	} else {
 		r0 = ret.Get(0).(Principal)
 	}
-	if returnFunc, ok := ret.Get(1).(func(Id) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(Id) error); ok {
 		r1 = returnFunc(id)
 	} else {
-		r1 = ret.Get(1).(bool)
+		r1 = ret.Error(1)
 	}
 	return r0, r1
 }
@@ -299,12 +299,12 @@ func (_c *MockPrincipalRepository_FindById_Call) Run(run func(id Id)) *MockPrinc
 	return _c
 }
 
-func (_c *MockPrincipalRepository_FindById_Call) Return(principal Principal, b bool) *MockPrincipalRepository_FindById_Call {
-	_c.Call.Return(principal, b)
+func (_c *MockPrincipalRepository_FindById_Call) Return(principal Principal, err error) *MockPrincipalRepository_FindById_Call {
+	_c.Call.Return(principal, err)
 	return _c
 }
 
-func (_c *MockPrincipalRepository_FindById_Call) RunAndReturn(run func(id Id) (Principal, bool)) *MockPrincipalRepository_FindById_Call {
+func (_c *MockPrincipalRepository_FindById_Call) RunAndReturn(run func(id Id) (Principal, error)) *MockPrincipalRepository_FindById_Call {
 	_c.Call.Return(run)
 	return _c
 }

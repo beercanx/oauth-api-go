@@ -1,4 +1,4 @@
-package sql
+package repository
 
 import (
 	"fmt"
@@ -64,8 +64,8 @@ func TestSqlPrincipalRepository_FindById(t *testing.T) {
 		principal, err := underTest.FindById("cicada")
 		require.NoError(t, err)
 		assert.Equal(t, client.Principal{
-			Id:                "cicada",
-			Type:              client.Public,
+			ClientID:          "cicada",
+			ClientType:        client.Public,
 			RedirectUris:      client.RedirectUris{"https://cicada.baconi.co.uk/callback"},
 			AllowedScopes:     scope.Scopes{"basic"},
 			AllowedActions:    client.Actions{client.Authorise, client.ProofKeyForCodeExchange},
@@ -77,8 +77,8 @@ func TestSqlPrincipalRepository_FindById(t *testing.T) {
 		principal, err := underTest.FindById("aardvark")
 		require.NoError(t, err)
 		assert.Equal(t, client.Principal{
-			Id:                "aardvark",
-			Type:              client.Confidential,
+			ClientID:          "aardvark",
+			ClientType:        client.Confidential,
 			RedirectUris:      client.RedirectUris{},
 			AllowedScopes:     scope.Scopes{"basic", "read", "write"},
 			AllowedActions:    client.Actions{client.Introspect},

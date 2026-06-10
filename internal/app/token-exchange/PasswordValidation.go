@@ -23,7 +23,7 @@ func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) 
 
 	switch {
 	case !principal.IsConfidential(), !principal.CanBeGranted(grant.Password):
-		return nil, &Invalid{Err: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.Id, grant.Password)}
+		return nil, &Invalid{Err: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.ClientID, grant.Password)}
 
 	case !usernameOk:
 		return nil, &Invalid{Err: InvalidRequest, Description: "missing parameter: username"}

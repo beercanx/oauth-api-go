@@ -7,7 +7,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 )
 
 type DBTX interface {
@@ -21,108 +20,12 @@ func New(db DBTX) *Queries {
 	return &Queries{db: db}
 }
 
-func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
-	q := Queries{db: db}
-	var err error
-	if q.createAccessTokenStmt, err = db.PrepareContext(ctx, createAccessToken); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateAccessToken: %w", err)
-	}
-	if q.deleteAccessTokenStmt, err = db.PrepareContext(ctx, deleteAccessToken); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteAccessToken: %w", err)
-	}
-	if q.deleteExpiredAccessTokensStmt, err = db.PrepareContext(ctx, deleteExpiredAccessTokens); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteExpiredAccessTokens: %w", err)
-	}
-	if q.getAccessTokenStmt, err = db.PrepareContext(ctx, getAccessToken); err != nil {
-		return nil, fmt.Errorf("error preparing query GetAccessToken: %w", err)
-	}
-	if q.getClientConfigurationStmt, err = db.PrepareContext(ctx, getClientConfiguration); err != nil {
-		return nil, fmt.Errorf("error preparing query GetClientConfiguration: %w", err)
-	}
-	return &q, nil
-}
-
-func (q *Queries) Close() error {
-	var err error
-	if q.createAccessTokenStmt != nil {
-		if cerr := q.createAccessTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createAccessTokenStmt: %w", cerr)
-		}
-	}
-	if q.deleteAccessTokenStmt != nil {
-		if cerr := q.deleteAccessTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteAccessTokenStmt: %w", cerr)
-		}
-	}
-	if q.deleteExpiredAccessTokensStmt != nil {
-		if cerr := q.deleteExpiredAccessTokensStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteExpiredAccessTokensStmt: %w", cerr)
-		}
-	}
-	if q.getAccessTokenStmt != nil {
-		if cerr := q.getAccessTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getAccessTokenStmt: %w", cerr)
-		}
-	}
-	if q.getClientConfigurationStmt != nil {
-		if cerr := q.getClientConfigurationStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getClientConfigurationStmt: %w", cerr)
-		}
-	}
-	return err
-}
-
-func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
-	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).ExecContext(ctx, args...)
-	case stmt != nil:
-		return stmt.ExecContext(ctx, args...)
-	default:
-		return q.db.ExecContext(ctx, query, args...)
-	}
-}
-
-func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
-	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryContext(ctx, args...)
-	default:
-		return q.db.QueryContext(ctx, query, args...)
-	}
-}
-
-func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
-	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryRowContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryRowContext(ctx, args...)
-	default:
-		return q.db.QueryRowContext(ctx, query, args...)
-	}
-}
-
 type Queries struct {
-	db                            DBTX
-	tx                            *sql.Tx
-	createAccessTokenStmt         *sql.Stmt
-	deleteAccessTokenStmt         *sql.Stmt
-	deleteExpiredAccessTokensStmt *sql.Stmt
-	getAccessTokenStmt            *sql.Stmt
-	getClientConfigurationStmt    *sql.Stmt
+	db DBTX
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                            tx,
-		tx:                            tx,
-		createAccessTokenStmt:         q.createAccessTokenStmt,
-		deleteAccessTokenStmt:         q.deleteAccessTokenStmt,
-		deleteExpiredAccessTokensStmt: q.deleteExpiredAccessTokensStmt,
-		getAccessTokenStmt:            q.getAccessTokenStmt,
-		getClientConfigurationStmt:    q.getClientConfigurationStmt,
+		db: tx,
 	}
 }
