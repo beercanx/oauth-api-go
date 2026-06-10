@@ -46,7 +46,7 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 		AccessToken:  accessToken.ID,
 		TokenType:    token.Bearer,
 		ExpiresIn:    secondsBetween(accessToken.ExpiresAt, accessToken.IssuedAt),
-		RefreshToken: refreshToken.GetValue(),
+		RefreshToken: refreshToken.ID,
 		Scope:        accessToken.Scopes,
 		State:        request.State,
 	}, nil

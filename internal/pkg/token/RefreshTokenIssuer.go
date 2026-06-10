@@ -10,13 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type RefreshTokenIssuer struct {
+type refreshTokenIssuer struct {
 	repository     RepositoryCreate[RefreshToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
 }
 
-func (issuer *RefreshTokenIssuer) Issue(
+func (issuer *refreshTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes scope.Scopes,
@@ -28,13 +28,13 @@ func (issuer *RefreshTokenIssuer) Issue(
 	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
 	refreshToken := RefreshToken{
-		value:     uuid.New(),
-		username:  username,
-		clientId:  clientId,
-		scopes:    scopes,
-		issuedAt:  issuedAt,
-		expiresAt: expiresAt,
-		notBefore: notBefore,
+		ID:        uuid.New(),
+		Username:  username,
+		ClientId:  clientId,
+		Scopes:    scopes,
+		IssuedAt:  issuedAt,
+		ExpiresAt: expiresAt,
+		NotBefore: notBefore,
 	}
 
 	if err := issuer.repository.Insert(refreshToken); err != nil {
@@ -45,10 +45,10 @@ func (issuer *RefreshTokenIssuer) Issue(
 }
 
 // assert RefreshTokenService implements Issuer
-var _ Issuer[RefreshToken] = (*RefreshTokenIssuer)(nil)
+var _ Issuer[RefreshToken] = (*refreshTokenIssuer)(nil)
 
-func NewRefreshTokenIssuer(repository RepositoryCreate[RefreshToken]) *RefreshTokenIssuer {
-	return &RefreshTokenIssuer{
+func NewRefreshTokenIssuer(repository RepositoryCreate[RefreshToken]) Issuer[RefreshToken] {
+	return &refreshTokenIssuer{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,
 		tokenAge:       4 * time.Hour,

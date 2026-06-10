@@ -10,42 +10,21 @@ import (
 )
 
 type RefreshToken struct {
-	value     uuid.UUID                  `db:"id"`
-	username  user.AuthenticatedUsername `db:"username"`
-	clientId  client.Id                  `db:"client_id"`
-	scopes    scope.Scopes               `db:"scopes"`
-	issuedAt  time.Time                  `db:"issued_at"`
-	expiresAt time.Time                  `db:"expires_at"`
-	notBefore time.Time                  `db:"not_before"`
+	ID        uuid.UUID                  `db:"id"`
+	Username  user.AuthenticatedUsername `db:"username"`
+	ClientId  client.Id                  `db:"client_id"`
+	Scopes    scope.Scopes               `db:"scopes"`
+	IssuedAt  time.Time                  `db:"issued_at"`
+	ExpiresAt time.Time                  `db:"expires_at"`
+	NotBefore time.Time                  `db:"not_before"`
+	// TODO - Decide if we need to store a database link to the access token issued with it,
+	// 				so that once a refresh is performed, both this and its access token are revoked when issuing the new tokens.
 }
 
-// assert RefreshToken implements Token
-var _ Token = (*RefreshToken)(nil)
-
-func (token RefreshToken) GetValue() uuid.UUID {
-	return token.value
+func (token RefreshToken) HasExpired() bool {
+	return time.Now().After(token.ExpiresAt)
 }
 
-func (token RefreshToken) GetUsername() user.AuthenticatedUsername {
-	return token.username
-}
-
-func (token RefreshToken) GetClientId() client.Id {
-	return token.clientId
-}
-
-func (token RefreshToken) GetScopes() scope.Scopes {
-	return token.scopes
-}
-
-func (token RefreshToken) GetIssuedAt() time.Time {
-	return token.issuedAt
-}
-
-func (token RefreshToken) GetExpiresAt() time.Time {
-	return token.expiresAt
-}
-
-func (token RefreshToken) GetNotBefore() time.Time {
-	return token.notBefore
+func (token RefreshToken) IsBefore() bool {
+	return time.Now().Before(token.NotBefore)
 }
