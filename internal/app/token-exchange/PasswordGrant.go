@@ -5,20 +5,19 @@ import (
 	"math"
 	"time"
 
-	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
 )
 
 type PasswordGrant struct {
-	accessTokenIssuer  token.Issuer[db.AccessToken]
+	accessTokenIssuer  token.Issuer[token.AccessToken]
 	refreshTokenIssuer token.Issuer[token.RefreshToken]
 	userAuthenticator  user.Authenticator
 }
 
 var _ Grant[PasswordRequest] = (*PasswordGrant)(nil)
 
-func NewPasswordGrant(accessTokenIssuer token.Issuer[db.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) Grant[PasswordRequest] {
+func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) Grant[PasswordRequest] {
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
@@ -33,12 +32,12 @@ func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
 		return Success{}, err
 	}
 
-	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.ClientID, request.Scopes)
+	accessToken, err := grant.accessTokenIssuer.Issue(success.Username, request.Principal.ClientId, request.Scopes)
 	if err != nil {
 		return Success{}, err
 	}
 
-	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.ClientID, request.Scopes)
+	refreshToken, err := grant.refreshTokenIssuer.Issue(success.Username, request.Principal.ClientId, request.Scopes)
 	if err != nil {
 		return Success{}, err
 	}

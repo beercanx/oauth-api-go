@@ -5,14 +5,13 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/google/uuid"
 )
 
 type accessTokenIssuer struct {
-	repository     RepositoryCreate[db.CreateAccessTokenParams]
+	repository     RepositoryCreate[AccessToken]
 	tokenAge       time.Duration
 	notBeforeShift time.Duration
 }
@@ -21,14 +20,14 @@ func (issuer *accessTokenIssuer) Issue(
 	username user.AuthenticatedUsername,
 	clientId client.Id,
 	scopes scope.Scopes,
-) (db.AccessToken, error) {
+) (AccessToken, error) {
 
 	issuedAt := time.Now()
 
 	expiresAt := issuedAt.Add(issuer.tokenAge)
 	notBefore := issuedAt.Add(-issuer.notBeforeShift)
 
-	accessToken := db.CreateAccessTokenParams{
+	accessToken := AccessToken{
 		ID:        uuid.New(),
 		Username:  username,
 		ClientID:  clientId,
@@ -39,16 +38,16 @@ func (issuer *accessTokenIssuer) Issue(
 	}
 
 	if err := issuer.repository.Insert(accessToken); err != nil {
-		return db.AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
+		return AccessToken{}, fmt.Errorf("issue access token failed: %w", err)
 	}
 
-	return db.AccessToken(accessToken), nil
+	return accessToken, nil
 }
 
 // assert accessTokenIssuer implements Issuer
-var _ Issuer[db.AccessToken] = (*accessTokenIssuer)(nil)
+var _ Issuer[AccessToken] = (*accessTokenIssuer)(nil)
 
-func NewAccessTokenIssuer(repository RepositoryCreate[db.CreateAccessTokenParams]) Issuer[db.AccessToken] {
+func NewAccessTokenIssuer(repository RepositoryCreate[AccessToken]) Issuer[AccessToken] {
 	return &accessTokenIssuer{
 		repository:     repository,
 		notBeforeShift: 1 * time.Minute,

@@ -3,7 +3,6 @@ package token_introspection
 import (
 	"errors"
 
-	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/token"
 )
 
@@ -11,12 +10,12 @@ type Introspector interface {
 	introspect(request) (response, error)
 }
 
-func NewIntrospector(authenticator token.Authenticator[db.AccessToken]) Introspector {
+func NewIntrospector(authenticator token.Authenticator[token.AccessToken]) Introspector {
 	return &introspector{authenticator}
 }
 
 type introspector struct {
-	authenticator token.Authenticator[db.AccessToken]
+	authenticator token.Authenticator[token.AccessToken]
 }
 
 // assert introspector implements Introspector

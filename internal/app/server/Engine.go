@@ -6,7 +6,6 @@ import (
 	"baconi.co.uk/oauth/internal/app/token-exchange"
 	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
-	clientRepository "baconi.co.uk/oauth/internal/pkg/client/repository"
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
@@ -60,7 +59,7 @@ func Engine(
 	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticator)
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
-	clientPrincipalRepository := clientRepository.NewSqlPrincipalRepository(ctx, database)
+	clientPrincipalRepository := client.NewPrincipalRepository(ctx, database)
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := token_introspection.NewIntrospector(accessTokenAuthenticator)

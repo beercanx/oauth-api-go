@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
@@ -25,11 +24,11 @@ func TestIntrospector(t *testing.T) {
 	t.Run("when token repository errors", func(t *testing.T) {
 		t.Parallel()
 
-		accessTokenRepository := token.NewMockAuthenticator[db.AccessToken](t)
+		accessTokenRepository := token.NewMockAuthenticator[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			Authenticate(mock.AnythingOfType("uuid.UUID")).
-			Return(db.AccessToken{}, errorNoDatabase).
+			Return(token.AccessToken{}, errorNoDatabase).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
@@ -49,11 +48,11 @@ func TestIntrospector(t *testing.T) {
 		t.Run(fmt.Sprintf("when token %s", name), func(t *testing.T) {
 			t.Parallel()
 
-			authenticator := token.NewMockAuthenticator[db.AccessToken](t)
+			authenticator := token.NewMockAuthenticator[token.AccessToken](t)
 			authenticator.
 				EXPECT().
 				Authenticate(mock.AnythingOfType("uuid.UUID")).
-				Return(db.AccessToken{}, authenticatorError).
+				Return(token.AccessToken{}, authenticatorError).
 				Once()
 
 			underTest := NewIntrospector(authenticator)
@@ -69,7 +68,7 @@ func TestIntrospector(t *testing.T) {
 
 		now := time.Now()
 
-		accessToken := db.AccessToken{
+		accessToken := token.AccessToken{
 			ID:        uuid.New(),
 			Username:  user.AuthenticatedUsername("aardvark"),
 			Scopes:    scope.Scopes{"basic"},
@@ -79,7 +78,7 @@ func TestIntrospector(t *testing.T) {
 			NotBefore: now.Add(-time.Minute),
 		}
 
-		accessTokenRepository := token.NewMockAuthenticator[db.AccessToken](t)
+		accessTokenRepository := token.NewMockAuthenticator[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
 			Authenticate(accessToken.ID).

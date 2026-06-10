@@ -10,8 +10,8 @@ var (
 	ErrNoSuchToken = errors.New("token does not exist")
 )
 
-type RepositoryCreate[N any] interface {
-	Insert(new N) error
+type RepositoryCreate[R any] interface {
+	Insert(new R) error
 }
 
 type RepositoryRead[R any] interface {
@@ -29,8 +29,8 @@ type RepositoryReadDelete[R any] interface {
 	RepositoryDelete[R]
 }
 
-type Repository[N any, R any] interface {
-	RepositoryCreate[N]
+type Repository[R any] interface {
+	RepositoryCreate[R]
 	RepositoryRead[R]
 	RepositoryDelete[R]
 }

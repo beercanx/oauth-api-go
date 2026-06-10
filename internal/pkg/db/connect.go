@@ -1,6 +1,10 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "github.com/ncruces/go-sqlite3/driver"
+)
 
 func Connect(source string) (*sql.DB, error) {
 

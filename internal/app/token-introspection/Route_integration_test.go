@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/client/repository"
 	"baconi.co.uk/oauth/internal/pkg/db"
 	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
@@ -28,13 +27,13 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 	database, databaseError := db.Connect("file:token_introspection_route_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
-	require.NoError(t, db.RunMigrations(database, "file:../../../sqlc/migrations"))
+	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 
 	accessTokenRepository := token.NewAccessTokenRepository(t.Context(), database)
 	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
-	clientPrincipalRepository := repository.NewSqlPrincipalRepository(t.Context(), database)
+	clientPrincipalRepository := client.NewPrincipalRepository(t.Context(), database)
 	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := NewIntrospector(accessTokenAuthenticator)
@@ -230,7 +229,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("return an inactive response for an access token that has expired", func(t *testing.T) {
 
-			accessToken := db.CreateAccessTokenParams{
+			accessToken := token.AccessToken{
 				ID:        uuid.New(),
 				Username:  "expired",
 				ClientID:  "cicada",
@@ -257,7 +256,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 		t.Run("return an inactive response for an access token that is in the future", func(t *testing.T) {
 
-			accessToken := db.CreateAccessTokenParams{
+			accessToken := token.AccessToken{
 				ID:        uuid.New(),
 				Username:  "future",
 				ClientID:  "cicada",

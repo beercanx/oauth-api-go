@@ -10,12 +10,13 @@ import (
 )
 
 type Principal struct {
-	ClientID          Id
-	ClientType        Type
-	RedirectUris      RedirectUris
-	AllowedScopes     scope.Scopes
-	AllowedActions    Actions
-	AllowedGrantTypes grant.Types
+	ClientId          Id           `db:"client_id"`
+	ClientType        Type         `db:"client_type"`
+	RedirectUris      RedirectUris `db:"redirect_uris"`
+	AllowedScopes     scope.Scopes `db:"allowed_scopes"`
+	AllowedActions    Actions      `db:"allowed_actions"`
+	AllowedGrantTypes grant.Types  `db:"allowed_grant_types"`
+	// TODO - make sure database has createdAt and updatedAt columns
 }
 
 var ErrPrincipalIsInvalid = errors.New("principal is invalid")
@@ -24,36 +25,36 @@ var ErrPrincipalIsInvalid = errors.New("principal is invalid")
 func (p Principal) Validate() error {
 
 	if p.ClientType != Public && p.ClientType != Confidential {
-		return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientID, p.ClientType, ErrPrincipalIsInvalid)
+		return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
 	}
 
 	if p.IsConfidential() {
 		if p.ClientType != Confidential {
-			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientID, p.ClientType, ErrPrincipalIsInvalid)
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
 		}
 	}
 
 	if p.IsPublic() {
 		if p.ClientType != Public {
-			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientID, p.ClientType, ErrPrincipalIsInvalid)
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
 		}
 		if p.CanPerformAction(Introspect) {
-			return fmt.Errorf("[%s] public clients must not be allowed to introspect: %w", p.ClientID, ErrPrincipalIsInvalid)
+			return fmt.Errorf("[%s] public clients must not be allowed to introspect: %w", p.ClientId, ErrPrincipalIsInvalid)
 		}
 		if p.CanBeGranted(grant.Password) {
-			return fmt.Errorf("[%s] public clients must not use password grant: %w", p.ClientID, ErrPrincipalIsInvalid)
+			return fmt.Errorf("[%s] public clients must not use password grant: %w", p.ClientId, ErrPrincipalIsInvalid)
 		}
 		if p.CanBeGranted(grant.AuthorisationCode) && !p.CanPerformAction(ProofKeyForCodeExchange) {
-			return fmt.Errorf("[%s] public clients must not use authorisation code grant without PKCE: %w", p.ClientID, ErrPrincipalIsInvalid)
+			return fmt.Errorf("[%s] public clients must not use authorisation code grant without PKCE: %w", p.ClientId, ErrPrincipalIsInvalid)
 		}
 	}
 
 	if p.CanPerformAction(Authorise) && !p.CanBeGranted(grant.AuthorisationCode) {
-		return fmt.Errorf("[%s] clients with 'Authorise' must have 'AuthorisationCode': %w", p.ClientID, ErrPrincipalIsInvalid)
+		return fmt.Errorf("[%s] clients with 'Authorise' must have 'AuthorisationCode': %w", p.ClientId, ErrPrincipalIsInvalid)
 	}
 
 	if p.CanPerformAction(Authorise) && len(p.RedirectUris) == 0 {
-		return fmt.Errorf("[%s] clients with 'Authorise' must have some 'RedirectUris': %w", p.ClientID, ErrPrincipalIsInvalid)
+		return fmt.Errorf("[%s] clients with 'Authorise' must have some 'RedirectUris': %w", p.ClientId, ErrPrincipalIsInvalid)
 	}
 
 	return nil

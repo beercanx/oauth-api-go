@@ -7,9 +7,10 @@ import (
 )
 
 type Secret struct {
-	id           uuid.UUID
-	clientId     Id
-	hashedSecret string
+	id           uuid.UUID `db:"id"`
+	clientId     Id        `db:"client_id"`
+	hashedSecret string    `db:"hash"`
+	// TODO - make sure database has createdAt and updatedAt columns
 }
 
 var _ fmt.Stringer = (*Secret)(nil)

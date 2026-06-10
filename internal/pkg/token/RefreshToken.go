@@ -10,13 +10,13 @@ import (
 )
 
 type RefreshToken struct {
-	value     uuid.UUID
-	username  user.AuthenticatedUsername
-	clientId  client.Id
-	scopes    scope.Scopes
-	issuedAt  time.Time
-	expiresAt time.Time
-	notBefore time.Time
+	value     uuid.UUID                  `db:"id"`
+	username  user.AuthenticatedUsername `db:"username"`
+	clientId  client.Id                  `db:"client_id"`
+	scopes    scope.Scopes               `db:"scopes"`
+	issuedAt  time.Time                  `db:"issued_at"`
+	expiresAt time.Time                  `db:"expires_at"`
+	notBefore time.Time                  `db:"not_before"`
 }
 
 // assert RefreshToken implements Token

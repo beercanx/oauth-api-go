@@ -16,7 +16,7 @@ import (
 
 // assertAccessTokensEqual compares two access tokens for equality.
 // This helper exists because of https://github.com/stretchr/testify/issues/984
-func assertAccessTokensEqual(t *testing.T, expected db.AccessToken, actual db.AccessToken) {
+func assertAccessTokensEqual(t *testing.T, expected AccessToken, actual AccessToken) {
 	t.Helper()
 	assert.Equal(t, expected.ID, actual.ID)
 	assert.Equal(t, expected.Username, actual.Username)
@@ -32,11 +32,11 @@ func TestAccessTokenRepository(t *testing.T) {
 
 	database, databaseError := db.Connect("file:access_tokens_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
-	require.NoError(t, db.RunMigrations(database, "file:../../../sqlc/migrations"))
+	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 
 	underTest := NewAccessTokenRepository(t.Context(), database)
 
-	validAccessToken := db.CreateAccessTokenParams{
+	validAccessToken := AccessToken{
 		ID:        uuid.MustParse("dad063b2-bf86-4aed-a505-a8329535c0a8"),
 		Username:  "aardvark",
 		ClientID:  "dodo",
@@ -49,7 +49,7 @@ func TestAccessTokenRepository(t *testing.T) {
 	t.Run("insert access token", func(t *testing.T) {
 
 		t.Run("should reject if access token is zero", func(t *testing.T) {
-			result := underTest.Insert(db.CreateAccessTokenParams{})
+			result := underTest.Insert(AccessToken{})
 			require.ErrorContains(t, result, "sqlite3: constraint failed")
 		})
 
@@ -122,7 +122,7 @@ func TestAccessTokenRepository(t *testing.T) {
 		t.Run("should return access token if found", func(t *testing.T) {
 			result, err := underTest.FindById(validAccessToken.ID)
 			require.NoError(t, err)
-			assertAccessTokensEqual(t, db.AccessToken(validAccessToken), result)
+			assertAccessTokensEqual(t, validAccessToken, result)
 		})
 	})
 
@@ -150,11 +150,11 @@ func TestAccessTokenRepository(t *testing.T) {
 		require.NoError(t, underTest.Insert(validAccessToken))
 
 		t.Run("should return no error if no access token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(db.AccessToken{ID: uuid.New()}))
+			require.NoError(t, underTest.DeleteByRecord(AccessToken{ID: uuid.New()}))
 		})
 
 		t.Run("should return no error if access token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(db.AccessToken(validAccessToken)))
+			require.NoError(t, underTest.DeleteByRecord(validAccessToken))
 			_, err := underTest.FindById(validAccessToken.ID)
 			require.ErrorIs(t, err, ErrNoSuchToken)
 		})
