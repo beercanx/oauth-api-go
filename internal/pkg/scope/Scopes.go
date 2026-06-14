@@ -16,9 +16,7 @@ var _ driver.Valuer = (*Scopes)(nil)
 var _ sql.Scanner = (*Scopes)(nil)
 
 func (scopes Scopes) MarshalJSON() ([]byte, error) {
-	return json.Marshal(marshalSpaceDelimited(scopes, func(scope Scope) string {
-		return string(scope)
-	}))
+	return json.Marshal(marshalSpaceDelimited(scopes))
 }
 
 func (scopes Scopes) UnmarshalJSON(_ []byte) error {
