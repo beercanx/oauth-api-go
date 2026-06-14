@@ -4,9 +4,6 @@ template: testify
 template-data:
   unroll-variadic: true
 packages:
-  baconi.co.uk/oauth/internal/app/token-introspection:
-    config:
-      all: true
   baconi.co.uk/oauth/internal/pkg/client:
     config:
       all: true

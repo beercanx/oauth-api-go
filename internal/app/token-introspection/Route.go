@@ -1,7 +1,6 @@
 package token_introspection
 
 import (
-	"errors"
 	"log"
 	"net/http"
 
@@ -23,23 +22,12 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 			validated, validationError := validateRequest(context)
 
 			if validationError != nil {
-
-				if failedValidation, ok := errors.AsType[invalid](validationError); ok {
-
-					switch failedValidation.ErrorType {
-
-					case InvalidRequest:
-						context.AbortWithStatusJSON(http.StatusBadRequest, failedValidation)
-						return
-
-					case UnauthorizedClient:
-						context.AbortWithStatusJSON(http.StatusForbidden, failedValidation)
-						return
-					}
+				switch validationError.ErrorType {
+				case UnauthorizedClient:
+					context.AbortWithStatusJSON(http.StatusForbidden, validationError)
+				default:
+					context.AbortWithStatusJSON(http.StatusBadRequest, validationError)
 				}
-
-				log.Println("[ERROR] Unexpected introspection validation error:", validationError)
-				context.AbortWithStatus(http.StatusInternalServerError)
 				return
 			}
 
