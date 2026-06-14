@@ -16,5 +16,5 @@ type Secret struct {
 var _ fmt.Stringer = (*Secret)(nil)
 
 func (s Secret) String() string {
-	return fmt.Sprintf("Secret{id=%s, clientId=%s, hashedSecret='REDACTED'}", s.id, s.clientId)
+	return fmt.Sprintf("Secret{id: %s, clientId: %s}", s.id, s.clientId)
 }

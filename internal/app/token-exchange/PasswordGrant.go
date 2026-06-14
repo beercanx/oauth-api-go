@@ -21,7 +21,7 @@ func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refresh
 	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
-func (grant PasswordGrant) Exchange(request PasswordRequest) (Success, error) {
+func (grant PasswordGrant) Exchange(request *PasswordRequest) (Success, error) {
 
 	success, err := grant.userAuthenticator.Authenticate(request.Username, request.Password)
 	var failure user.AuthenticationFailure

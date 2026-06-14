@@ -46,7 +46,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	Route(router, clientAuthenticationService, tokenIntrospector)
 
 	t.Run("should allow only post requests", func(t *testing.T) {
-		t.Parallel()
 
 		for _, invalidMethod := range []string{
 			http.MethodGet,
@@ -59,7 +58,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			http.MethodTrace,
 		} {
 			t.Run(fmt.Sprintf("reject %s", invalidMethod), func(t *testing.T) {
-				t.Parallel()
 
 				testRequest := httptest.NewRequestWithContext(t.Context(), invalidMethod, "/introspect", nil)
 
@@ -76,10 +74,8 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	})
 
 	t.Run("must allow only authorized requests", func(t *testing.T) {
-		t.Parallel()
 
 		t.Run("reject missing authentication", func(t *testing.T) {
-			t.Parallel()
 
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", nil)
 
@@ -93,7 +89,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("reject invalid basic authentication", func(t *testing.T) {
-			t.Parallel()
 
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", nil)
 			testRequest.SetBasicAuth("invalid", "invalid")
@@ -108,7 +103,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("reject public client authentication", func(t *testing.T) {
-			t.Parallel()
 
 			formBody := url.Values{"client_id": {"cicada"}, "token": {"a"}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
@@ -124,7 +118,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		})
 
 		t.Run("reject a valid client missing the introspection allowed action", func(t *testing.T) {
-			t.Parallel()
 
 			formBody := url.Values{"token": {"a"}}
 			testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(formBody.Encode()))
@@ -148,14 +141,13 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	})
 
 	t.Run("should allow only url encoded form requests", func(t *testing.T) {
-		t.Parallel()
+
 
 		for contentType, contentBody := range map[string]string{
 			"json": `{"token":"94efe4d7-7dbe-455f-b974-46656fd8d035"}`,
 			"xml":  `<request><token>94efe4d7-7dbe-455f-b974-46656fd8d035</token></request>`,
 		} {
 			t.Run(fmt.Sprintf("reject %s body requests", contentType), func(t *testing.T) {
-				t.Parallel()
 
 				testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(contentBody))
 				testRequest.Header.Set("Content-Type", fmt.Sprintf("application/%s", contentType))
@@ -177,7 +169,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	})
 
 	t.Run("should handle invalid body content", func(t *testing.T) {
-		t.Parallel()
 
 		for _, data := range []struct {
 			state    string
@@ -189,7 +180,6 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 			{"non uuid", url.Values{"token": {"aardvark"}}, "invalid parameter: token"},
 		} {
 			t.Run(fmt.Sprintf("return invalid request on %s token", data.state), func(t *testing.T) {
-				t.Parallel()
 
 				testRequest := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/introspect", strings.NewReader(data.body.Encode()))
 				testRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")

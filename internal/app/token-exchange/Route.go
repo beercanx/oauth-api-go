@@ -41,7 +41,7 @@ func Route(
 			switch valid := request.(type) {
 			// TODO - Add support for other grant types
 			case *PasswordRequest:
-				result, exchangeError = passwordGrant.Exchange(*valid)
+				result, exchangeError = passwordGrant.Exchange(valid)
 			default:
 				exchangeError = Failed{Err: UnsupportedGrantType, Description: fmt.Sprintf("unsupported grant type: %T", valid)}
 			}
