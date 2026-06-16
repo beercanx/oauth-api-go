@@ -10,13 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) (*PasswordRequest, *Invalid) {
+func validatePasswordRequest(context *gin.Context) (*PasswordRequest, *Invalid) {
 
 	username, usernameOk := context.GetPostForm("username")
 	password, passwordOk := context.GetPostForm("password")
 	scopeP, scopeOk := context.GetPostForm("scope")
 	rawScopes := strings.Split(scopeP, " ")
-	scopes := scopeService.Validate(rawScopes)
+	scopes := scope.AsUniqueScopes(rawScopes)
 	state, stateOk := context.GetPostForm("state")
 
 	principal := context.MustGet(client.AuthClientKey).(client.Principal)
@@ -41,8 +41,6 @@ func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) 
 		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
 	case !principal.CanBeIssued(scopes):
 		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
-
-	// TODO - Enforce unique scopes requested
 
 	// If state is provided it cannot be a zero string.
 	case stateOk && state == "":

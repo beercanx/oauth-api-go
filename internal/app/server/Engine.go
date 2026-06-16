@@ -7,7 +7,6 @@ import (
 	"baconi.co.uk/oauth/internal/app/token-introspection"
 	"baconi.co.uk/oauth/internal/pkg/client"
 	"baconi.co.uk/oauth/internal/pkg/db"
-	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/token"
 	"baconi.co.uk/oauth/internal/pkg/user"
 	"github.com/gin-gonic/gin"
@@ -49,9 +48,6 @@ func Engine(
 	refreshTokenRepository := token.NewRefreshTokenRepository()
 	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
 
-	scopeRepository := scope.NewInMemoryRepository()
-	scopeService := scope.NewService(scopeRepository)
-
 	userCredentialRepository := user.NewInMemoryCredentialRepository()
 	userStatusRepository := user.NewInMemoryStatusRepository()
 	userAuthenticator := user.NewAuthenticator(userCredentialRepository, userStatusRepository)
@@ -67,7 +63,7 @@ func Engine(
 	//
 	// Add Routes
 	//
-	token_exchange.Route(engine, clientAuthenticationService, scopeService, passwordGrant)
+	token_exchange.Route(engine, clientAuthenticationService, passwordGrant)
 	token_introspection.Route(engine, clientAuthenticationService, tokenIntrospector)
 
 	return engine, nil

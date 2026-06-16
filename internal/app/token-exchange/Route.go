@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,6 @@ import (
 func Route(
 	engine *gin.Engine,
 	clientAuthenticator client.Authenticator,
-	scopeService *scope.Service,
 	passwordGrant Grant[PasswordRequest],
 ) {
 
@@ -29,7 +27,7 @@ func Route(
 
 		func(context *gin.Context) {
 
-			request, invalid := validateRequest(scopeService, context)
+			request, invalid := validateRequest(context)
 			if invalid != nil {
 				context.JSON(http.StatusBadRequest, Failed(*invalid))
 				return
