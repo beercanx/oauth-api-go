@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testErrorNoDatabase = errors.New("no database")
+var errorNoDatabase = errors.New("no database")
 
 func TestAccessTokenAuthenticator_Authenticate(t *testing.T) {
 	t.Parallel()
@@ -22,11 +22,11 @@ func TestAccessTokenAuthenticator_Authenticate(t *testing.T) {
 		repository := NewMockRepositoryReadDelete[AccessToken](t)
 		underTest := NewAccessTokenAuthenticator(repository)
 
-		repository.EXPECT().FindById(mock.AnythingOfType("uuid.UUID")).Return(AccessToken{}, testErrorNoDatabase).Once()
+		repository.EXPECT().FindById(mock.AnythingOfType("uuid.UUID")).Return(AccessToken{}, errorNoDatabase).Once()
 
 		token, err := underTest.Authenticate(uuid.New())
 
-		require.ErrorIs(t, err, testErrorNoDatabase)
+		require.ErrorIs(t, err, errorNoDatabase)
 		assert.Zero(t, token)
 	})
 
