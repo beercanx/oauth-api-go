@@ -25,6 +25,8 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 				switch validationError.ErrorType {
 				case UnauthorizedClient:
 					context.AbortWithStatusJSON(http.StatusForbidden, validationError)
+				case InvalidRequest:
+					fallthrough
 				default:
 					context.AbortWithStatusJSON(http.StatusBadRequest, validationError)
 				}
