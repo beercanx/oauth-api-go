@@ -46,6 +46,7 @@ func TestPrincipalRepository(t *testing.T) {
 }
 
 func testPrincipalRepository(t *testing.T, underTest func(id string) (Principal, error)) {
+	t.Helper()
 
 	for _, clientId := range []string{"", " ", "no-such-client"} {
 		t.Run(fmt.Sprintf("should return error on no such client: %s", clientId), func(t *testing.T) {
