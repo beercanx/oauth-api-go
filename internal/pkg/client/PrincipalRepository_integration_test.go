@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPrincipalRepository_FindById(t *testing.T) {
+func TestPrincipalRepository(t *testing.T) {
 	t.Parallel()
 
 	database, databaseError := db.Connect("file:principal_repository_integration_tests?mode=memory&cache=shared")
@@ -34,9 +34,22 @@ func TestPrincipalRepository_FindById(t *testing.T) {
 
 	underTest := NewPrincipalRepository(t.Context(), database)
 
+	t.Run("FindById", func(t *testing.T) {
+		testPrincipalRepository(t, func(id string) (Principal, error) {
+			return underTest.FindById(Id(id))
+		})
+	})
+
+	t.Run("FindByClientId", func(t *testing.T) {
+		testPrincipalRepository(t, underTest.FindByClientId)
+	})
+}
+
+func testPrincipalRepository(t *testing.T, underTest func(id string) (Principal, error)) {
+
 	for _, clientId := range []string{"", " ", "no-such-client"} {
 		t.Run(fmt.Sprintf("should return error on no such client: %s", clientId), func(t *testing.T) {
-			principal, err := underTest.FindById(Id(clientId))
+			principal, err := underTest(clientId)
 			require.ErrorIs(t, err, ErrNoSuchClientPrincipal)
 			assert.Zero(t, principal)
 		})
@@ -52,7 +65,7 @@ func TestPrincipalRepository_FindById(t *testing.T) {
 		"confidential-authorise-without-redirect-uris": "clients with 'Authorise' must have some 'RedirectUris'",
 	} {
 		t.Run(fmt.Sprintf("should return error on invalid client configuration: %s", name), func(t *testing.T) {
-			principal, err := underTest.FindById(Id(name))
+			principal, err := underTest(name)
 			require.ErrorIs(t, err, ErrPrincipalIsInvalid)
 			require.ErrorContains(t, err, expectedError)
 			assert.Zero(t, principal)
@@ -60,7 +73,7 @@ func TestPrincipalRepository_FindById(t *testing.T) {
 	}
 
 	t.Run("should be able to return a valid public client", func(t *testing.T) {
-		principal, err := underTest.FindById("cicada")
+		principal, err := underTest("cicada")
 		require.NoError(t, err)
 		assert.Equal(t, Principal{
 			ClientId:          "cicada",
@@ -73,7 +86,7 @@ func TestPrincipalRepository_FindById(t *testing.T) {
 	})
 
 	t.Run("should be able to return a valid confidential client", func(t *testing.T) {
-		principal, err := underTest.FindById("aardvark")
+		principal, err := underTest("aardvark")
 		require.NoError(t, err)
 		assert.Equal(t, Principal{
 			ClientId:          "aardvark",
