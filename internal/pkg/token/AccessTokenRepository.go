@@ -48,8 +48,8 @@ LIMIT 1;
 
 func (r accessTokenRepository) FindById(id uuid.UUID) (AccessToken, error) {
 	token, err := r.findOne(findAccessTokenById, id)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return AccessToken{}, ErrNoSuchToken
+	if errors.Is(err, sql.ErrNoRows) {
+		return token, ErrNoSuchToken
 	}
 	return token, err
 }
@@ -94,5 +94,8 @@ func (r accessTokenRepository) findOne(query string, args ...any) (AccessToken, 
 		&accessToken.ExpiresAt,
 		&accessToken.NotBefore,
 	)
-	return accessToken, queryError
+	if queryError != nil {
+		return AccessToken{}, queryError
+	}
+	return accessToken, nil
 }

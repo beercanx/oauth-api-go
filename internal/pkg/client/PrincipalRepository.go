@@ -32,13 +32,13 @@ func (r principalRepository) FindById(id Id) (Principal, error) {
 
 	principal, queryError := r.findOne(findClientConfigurationByClientId, id)
 
-	if queryError != nil && errors.Is(queryError, sql.ErrNoRows) {
-		return Principal{}, ErrNoSuchClientPrincipal
+	if errors.Is(queryError, sql.ErrNoRows) {
+		return principal, ErrNoSuchClientPrincipal
 	}
 
 	if queryError != nil {
 		log.Printf("Failed to retrieve client configuration for id %s: %v", id, queryError)
-		return Principal{}, queryError
+		return principal, queryError
 	}
 
 	if validateError := principal.Validate(); validateError != nil {
@@ -63,7 +63,10 @@ func (r principalRepository) findOne(query string, args ...any) (Principal, erro
 		&principal.AllowedActions,
 		&principal.AllowedGrantTypes,
 	)
-	return principal, queryError
+	if queryError != nil {
+		return Principal{}, queryError
+	}
+	return principal, nil
 }
 
 var _ PrincipalRepository = (*principalRepository)(nil)
