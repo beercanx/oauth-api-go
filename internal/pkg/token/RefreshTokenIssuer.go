@@ -30,7 +30,7 @@ func (issuer *refreshTokenIssuer) Issue(
 	refreshToken := RefreshToken{
 		ID:        uuid.New(),
 		Username:  username,
-		ClientId:  clientId,
+		ClientID:  clientId,
 		Scopes:    scopes,
 		IssuedAt:  issuedAt,
 		ExpiresAt: expiresAt,

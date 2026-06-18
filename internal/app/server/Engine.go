@@ -45,7 +45,7 @@ func Engine(
 	accessTokenIssuer := token.NewAccessTokenIssuer(accessTokenRepository)
 	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
-	refreshTokenRepository := token.NewRefreshTokenRepository()
+	refreshTokenRepository := token.NewRefreshTokenRepository(ctx, database)
 	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
 
 	userCredentialRepository := user.NewInMemoryCredentialRepository()

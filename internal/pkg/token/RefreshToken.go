@@ -12,7 +12,7 @@ import (
 type RefreshToken struct {
 	ID        uuid.UUID                  `db:"id"`
 	Username  user.AuthenticatedUsername `db:"username"`
-	ClientId  client.Id                  `db:"client_id"`
+	ClientID  client.Id                  `db:"client_id"`
 	Scopes    scope.Scopes               `db:"scopes"`
 	IssuedAt  time.Time                  `db:"issued_at"`
 	ExpiresAt time.Time                  `db:"expires_at"`
