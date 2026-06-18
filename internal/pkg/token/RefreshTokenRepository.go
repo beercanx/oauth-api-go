@@ -67,10 +67,6 @@ func (r refreshTokenRepository) DeleteById(id uuid.UUID) error {
 	return err
 }
 
-func (r refreshTokenRepository) DeleteByRecord(record RefreshToken) error {
-	return r.DeleteById(record.ID)
-}
-
 // #nosec G101 -- SQL query for a credential, not a credential itself
 const deleteExpiredRefreshTokens = `
 DELETE

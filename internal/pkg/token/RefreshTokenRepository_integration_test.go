@@ -143,23 +143,6 @@ func TestRefreshTokenRepository(t *testing.T) {
 		})
 	})
 
-	t.Run("delete refresh token by record", func(t *testing.T) {
-
-		validRefreshToken := validRefreshToken
-		validRefreshToken.ID = uuid.New()
-		require.NoError(t, underTest.Insert(validRefreshToken))
-
-		t.Run("should return no error if no refresh token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(RefreshToken{ID: uuid.New()}))
-		})
-
-		t.Run("should return no error if refresh token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(validRefreshToken))
-			_, err := underTest.FindById(validRefreshToken.ID)
-			require.ErrorIs(t, err, ErrNoSuchToken)
-		})
-	})
-
 	t.Run("delete all expired refresh tokens", func(t *testing.T) {
 
 		expiredRefreshToken := validRefreshToken

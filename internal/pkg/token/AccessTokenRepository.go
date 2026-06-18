@@ -66,10 +66,6 @@ func (r accessTokenRepository) DeleteById(id uuid.UUID) error {
 	return err
 }
 
-func (r accessTokenRepository) DeleteByRecord(record AccessToken) error {
-	return r.DeleteById(record.ID)
-}
-
 // #nosec G101 -- SQL query for a credential, not a credential itself
 const deleteExpiredAccessTokens = `
 DELETE

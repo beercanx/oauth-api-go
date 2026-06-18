@@ -143,23 +143,6 @@ func TestAccessTokenRepository(t *testing.T) {
 		})
 	})
 
-	t.Run("delete access token by record", func(t *testing.T) {
-
-		validAccessToken := validAccessToken
-		validAccessToken.ID = uuid.New()
-		require.NoError(t, underTest.Insert(validAccessToken))
-
-		t.Run("should return no error if no access token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(AccessToken{ID: uuid.New()}))
-		})
-
-		t.Run("should return no error if access token is found", func(t *testing.T) {
-			require.NoError(t, underTest.DeleteByRecord(validAccessToken))
-			_, err := underTest.FindById(validAccessToken.ID)
-			require.ErrorIs(t, err, ErrNoSuchToken)
-		})
-	})
-
 	t.Run("delete all expired access tokens", func(t *testing.T) {
 
 		expiredAccessToken := validAccessToken

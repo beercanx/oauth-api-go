@@ -40,7 +40,7 @@ func TestAccessTokenAuthenticator_Authenticate(t *testing.T) {
 		dbToken := AccessToken{ID: token, ExpiresAt: time.Now().Add(-time.Hour)}
 
 		repository.EXPECT().FindById(token).Return(dbToken, nil).Once()
-		repository.EXPECT().DeleteByRecord(dbToken).Return(nil).Once()
+		repository.EXPECT().DeleteById(token).Return(nil).Once()
 
 		accessToken, err := underTest.Authenticate(token)
 

@@ -19,7 +19,7 @@ func (service *accessTokenAuthenticator) Authenticate(token uuid.UUID) (AccessTo
 		return AccessToken{}, fmt.Errorf("authenticate access token failed: %w", err)
 
 	case accessToken.HasExpired():
-		if err = service.repository.DeleteByRecord(accessToken); err != nil {
+		if err = service.repository.DeleteById(accessToken.ID); err != nil {
 			return AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
 		}
 		return AccessToken{}, ErrTokenHasExpired

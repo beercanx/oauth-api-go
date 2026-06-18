@@ -20,7 +20,6 @@ type RepositoryRead[R any] interface {
 
 type RepositoryDelete[R any] interface {
 	DeleteById(id uuid.UUID) error
-	DeleteByRecord(record R) error
 	DeletedExpired() error
 }
 

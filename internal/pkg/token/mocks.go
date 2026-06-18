@@ -447,57 +447,6 @@ func (_c *MockRepositoryDelete_DeleteById_Call[R]) RunAndReturn(run func(id uuid
 	return _c
 }
 
-// DeleteByRecord provides a mock function for the type MockRepositoryDelete
-func (_mock *MockRepositoryDelete[R]) DeleteByRecord(record R) error {
-	ret := _mock.Called(record)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteByRecord")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(R) error); ok {
-		r0 = returnFunc(record)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRepositoryDelete_DeleteByRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteByRecord'
-type MockRepositoryDelete_DeleteByRecord_Call[R any] struct {
-	*mock.Call
-}
-
-// DeleteByRecord is a helper method to define mock.On call
-//   - record R
-func (_e *MockRepositoryDelete_Expecter[R]) DeleteByRecord(record interface{}) *MockRepositoryDelete_DeleteByRecord_Call[R] {
-	return &MockRepositoryDelete_DeleteByRecord_Call[R]{Call: _e.mock.On("DeleteByRecord", record)}
-}
-
-func (_c *MockRepositoryDelete_DeleteByRecord_Call[R]) Run(run func(record R)) *MockRepositoryDelete_DeleteByRecord_Call[R] {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 R
-		if args[0] != nil {
-			arg0 = args[0].(R)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRepositoryDelete_DeleteByRecord_Call[R]) Return(err error) *MockRepositoryDelete_DeleteByRecord_Call[R] {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRepositoryDelete_DeleteByRecord_Call[R]) RunAndReturn(run func(record R) error) *MockRepositoryDelete_DeleteByRecord_Call[R] {
-	_c.Call.Return(run)
-	return _c
-}
-
 // DeletedExpired provides a mock function for the type MockRepositoryDelete
 func (_mock *MockRepositoryDelete[R]) DeletedExpired() error {
 	ret := _mock.Called()
@@ -616,57 +565,6 @@ func (_c *MockRepositoryReadDelete_DeleteById_Call[R]) Return(err error) *MockRe
 }
 
 func (_c *MockRepositoryReadDelete_DeleteById_Call[R]) RunAndReturn(run func(id uuid.UUID) error) *MockRepositoryReadDelete_DeleteById_Call[R] {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteByRecord provides a mock function for the type MockRepositoryReadDelete
-func (_mock *MockRepositoryReadDelete[R]) DeleteByRecord(record R) error {
-	ret := _mock.Called(record)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteByRecord")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(R) error); ok {
-		r0 = returnFunc(record)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRepositoryReadDelete_DeleteByRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteByRecord'
-type MockRepositoryReadDelete_DeleteByRecord_Call[R any] struct {
-	*mock.Call
-}
-
-// DeleteByRecord is a helper method to define mock.On call
-//   - record R
-func (_e *MockRepositoryReadDelete_Expecter[R]) DeleteByRecord(record interface{}) *MockRepositoryReadDelete_DeleteByRecord_Call[R] {
-	return &MockRepositoryReadDelete_DeleteByRecord_Call[R]{Call: _e.mock.On("DeleteByRecord", record)}
-}
-
-func (_c *MockRepositoryReadDelete_DeleteByRecord_Call[R]) Run(run func(record R)) *MockRepositoryReadDelete_DeleteByRecord_Call[R] {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 R
-		if args[0] != nil {
-			arg0 = args[0].(R)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRepositoryReadDelete_DeleteByRecord_Call[R]) Return(err error) *MockRepositoryReadDelete_DeleteByRecord_Call[R] {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRepositoryReadDelete_DeleteByRecord_Call[R]) RunAndReturn(run func(record R) error) *MockRepositoryReadDelete_DeleteByRecord_Call[R] {
 	_c.Call.Return(run)
 	return _c
 }
@@ -851,57 +749,6 @@ func (_c *MockRepository_DeleteById_Call[R]) Return(err error) *MockRepository_D
 }
 
 func (_c *MockRepository_DeleteById_Call[R]) RunAndReturn(run func(id uuid.UUID) error) *MockRepository_DeleteById_Call[R] {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteByRecord provides a mock function for the type MockRepository
-func (_mock *MockRepository[R]) DeleteByRecord(record R) error {
-	ret := _mock.Called(record)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteByRecord")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(R) error); ok {
-		r0 = returnFunc(record)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockRepository_DeleteByRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteByRecord'
-type MockRepository_DeleteByRecord_Call[R any] struct {
-	*mock.Call
-}
-
-// DeleteByRecord is a helper method to define mock.On call
-//   - record R
-func (_e *MockRepository_Expecter[R]) DeleteByRecord(record interface{}) *MockRepository_DeleteByRecord_Call[R] {
-	return &MockRepository_DeleteByRecord_Call[R]{Call: _e.mock.On("DeleteByRecord", record)}
-}
-
-func (_c *MockRepository_DeleteByRecord_Call[R]) Run(run func(record R)) *MockRepository_DeleteByRecord_Call[R] {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 R
-		if args[0] != nil {
-			arg0 = args[0].(R)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockRepository_DeleteByRecord_Call[R]) Return(err error) *MockRepository_DeleteByRecord_Call[R] {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockRepository_DeleteByRecord_Call[R]) RunAndReturn(run func(record R) error) *MockRepository_DeleteByRecord_Call[R] {
 	_c.Call.Return(run)
 	return _c
 }
