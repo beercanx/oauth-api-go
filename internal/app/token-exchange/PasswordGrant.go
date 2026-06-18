@@ -9,19 +9,19 @@ import (
 	"baconi.co.uk/oauth/internal/pkg/user"
 )
 
-type PasswordGrant struct {
+type passwordGrant struct {
 	accessTokenIssuer  token.Issuer[token.AccessToken]
 	refreshTokenIssuer token.Issuer[token.RefreshToken]
 	userAuthenticator  user.Authenticator
 }
 
-var _ Grant[PasswordRequest] = (*PasswordGrant)(nil)
+var _ Grant[PasswordRequest] = (*passwordGrant)(nil)
 
 func NewPasswordGrant(accessTokenIssuer token.Issuer[token.AccessToken], refreshTokenIssuer token.Issuer[token.RefreshToken], userAuthenticator user.Authenticator) Grant[PasswordRequest] {
-	return &PasswordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
+	return &passwordGrant{accessTokenIssuer, refreshTokenIssuer, userAuthenticator}
 }
 
-func (grant PasswordGrant) Exchange(request *PasswordRequest) (Success, error) {
+func (grant passwordGrant) Exchange(request *PasswordRequest) (Success, error) {
 
 	success, err := grant.userAuthenticator.Authenticate(request.Username, request.Password)
 	var failure user.AuthenticationFailure

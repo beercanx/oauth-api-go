@@ -19,6 +19,14 @@ func TestScopes_Marshaler(t *testing.T) {
 		assert.Equal(t, []byte(`""`), result)
 	})
 
+	t.Run("should be able to marshal scopes with a single scope", func(t *testing.T) {
+		t.Parallel()
+
+		result, err := Scopes{"zebra"}.MarshalJSON()
+		require.NoError(t, err)
+		assert.Equal(t, []byte(`"zebra"`), result)
+	})
+
 	t.Run("should be able to marshal scopes as space deliminated string", func(t *testing.T) {
 		t.Parallel()
 

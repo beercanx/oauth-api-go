@@ -49,7 +49,7 @@ func Route(
 			case exchangeError != nil && errors.As(exchangeError, &failed):
 				context.JSON(http.StatusBadRequest, failed)
 			case exchangeError != nil:
-				log.Printf("[ERROR] Some kind of error bubbled up... %T: %v\n", exchangeError, exchangeError)
+				log.Printf("[ERROR][token_exchange.Route] Some kind of error bubbled up... %T: %v\n", exchangeError, exchangeError)
 				context.AbortWithStatus(http.StatusInternalServerError)
 			default:
 				context.JSON(http.StatusOK, result)

@@ -34,7 +34,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
 	clientPrincipalRepository := client.NewPrincipalRepository(t.Context(), database)
-	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
+	clientAuthenticator := client.NewAuthenticator(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := NewIntrospector(accessTokenAuthenticator)
 
@@ -43,7 +43,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 		engine.Use(gin.Logger(), gin.Recovery())
 	})
 
-	Route(router, clientAuthenticationService, tokenIntrospector)
+	Route(router, clientAuthenticator, tokenIntrospector)
 
 	t.Run("should allow only post requests", func(t *testing.T) {
 

@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/alexedwards/argon2id"
 )
@@ -48,32 +49,39 @@ func NewAuthenticator(credentialRepository CredentialRepository, statusRepositor
 
 func (service *authenticator) Authenticate(username string, password string) (Authenticated, error) {
 
-	credential, err := service.credentialRepository.FindByUsername(username)
+	credential, credentialError := service.credentialRepository.FindByUsername(username)
 	switch {
-	case errors.Is(err, ErrNoSuchCredential):
-		return Authenticated{}, AuthenticationFailure{Missing} // TODO - This is bad because of time-based attacks.
-	case err != nil:
-		return Authenticated{}, err
+	case errors.Is(credentialError, ErrNoSuchCredential):
+		log.Printf("[TRACE][user.Authenticator] No such credential for %s", username)
+		return Authenticated{}, AuthenticationFailure{Missing}
+	case credentialError != nil:
+		log.Printf("[ERROR][user.Authenticator] Failed to find user credential for %s: %v", username, credentialError)
+		return Authenticated{}, credentialError
 	}
 
-	// TODO - How can this be made to check non existent hashes to reduce surface area of a time-based attack.
-	match, err := argon2id.ComparePasswordAndHash(password, credential.hashedSecret)
+	match, matchError := argon2id.ComparePasswordAndHash(password, credential.hashedSecret)
 	switch {
-	case err != nil:
-		return Authenticated{}, err
+	case matchError != nil:
+		log.Printf("[ERROR][user.Authenticator] Failed to compare password and hash for %s: %v", username, matchError)
+		return Authenticated{}, matchError
 	case !match:
+		log.Printf("[DEBUG][user.Authenticator] Password mismatched for %s", username)
 		return Authenticated{}, AuthenticationFailure{Mismatched}
 	}
 
-	status, err := service.statusRepository.FindByUsername(username)
+	status, statusError := service.statusRepository.FindByUsername(username)
 	switch {
-	case errors.Is(err, ErrNoSuchStatus):
+	case errors.Is(statusError, ErrNoSuchStatus):
+		log.Printf("[WARN][user.Authenticator] No such status for %s", username)
 		return Authenticated{}, AuthenticationFailure{Missing}
-	case err != nil:
-		return Authenticated{}, err
+	case statusError != nil:
+		log.Printf("[ERROR][user.Authenticator] Failed to find user status for %s: %v", username, statusError)
+		return Authenticated{}, statusError
 	case status.locked:
+		log.Printf("[WARN][user.Authenticator] User is locked for %s", username)
 		return Authenticated{}, AuthenticationFailure{Locked}
 	default:
+		log.Printf("[TRACE][user.Authenticator] User authenticated for %s", username)
 		return Authenticated{AuthenticatedUsername(username)}, nil
 	}
 }

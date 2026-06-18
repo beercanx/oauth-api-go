@@ -36,7 +36,7 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 			introspected, introspectionError := introspector.introspect(validated)
 
 			if introspectionError != nil {
-				log.Println("[ERROR] Unexpected introspection error:", introspectionError)
+				log.Println("[ERROR][token_introspection.Route] Unexpected introspection error:", introspectionError)
 				context.AbortWithStatus(http.StatusInternalServerError)
 				return
 			}

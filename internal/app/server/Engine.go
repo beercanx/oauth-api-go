@@ -56,15 +56,15 @@ func Engine(
 
 	clientSecretRepository := client.NewInMemorySecretRepository()
 	clientPrincipalRepository := client.NewPrincipalRepository(ctx, database)
-	clientAuthenticationService := client.NewAuthenticationService(clientSecretRepository, clientPrincipalRepository)
+	clientAuthenticator := client.NewAuthenticator(clientSecretRepository, clientPrincipalRepository)
 
 	tokenIntrospector := token_introspection.NewIntrospector(accessTokenAuthenticator)
 
 	//
 	// Add Routes
 	//
-	token_exchange.Route(engine, clientAuthenticationService, passwordGrant)
-	token_introspection.Route(engine, clientAuthenticationService, tokenIntrospector)
+	token_exchange.Route(engine, clientAuthenticator, passwordGrant)
+	token_introspection.Route(engine, clientAuthenticator, tokenIntrospector)
 
 	return engine, nil
 }
