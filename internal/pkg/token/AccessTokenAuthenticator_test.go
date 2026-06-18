@@ -30,7 +30,7 @@ func TestAccessTokenAuthenticator_Authenticate(t *testing.T) {
 		assert.Zero(t, token)
 	})
 
-	t.Run("should return error if access token is expired", func(t *testing.T) {
+	t.Run("should return expired error if access token is expired", func(t *testing.T) {
 		t.Parallel()
 
 		repository := NewMockRepositoryReadDelete[AccessToken](t)
@@ -41,6 +41,25 @@ func TestAccessTokenAuthenticator_Authenticate(t *testing.T) {
 
 		repository.EXPECT().FindById(token).Return(dbToken, nil).Once()
 		repository.EXPECT().DeleteById(token).Return(nil).Once()
+
+		accessToken, err := underTest.Authenticate(token)
+
+		require.ErrorIs(t, err, ErrTokenHasExpired)
+		assert.Zero(t, accessToken)
+		assert.NotEqual(t, dbToken, accessToken)
+	})
+
+	t.Run("should return expired error if access token is expired and delete fails", func(t *testing.T) {
+		t.Parallel()
+
+		repository := NewMockRepositoryReadDelete[AccessToken](t)
+		underTest := NewAccessTokenAuthenticator(repository)
+
+		token := uuid.New()
+		dbToken := AccessToken{ID: token, ExpiresAt: time.Now().Add(-time.Hour)}
+
+		repository.EXPECT().FindById(token).Return(dbToken, nil).Once()
+		repository.EXPECT().DeleteById(token).Return(errors.ErrUnsupported).Once()
 
 		accessToken, err := underTest.Authenticate(token)
 

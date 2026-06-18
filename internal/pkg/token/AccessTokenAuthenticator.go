@@ -2,6 +2,7 @@ package token
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ func (service *accessTokenAuthenticator) Authenticate(token uuid.UUID) (AccessTo
 
 	case accessToken.HasExpired():
 		if err = service.repository.DeleteById(accessToken.ID); err != nil {
-			return AccessToken{}, fmt.Errorf("delete expired access token failed: %w", err)
+			log.Println("[WARN] AccessTokenAuthenticator.Authenticate failed to delete expired access token:", err)
 		}
 		return AccessToken{}, ErrTokenHasExpired
 
