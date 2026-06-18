@@ -7,27 +7,27 @@ import (
 	"github.com/alexedwards/argon2id"
 )
 
-type InMemoryCredentialRepository struct {
+type inMemoryCredentialRepository struct {
 	store map[string]Credential
 }
 
-func (repository *InMemoryCredentialRepository) Insert(new Credential) error {
+func (repository *inMemoryCredentialRepository) Insert(new Credential) error {
 	repository.store[strings.ToLower(new.username)] = new
 	return nil
 }
 
-func (repository *InMemoryCredentialRepository) FindByUsername(username string) (Credential, error) {
+func (repository *inMemoryCredentialRepository) FindByUsername(username string) (Credential, error) {
 	if credential, ok := repository.store[strings.ToLower(username)]; ok {
 		return credential, nil
 	}
 	return Credential{}, ErrNoSuchCredential
 }
 
-// assert InMemoryCredentialRepository implements CredentialRepository
-var _ CredentialRepository = (*InMemoryCredentialRepository)(nil)
+// assert inMemoryCredentialRepository implements CredentialRepository
+var _ CredentialRepository = (*inMemoryCredentialRepository)(nil)
 
-func NewInMemoryCredentialRepository() *InMemoryCredentialRepository {
-	repository := &InMemoryCredentialRepository{make(map[string]Credential)}
+func NewInMemoryCredentialRepository() CredentialRepository {
+	repository := &inMemoryCredentialRepository{make(map[string]Credential)}
 
 	// TODO - Remove once we've got a means of creating new users
 	hash, _ := argon2id.CreateHash("P@55w0rd", argon2id.DefaultParams)

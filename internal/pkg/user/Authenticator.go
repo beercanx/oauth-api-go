@@ -71,7 +71,7 @@ func (service *authenticator) Authenticate(username string, password string) (Au
 		return Authenticated{}, AuthenticationFailure{Missing}
 	case err != nil:
 		return Authenticated{}, err
-	case status.isLocked():
+	case status.locked:
 		return Authenticated{}, AuthenticationFailure{Locked}
 	default:
 		return Authenticated{AuthenticatedUsername(username)}, nil
