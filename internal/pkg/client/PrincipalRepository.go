@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
+	"log/slog"
 )
 
 var (
@@ -37,7 +37,7 @@ func (r principalRepository) FindById(id Id) (Principal, error) {
 	}
 
 	if queryError != nil {
-		log.Printf("Failed to retrieve client configuration for id %s: %v", id, queryError)
+		slog.Error("Failed to retrieve client configuration", "id", string(id), "error", queryError)
 		return principal, queryError
 	}
 

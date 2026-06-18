@@ -2,7 +2,7 @@ package token_introspection
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 
 	"baconi.co.uk/oauth/internal/pkg/token"
 )
@@ -29,25 +29,25 @@ func (service introspector) introspect(r request) (response, error) {
 	switch {
 
 	case errors.Is(err, token.ErrNoSuchToken):
-		log.Println("[TRACE][token_introspection.Introspector] No such token")
+		slog.Debug("No such token")
 		return response{Active: false}, nil
 
 	case errors.Is(err, token.ErrTokenHasExpired):
-		log.Println("[TRACE][token_introspection.Introspector] Token has expired")
+		slog.Debug("Token has expired")
 		return response{Active: false}, nil
 
 	case errors.Is(err, token.ErrTokenIsBefore):
-		log.Println("[TRACE][token_introspection.Introspector] Token is not yet valid")
+		slog.Debug("Token is not yet valid")
 		return response{Active: false}, nil
 
 	case err != nil:
-		log.Println("[ERROR][token_introspection.Introspector] Failed to authenticate token:", err)
+		slog.Error("Failed to authenticate token", slog.Any("error", err))
 		return response{}, err
 
 	// TODO - Decide out if we want to block any Confident client from introspecting any token.
 
 	default:
-		log.Println("[TRACE][token_introspection.Introspector] Token found and is valid")
+		slog.Debug("Token found and is valid")
 		return response{
 			Active:         true,
 			Scope:          accessToken.Scopes,

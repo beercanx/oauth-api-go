@@ -1,7 +1,7 @@
 package token_introspection
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
@@ -36,7 +36,7 @@ func Route(engine *gin.Engine, clientAuthenticator client.Authenticator, introsp
 			introspected, introspectionError := introspector.introspect(validated)
 
 			if introspectionError != nil {
-				log.Println("[ERROR][token_introspection.Route] Unexpected introspection error:", introspectionError)
+				slog.Error("Unexpected error during introspection", slog.Any("error", introspectionError))
 				context.AbortWithStatus(http.StatusInternalServerError)
 				return
 			}

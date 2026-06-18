@@ -3,7 +3,7 @@ package token_exchange
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
@@ -49,7 +49,7 @@ func Route(
 			case exchangeError != nil && errors.As(exchangeError, &failed):
 				context.JSON(http.StatusBadRequest, failed)
 			case exchangeError != nil:
-				log.Printf("[ERROR][token_exchange.Route] Some kind of error bubbled up... %T: %v\n", exchangeError, exchangeError)
+				slog.Error("Unexpected error during token exchange", slog.Any("error", exchangeError))
 				context.AbortWithStatus(http.StatusInternalServerError)
 			default:
 				context.JSON(http.StatusOK, result)

@@ -28,6 +28,7 @@ linters:
     - contextcheck
     - asasalint
     - importas
+    - sloglint
 
     # Security
     - gosec
