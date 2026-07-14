@@ -44,7 +44,11 @@ func (a authenticator) AuthenticateAsPublic(clientId string) (Principal, bool) {
 
 func (a authenticator) AuthenticateAsConfidential(clientId string, clientSecret string) (Principal, bool) {
 
-	secrets, _ := a.secretRepository.FindByClientId(clientId)
+	secrets, secretError := a.secretRepository.FindByClientId(clientId)
+	if secretError != nil {
+		slog.Error("Failed to retrieve confidential client secrets", "clientId", clientId, "error", secretError)
+		return Principal{}, false
+	}
 
 	var secret Secret
 	var matched = false
@@ -68,13 +72,13 @@ loop:
 		return Principal{}, false
 	}
 
-	principal, repositoryError := a.principalRepository.FindById(secret.clientId)
+	principal, principalError := a.principalRepository.FindById(secret.clientId)
 	switch {
-	case errors.Is(repositoryError, ErrNoSuchClientPrincipal):
+	case errors.Is(principalError, ErrNoSuchClientPrincipal):
 		slog.Debug("No confidential client principal found", "clientId", secret.clientId)
 		return Principal{}, false
-	case repositoryError != nil:
-		slog.Error("Failed to retrieve confidential client", "clientId", secret.clientId, "error", repositoryError)
+	case principalError != nil:
+		slog.Error("Failed to retrieve confidential client", "clientId", secret.clientId, "error", principalError)
 		return Principal{}, false
 	case !principal.IsConfidential():
 		slog.Debug("Client is not confidential", "clientId", secret.clientId)

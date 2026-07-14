@@ -54,7 +54,7 @@ func Engine(
 
 	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticator)
 
-	clientSecretRepository := client.NewInMemorySecretRepository()
+	clientSecretRepository := client.NewSecretRepository(ctx, database)
 	clientPrincipalRepository := client.NewPrincipalRepository(ctx, database)
 	clientAuthenticator := client.NewAuthenticator(clientSecretRepository, clientPrincipalRepository)
 

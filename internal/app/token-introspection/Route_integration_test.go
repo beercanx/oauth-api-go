@@ -32,7 +32,7 @@ func TestTokenIntrospectionRequests(t *testing.T) {
 	accessTokenRepository := token.NewAccessTokenRepository(t.Context(), database)
 	accessTokenAuthenticator := token.NewAccessTokenAuthenticator(accessTokenRepository)
 
-	clientSecretRepository := client.NewInMemorySecretRepository()
+	clientSecretRepository := client.NewSecretRepository(t.Context(), database)
 	clientPrincipalRepository := client.NewPrincipalRepository(t.Context(), database)
 	clientAuthenticator := client.NewAuthenticator(clientSecretRepository, clientPrincipalRepository)
 
