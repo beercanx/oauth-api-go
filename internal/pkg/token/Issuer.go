@@ -6,6 +6,6 @@ import (
 	"baconi.co.uk/oauth/internal/pkg/user"
 )
 
-type Issuer[T Token] interface {
+type Issuer[T any] interface {
 	Issue(username user.AuthenticatedUsername, clientId client.Id, scopes scope.Scopes) (T, error)
 }

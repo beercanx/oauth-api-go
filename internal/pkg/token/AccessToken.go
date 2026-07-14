@@ -10,42 +10,19 @@ import (
 )
 
 type AccessToken struct {
-	Value     uuid.UUID
-	Username  user.AuthenticatedUsername
-	ClientId  client.Id
-	Scopes    scope.Scopes
-	IssuedAt  time.Time
-	ExpiresAt time.Time
-	NotBefore time.Time
+	ID        uuid.UUID                  `db:"id"`
+	Username  user.AuthenticatedUsername `db:"username"`
+	ClientID  client.Id                  `db:"client_id"`
+	Scopes    scope.Scopes               `db:"scopes"`
+	IssuedAt  time.Time                  `db:"issued_at"`
+	ExpiresAt time.Time                  `db:"expires_at"`
+	NotBefore time.Time                  `db:"not_before"`
 }
 
-// assert AccessToken implements Token
-var _ Token = (*AccessToken)(nil)
-
-func (token AccessToken) GetValue() uuid.UUID {
-	return token.Value
+func (token AccessToken) HasExpired() bool {
+	return time.Now().After(token.ExpiresAt)
 }
 
-func (token AccessToken) GetUsername() user.AuthenticatedUsername {
-	return token.Username
-}
-
-func (token AccessToken) GetClientId() client.Id {
-	return token.ClientId
-}
-
-func (token AccessToken) GetScopes() scope.Scopes {
-	return token.Scopes
-}
-
-func (token AccessToken) GetIssuedAt() time.Time {
-	return token.IssuedAt
-}
-
-func (token AccessToken) GetExpiresAt() time.Time {
-	return token.ExpiresAt
-}
-
-func (token AccessToken) GetNotBefore() time.Time {
-	return token.NotBefore
+func (token AccessToken) IsBefore() bool {
+	return time.Now().Before(token.NotBefore)
 }

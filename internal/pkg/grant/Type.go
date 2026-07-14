@@ -1,5 +1,12 @@
 package grant
 
+import (
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+)
+
 type Type string
 
 const (
@@ -8,3 +15,20 @@ const (
 	RefreshToken      Type = "refresh_token"
 	Assertion         Type = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 )
+
+type Types []Type
+
+var _ sql.Scanner = (*Types)(nil)
+
+var ErrUnsupportedGrantTypeSource = errors.New("unsupported source type for grant Type")
+
+func (r *Types) Scan(raw any) error {
+	switch source := raw.(type) {
+	case string:
+		return json.Unmarshal([]byte(source), r)
+	case []byte:
+		return json.Unmarshal(source, r)
+	default:
+		return fmt.Errorf("%w: %T", ErrUnsupportedGrantTypeSource, raw)
+	}
+}

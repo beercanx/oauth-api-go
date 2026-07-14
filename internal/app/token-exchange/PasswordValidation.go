@@ -10,20 +10,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) (*PasswordRequest, *Invalid) {
+func validatePasswordRequest(context *gin.Context) (*PasswordRequest, *Invalid) {
 
 	username, usernameOk := context.GetPostForm("username")
 	password, passwordOk := context.GetPostForm("password")
 	scopeP, scopeOk := context.GetPostForm("scope")
 	rawScopes := strings.Split(scopeP, " ")
-	scopes := scopeService.Validate(rawScopes)
+	scopes := scope.AsUniqueScopes(rawScopes)
 	state, stateOk := context.GetPostForm("state")
 
 	principal := context.MustGet(client.AuthClientKey).(client.Principal)
 
 	switch {
 	case !principal.IsConfidential(), !principal.CanBeGranted(grant.Password):
-		return nil, &Invalid{Err: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.Id, grant.Password)}
+		return nil, &Invalid{Err: UnauthorizedClient, Description: fmt.Sprintf("%s is not authorized to: %s", principal.ClientId, grant.Password)}
 
 	case !usernameOk:
 		return nil, &Invalid{Err: InvalidRequest, Description: "missing parameter: username"}
@@ -35,14 +35,12 @@ func validatePasswordRequest(scopeService *scope.Service, context *gin.Context) 
 		return nil, &Invalid{Err: InvalidRequest, Description: "missing parameter: password"}
 
 	// The requested scope is invalid, unknown, or malformed.
-	case scopeOk && len(scopes.Value) == 0:
+	case scopeOk && len(scopes) == 0:
 		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
-	case len(rawScopes) != len(scopes.Value):
+	case len(rawScopes) != len(scopes):
 		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
-	case !principal.CanBeIssued(scopes.Value):
+	case !principal.CanBeIssued(scopes):
 		return nil, &Invalid{Err: InvalidScope, Description: "invalid parameter: scope"}
-
-	// TODO - Enforce unique scopes requested
 
 	// If state is provided it cannot be a zero string.
 	case stateOk && state == "":

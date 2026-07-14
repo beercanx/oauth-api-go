@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	ErrAccessTokenHasExpired = errors.New("access token has expired")
-	ErrAccessTokenIsBefore   = errors.New("access token is before")
+	ErrTokenHasExpired = errors.New("token has expired")
+	ErrTokenIsBefore   = errors.New("token is before")
 )
 
-type Authenticator[T Token] interface {
+type Authenticator[T any] interface {
 	Authenticate(token uuid.UUID) (T, error)
 }

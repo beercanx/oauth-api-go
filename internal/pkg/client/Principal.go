@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
@@ -9,47 +10,62 @@ import (
 )
 
 type Principal struct {
-	Id                Id
-	Type              Type
-	RedirectUris      []string
-	AllowedScopes     []scope.Scope
-	AllowedActions    []Action
-	AllowedGrantTypes []grant.Type
+	ClientId          Id           `db:"client_id"`
+	ClientType        Type         `db:"client_type"`
+	RedirectUris      RedirectUris `db:"redirect_uris"`
+	AllowedScopes     scope.Scopes `db:"allowed_scopes"`
+	AllowedActions    Actions      `db:"allowed_actions"`
+	AllowedGrantTypes grant.Types  `db:"allowed_grant_types"`
+	// TODO - make sure database has createdAt and updatedAt columns
 }
 
-// Verify that the Principal is configured correctly for its Type. TODO - Work out if we still want this and where it goes.
-func (p Principal) verify() {
+var ErrPrincipalIsInvalid = errors.New("principal is invalid")
 
-	require(p.Type == Public || p.Type == Confidential, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
+// Validate that the Principal is configured correctly for its Type.
+func (p Principal) Validate() error {
+
+	if p.ClientType != Public && p.ClientType != Confidential {
+		return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
+	}
 
 	if p.IsConfidential() {
-		require(p.Type == Confidential, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
+		if p.ClientType != Confidential {
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
+		}
 	}
 
 	if p.IsPublic() {
-		require(p.Type == Public, fmt.Sprintf("[%s] type cannot be [%s]", p.Id, p.Type))
-		require(!p.CanPerformAction(Introspect), fmt.Sprintf("public clients must not be allowed to introspect: %s", p.Id))
-		require(!p.CanBeGranted(grant.Password), fmt.Sprintf("public clients must not use password grant: %s", p.Id))
-		require(!p.CanBeGranted(grant.AuthorisationCode) || p.CanPerformAction(ProofKeyForCodeExchange),
-			fmt.Sprintf("public clients must not use authorisation code grant without PKCE: %s", p.Id),
-		)
+		if p.ClientType != Public {
+			return fmt.Errorf("[%s] type cannot be [%s]: %w", p.ClientId, p.ClientType, ErrPrincipalIsInvalid)
+		}
+		if p.CanPerformAction(Introspect) {
+			return fmt.Errorf("[%s] public clients must not be allowed to introspect: %w", p.ClientId, ErrPrincipalIsInvalid)
+		}
+		if p.CanBeGranted(grant.Password) {
+			return fmt.Errorf("[%s] public clients must not use password grant: %w", p.ClientId, ErrPrincipalIsInvalid)
+		}
+		if p.CanBeGranted(grant.AuthorisationCode) && !p.CanPerformAction(ProofKeyForCodeExchange) {
+			return fmt.Errorf("[%s] public clients must not use authorisation code grant without PKCE: %w", p.ClientId, ErrPrincipalIsInvalid)
+		}
 	}
 
-	require(!p.CanPerformAction(Authorise) || p.CanBeGranted(grant.AuthorisationCode), // TODO - Replace with implied action based on grant type?
-		fmt.Sprintf("clients with 'Authorise' must have 'AuthorisationCode': %s", p.Id),
-	)
+	if p.CanPerformAction(Authorise) && !p.CanBeGranted(grant.AuthorisationCode) {
+		return fmt.Errorf("[%s] clients with 'Authorise' must have 'AuthorisationCode': %w", p.ClientId, ErrPrincipalIsInvalid)
+	}
 
-	require(!p.CanPerformAction(Authorise) || len(p.RedirectUris) != 0,
-		fmt.Sprintf("clients with 'Authorise' must have some 'RedirectUris': %s", p.Id),
-	)
+	if p.CanPerformAction(Authorise) && len(p.RedirectUris) == 0 {
+		return fmt.Errorf("[%s] clients with 'Authorise' must have some 'RedirectUris': %w", p.ClientId, ErrPrincipalIsInvalid)
+	}
+
+	return nil
 }
 
 func (p Principal) IsPublic() bool {
-	return p.Type == Public
+	return p.ClientType == Public
 }
 
 func (p Principal) IsConfidential() bool {
-	return p.Type == Confidential
+	return p.ClientType == Confidential
 }
 
 func (p Principal) CanBeGranted(grantType grant.Type) bool {

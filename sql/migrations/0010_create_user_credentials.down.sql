@@ -1,0 +1,2 @@
+DROP TRIGGER user_credentials_modified_at;
+DROP TABLE user_credentials;

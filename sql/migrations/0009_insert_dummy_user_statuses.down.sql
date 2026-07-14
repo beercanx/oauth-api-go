@@ -1,0 +1,1 @@
+DELETE FROM user_statuses WHERE username in ('aardvark');

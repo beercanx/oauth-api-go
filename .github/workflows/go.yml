@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
+          go-version: '1.26'
 
       - name: "Build: The OAuth server"
         run: go build -x ./cmd/server
@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
+          go-version: '1.26'
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9

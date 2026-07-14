@@ -1,5 +1,5 @@
 package token_exchange
 
-type Grant[Request Valid] interface {
-	Exchange(request Request) (Success, error)
+type Grant[Request any] interface {
+	Exchange(request *Request) (Success, error)
 }

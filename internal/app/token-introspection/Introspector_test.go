@@ -2,6 +2,7 @@ package token_introspection
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -23,10 +24,10 @@ func TestIntrospector(t *testing.T) {
 	t.Run("when token repository errors", func(t *testing.T) {
 		t.Parallel()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockAuthenticator[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
-			FindById(mock.AnythingOfType("uuid.UUID")).
+			Authenticate(mock.AnythingOfType("uuid.UUID")).
 			Return(token.AccessToken{}, errorNoDatabase).
 			Once()
 
@@ -39,60 +40,28 @@ func TestIntrospector(t *testing.T) {
 		assert.IsType(t, response{}, result)
 	})
 
-	t.Run("when token does not exist", func(t *testing.T) {
-		t.Parallel()
+	for name, authenticatorError := range map[string]error{
+		"does not exist":   token.ErrNoSuchToken,
+		"has expired":      token.ErrTokenHasExpired,
+		"is not yet valid": token.ErrTokenIsBefore,
+	} {
+		t.Run(fmt.Sprintf("when token %s", name), func(t *testing.T) {
+			t.Parallel()
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
-		accessTokenRepository.
-			EXPECT().
-			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{}, token.ErrNoSuchToken).
-			Once()
+			authenticator := token.NewMockAuthenticator[token.AccessToken](t)
+			authenticator.
+				EXPECT().
+				Authenticate(mock.AnythingOfType("uuid.UUID")).
+				Return(token.AccessToken{}, authenticatorError).
+				Once()
 
-		underTest := NewIntrospector(accessTokenRepository)
+			underTest := NewIntrospector(authenticator)
 
-		result, err := underTest.introspect(request{token: uuid.New()})
-		require.NoError(t, err)
-		assert.Equal(t, response{Active: false}, result)
-	})
-
-	t.Run("when token has expired", func(t *testing.T) {
-		t.Parallel()
-
-		now := time.Now()
-
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
-		accessTokenRepository.
-			EXPECT().
-			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{IssuedAt: now, ExpiresAt: now.Add(-time.Hour), NotBefore: now.Add(-time.Hour)}, nil).
-			Once()
-
-		underTest := NewIntrospector(accessTokenRepository)
-
-		result, err := underTest.introspect(request{token: uuid.New()})
-		require.NoError(t, err)
-		assert.Equal(t, response{Active: false}, result)
-	})
-
-	t.Run("when token is not yet valid", func(t *testing.T) {
-		t.Parallel()
-
-		now := time.Now()
-
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
-		accessTokenRepository.
-			EXPECT().
-			FindById(mock.AnythingOfType("uuid.UUID")).
-			Return(token.AccessToken{IssuedAt: now, ExpiresAt: now.Add(time.Minute), NotBefore: now.Add(time.Minute)}, nil).
-			Once()
-
-		underTest := NewIntrospector(accessTokenRepository)
-
-		result, err := underTest.introspect(request{token: uuid.New()})
-		require.NoError(t, err)
-		assert.Equal(t, response{Active: false}, result)
-	})
+			result, err := underTest.introspect(request{token: uuid.New()})
+			require.NoError(t, err)
+			assert.Equal(t, response{Active: false}, result)
+		})
+	}
 
 	t.Run("when token is just right", func(t *testing.T) {
 		t.Parallel()
@@ -100,33 +69,33 @@ func TestIntrospector(t *testing.T) {
 		now := time.Now()
 
 		accessToken := token.AccessToken{
-			Value:     uuid.New(),
-			Username:  user.AuthenticatedUsername{Value: "aardvark"},
-			Scopes:    scope.Scopes{Value: []scope.Scope{{Value: "basic"}}},
-			ClientId:  client.Id{Value: "v"},
+			ID:        uuid.New(),
+			Username:  user.AuthenticatedUsername("aardvark"),
+			Scopes:    scope.Scopes{"basic"},
+			ClientID:  client.Id("v"),
 			IssuedAt:  now,
 			ExpiresAt: now.Add(time.Minute),
 			NotBefore: now.Add(-time.Minute),
 		}
 
-		accessTokenRepository := token.NewMockRepository[token.AccessToken](t)
+		accessTokenRepository := token.NewMockAuthenticator[token.AccessToken](t)
 		accessTokenRepository.
 			EXPECT().
-			FindById(accessToken.Value).
+			Authenticate(accessToken.ID).
 			Return(accessToken, nil).
 			Once()
 
 		underTest := NewIntrospector(accessTokenRepository)
 
-		result, err := underTest.introspect(request{token: accessToken.Value})
+		result, err := underTest.introspect(request{token: accessToken.ID})
 		require.NoError(t, err)
 		assert.NotZero(t, result)
 		assert.Equal(t, response{
 			Active:         true,
-			Scope:          scope.Scopes{Value: []scope.Scope{{Value: "basic"}}},
-			Subject:        user.AuthenticatedUsername{Value: "aardvark"},
-			Username:       user.AuthenticatedUsername{Value: "aardvark"},
-			ClientId:       client.Id{Value: "v"},
+			Scope:          scope.Scopes{"basic"},
+			Subject:        "aardvark",
+			Username:       "aardvark",
+			ClientId:       "v",
 			TokenType:      token.Bearer,
 			IssuedAt:       now.Unix(),
 			NotBefore:      now.Add(-time.Minute).Unix(),

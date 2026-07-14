@@ -14,12 +14,12 @@ func TestAuthenticatedUsername(t *testing.T) {
 
 	t.Run("when printing as a string", func(t *testing.T) {
 		t.Parallel()
-		assert.Equal(t, "aardvark", AuthenticatedUsername{"aardvark"}.String())
+		assert.Equal(t, "aardvark", AuthenticatedUsername("aardvark").String())
 	})
 
 	t.Run("when marshalling to JSON", func(t *testing.T) {
 		t.Parallel()
-		result, err := json.Marshal(AuthenticatedUsername{"AARDVARK"})
+		result, err := json.Marshal(AuthenticatedUsername("AARDVARK"))
 		require.NoError(t, err)
 		assert.Equal(t, `"AARDVARK"`, string(result))
 	})

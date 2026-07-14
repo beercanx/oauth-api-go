@@ -1,6 +1,11 @@
 version: "2"
 
 linters:
+  settings:
+    paralleltest:
+      check-cleanup: true
+      ignore-missing-subtests: true
+
   enable:
     # Correctness / bugs
     - govet
@@ -23,6 +28,7 @@ linters:
     - contextcheck
     - asasalint
     - importas
+    - sloglint
 
     # Security
     - gosec
@@ -51,6 +57,5 @@ linters:
 
     # Tests
     - testifylint
-    - tparallel
     - thelper
     - paralleltest

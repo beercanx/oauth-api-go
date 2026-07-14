@@ -2,12 +2,11 @@ package token_exchange
 
 import (
 	"errors"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
-	"reflect"
 
 	"baconi.co.uk/oauth/internal/pkg/client"
-	"baconi.co.uk/oauth/internal/pkg/scope"
 	"baconi.co.uk/oauth/internal/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,6 @@ import (
 func Route(
 	engine *gin.Engine,
 	clientAuthenticator client.Authenticator,
-	scopeService *scope.Service,
 	passwordGrant Grant[PasswordRequest],
 ) {
 
@@ -29,29 +27,29 @@ func Route(
 
 		func(context *gin.Context) {
 
-			request, invalid := validateRequest(scopeService, context)
+			request, invalid := validateRequest(context)
 			if invalid != nil {
 				context.JSON(http.StatusBadRequest, Failed(*invalid))
 				return
 			}
 
 			var result Success
-			var err error
+			var exchangeError error
 
 			switch valid := request.(type) {
 			// TODO - Add support for other grant types
 			case *PasswordRequest:
-				result, err = passwordGrant.Exchange(*valid)
+				result, exchangeError = passwordGrant.Exchange(valid)
 			default:
-				err = Failed{Err: UnsupportedGrantType, Description: reflect.TypeOf(valid).Name()}
+				exchangeError = Failed{Err: UnsupportedGrantType, Description: fmt.Sprintf("unsupported grant type: %T", valid)}
 			}
 
 			var failed Failed
 			switch {
-			case err != nil && errors.As(err, &failed):
+			case exchangeError != nil && errors.As(exchangeError, &failed):
 				context.JSON(http.StatusBadRequest, failed)
-			case err != nil:
-				log.Println("[ERROR] Some kind of error bubbled up...", reflect.TypeOf(err).Name(), err)
+			case exchangeError != nil:
+				slog.Error("Unexpected error during token exchange", slog.Any("error", exchangeError))
 				context.AbortWithStatus(http.StatusInternalServerError)
 			default:
 				context.JSON(http.StatusOK, result)
