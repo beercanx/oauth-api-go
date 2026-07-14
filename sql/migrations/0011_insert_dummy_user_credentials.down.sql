@@ -1,0 +1,1 @@
+DELETE FROM user_credentials WHERE username = 'aardvark';

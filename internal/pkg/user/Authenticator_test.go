@@ -3,7 +3,6 @@ package user
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/alexedwards/argon2id"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +18,7 @@ func TestAuthenticate(t *testing.T) {
 	validUsername := "aardvark"
 	validPassword := "P@55w0rd"
 	validHash := "$argon2id$v=19$m=8,t=1,p=1$ZHl1SVFDUVBlT3JkYkpJRQ$smHA3mizJ+fSojqdxJC+Pg" // P@55w09rd
-	validCredential := Credential{validUsername, validHash, time.Now(), time.Now()}
+	validCredential := Credential{validUsername, validHash}
 
 	//
 	// Error
@@ -48,7 +47,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository.
 			EXPECT().
 			FindByUsername("argon2-error").
-			Return(Credential{"argon2-error", "aardvark", time.Now(), time.Now()}, nil).
+			Return(Credential{"argon2-error", "aardvark"}, nil).
 			Once()
 
 		underTest := NewAuthenticator(credentialRepository, statusRepository)
@@ -82,7 +81,7 @@ func TestAuthenticate(t *testing.T) {
 		credentialRepository := NewMockCredentialRepository(t)
 		statusRepository := NewMockStatusRepository(t)
 
-		credentialRepository.EXPECT().FindByUsername(validUsername).Return(Credential{}, ErrNoSuchCredential).Once()
+		credentialRepository.EXPECT().FindByUsername(validUsername).Return(Credential{}, ErrNoSuchUserCredential).Once()
 
 		underTest := NewAuthenticator(credentialRepository, statusRepository)
 
@@ -115,7 +114,7 @@ func TestAuthenticate(t *testing.T) {
 		statusRepository := NewMockStatusRepository(t)
 
 		credentialRepository.EXPECT().FindByUsername(validUsername).Return(validCredential, nil).Once()
-		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, ErrNoSuchStatus).Once()
+		statusRepository.EXPECT().FindByUsername(validUsername).Return(Status{}, ErrNoSuchUserStatus).Once()
 
 		underTest := NewAuthenticator(credentialRepository, statusRepository)
 

@@ -48,7 +48,7 @@ func Engine(
 	refreshTokenRepository := token.NewRefreshTokenRepository(ctx, database)
 	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
 
-	userCredentialRepository := user.NewInMemoryCredentialRepository()
+	userCredentialRepository := user.NewCredentialRepository(ctx, database)
 	userStatusRepository := user.NewStatusRepository(ctx, database)
 	userAuthenticator := user.NewAuthenticator(userCredentialRepository, userStatusRepository)
 

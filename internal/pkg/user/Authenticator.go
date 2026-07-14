@@ -51,7 +51,7 @@ func (service *authenticator) Authenticate(username string, password string) (Au
 
 	credential, credentialError := service.credentialRepository.FindByUsername(username)
 	switch {
-	case errors.Is(credentialError, ErrNoSuchCredential):
+	case errors.Is(credentialError, ErrNoSuchUserCredential):
 		slog.Debug("No such credential", "username", username)
 		return Authenticated{}, AuthenticationFailure{Missing}
 	case credentialError != nil:
@@ -71,7 +71,7 @@ func (service *authenticator) Authenticate(username string, password string) (Au
 
 	status, statusError := service.statusRepository.FindByUsername(username)
 	switch {
-	case errors.Is(statusError, ErrNoSuchStatus):
+	case errors.Is(statusError, ErrNoSuchUserStatus):
 		slog.Warn("No such status", "username", username)
 		return Authenticated{}, AuthenticationFailure{Missing}
 	case statusError != nil:

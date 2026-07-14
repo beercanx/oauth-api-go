@@ -1,6 +1,6 @@
 package user
 
 type Status struct {
-	username string
-	locked   bool
+	username string `db:"username"`
+	locked   bool   `db:"locked"`
 }

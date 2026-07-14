@@ -189,7 +189,7 @@ func (_c *MockCredentialRepository_FindByUsername_Call) RunAndReturn(run func(us
 }
 
 // Insert provides a mock function for the type MockCredentialRepository
-func (_mock *MockCredentialRepository) Insert(new Credential) error {
+func (_mock *MockCredentialRepository) insert(new Credential) error {
 	ret := _mock.Called(new)
 
 	if len(ret) == 0 {
