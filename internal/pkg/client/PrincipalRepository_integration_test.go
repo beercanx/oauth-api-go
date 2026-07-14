@@ -1,7 +1,6 @@
 package client
 
 import (
-	"database/sql"
 	"fmt"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 func TestPrincipalRepository(t *testing.T) {
 	t.Parallel()
 
-	database, databaseError := sql.Open("sqlite3", "file:principal_repository_integration_tests?mode=memory&cache=shared")
+	database, databaseError := db.Connect("file:principal_repository_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
 	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 

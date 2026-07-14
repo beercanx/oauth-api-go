@@ -1,7 +1,6 @@
 package token
 
 import (
-	"database/sql"
 	"strings"
 	"testing"
 	"time"
@@ -31,7 +30,7 @@ func assertAccessTokensEqual(t *testing.T, expected AccessToken, actual AccessTo
 func TestAccessTokenRepository(t *testing.T) {
 	t.Parallel()
 
-	database, databaseError := sql.Open("sqlite3", "file:access_tokens_integration_tests?mode=memory&cache=shared")
+	database, databaseError := db.Connect("file:access_tokens_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
 	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 
