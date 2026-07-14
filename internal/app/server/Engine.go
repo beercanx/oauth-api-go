@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 
 	"baconi.co.uk/oauth/internal/app/token-exchange"
 	"baconi.co.uk/oauth/internal/app/token-introspection"
@@ -33,7 +34,7 @@ func Engine(
 	//
 	// Create stuff to be injected
 	//
-	database, databaseError := db.Connect(config.DatabaseSource)
+	database, databaseError := sql.Open(config.DatabaseDriver, config.DatabaseSource)
 	if databaseError != nil {
 		return nil, databaseError
 	}

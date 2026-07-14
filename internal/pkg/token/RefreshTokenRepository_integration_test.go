@@ -1,6 +1,7 @@
 package token
 
 import (
+	"database/sql"
 	"strings"
 	"testing"
 	"time"
@@ -30,7 +31,7 @@ func assertRefreshTokensEqual(t *testing.T, expected RefreshToken, actual Refres
 func TestRefreshTokenRepository(t *testing.T) {
 	t.Parallel()
 
-	database, databaseError := db.Connect("file:refresh_tokens_integration_tests?mode=memory&cache=shared")
+	database, databaseError := sql.Open("sqlite3", "file:refresh_tokens_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
 	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 

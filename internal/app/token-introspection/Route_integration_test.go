@@ -2,6 +2,7 @@
 package token_introspection
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -25,7 +26,7 @@ import (
 func TestTokenIntrospectionRequests(t *testing.T) {
 	t.Parallel()
 
-	database, databaseError := db.Connect("file:token_introspection_route_integration_tests?mode=memory&cache=shared")
+	database, databaseError := sql.Open("sqlite3", "file:token_introspection_route_integration_tests?mode=memory&cache=shared")
 	require.NoError(t, databaseError)
 	require.NoError(t, db.RunMigrations(database, "file:../../../sql/migrations"))
 
