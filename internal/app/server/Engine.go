@@ -49,7 +49,7 @@ func Engine(
 	refreshTokenIssuer := token.NewRefreshTokenIssuer(refreshTokenRepository)
 
 	userCredentialRepository := user.NewInMemoryCredentialRepository()
-	userStatusRepository := user.NewInMemoryStatusRepository()
+	userStatusRepository := user.NewStatusRepository(ctx, database)
 	userAuthenticator := user.NewAuthenticator(userCredentialRepository, userStatusRepository)
 
 	passwordGrant := token_exchange.NewPasswordGrant(accessTokenIssuer, refreshTokenIssuer, userAuthenticator)

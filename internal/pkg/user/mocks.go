@@ -327,7 +327,7 @@ func (_c *MockStatusRepository_FindByUsername_Call) RunAndReturn(run func(userna
 }
 
 // Insert provides a mock function for the type MockStatusRepository
-func (_mock *MockStatusRepository) Insert(status Status) error {
+func (_mock *MockStatusRepository) insert(status Status) error {
 	ret := _mock.Called(status)
 
 	if len(ret) == 0 {
