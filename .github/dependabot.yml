@@ -8,6 +8,10 @@ updates:
       interval: "monthly"
     labels:
       - "dependencies"
+    groups:
+      all-github-actions:
+        patterns:
+          - "*"
 
   # Maintain dependencies for GO
   - package-ecosystem: "gomod"
@@ -16,3 +20,12 @@ updates:
       interval: "monthly"
     labels:
       - "dependencies"
+    groups:
+      security-updates-go-dependencies:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      version-updates-go-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
